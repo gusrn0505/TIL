@@ -1,10 +1,10 @@
 # Efficient Estimation of Word Representations in Vector Space
 
-
-
 ##### 1. 서론
 
 - 기존의 NLP 시스템과 기술들은 각 단어를 독립적인 개별 객체로 여긴다. 이 방법은 단순하고 강건성이 높고, 간단한 모델로도 높은 성능을 낼 수 있다. 하지만 성능이 계산양에 압도될 때가 많다.    
+  
+  - One- hot 인코딩의 단점
 
 - 이 논문의 목표는  계산양을 대폭 줄여 bil 단위의 단어 / mil 단위의 어휘들을 소화내면서 성능을 일정 이상 유지하는 모델/기술을 소개하는 것이다. 
   
@@ -14,11 +14,7 @@
 
 - 이전 연구로는 NNLM이 있으며, NNLM 모델에서 최초 1회 hidden layer 학습 과정만 채택할 것이다. 
 
-
-
 Q. distributed representations of word 가 정확히 의미하는 건 뭐지? 
-
-
 
 ##### 2. 모델 구조
 
@@ -34,9 +30,11 @@ Q. distributed representations of word 가 정확히 의미하는 건 뭐지?
   
   - NNLM 모델은 N * D * H  부분에 계산복잡도 비중이 높다. 
     
-    > Q = N * D + N * D * H + H * V
+    <img title="" src="./picture/2-1.png" alt="" width="555">
     
-    - V 는 Huffman binary tree 도입시 계산양이 log2(Unigram-perplexity(V)) 까지 낮아진다.
+    > Q = N * D   +   N * D * H   +   H * V
+    
+    - V 는 Huffman binary tree(= Hierarchical Softmax) 도입시 계산양이 log2(Unigram-perplexity(V)) 까지 낮아진다. 
   
   - RNNLM 모델의 H * H 부분에 계산복잡도의 비중이 높다.
     
@@ -48,25 +46,29 @@ Q. distributed representations of word 가 정확히 의미하는 건 뭐지?
 
 
 
-Q. Huffman binary tree 확인 필요 
-
-
-
 ##### 3. New log-linear 모델
 
 - 계산 복잡도를 줄이기 위해 log-linear한 모델 2가지를 살펴볼 것이다. 
   
   - CBOW  
     
+    ![](./picture/2-2.png)
+    
     > Q= N * D + D * log2(V)
+    > 
+    > - N * D : 현재 단어를 중심으로 N개의 단어 Projection
+    > 
+    > - D * V : Projection layer에서 Output layer 계산 
   
   - Continuous Skipgram model
+    
+    ![](./picture/2-3.png)
     
     > Q = C *(D+ D * log2(V))
     > 
     > > C : maximum distance of word
-
-
+    > 
+    > - 
 
 ##### 4. 결과
 
@@ -84,14 +86,10 @@ Q. Huffman binary tree 확인 필요
 
 - 계산양을 최소화하기 위해 단 1회 epoch 학습을 진행하였을 때, CBOW가 Skip-gram에 비해 약 3배 가량 빨리 처리되었다. 
 
-
-
 ##### 5. 결과
 
 - 단순한 모델로도 복잡한 모델구조만큼 얼추 성능이 나옴
 
 - 또한 계산양이 매우 줄어들었기 때문에 보다 많은 양의 데이터 / 높은 차원을 소화할 수 있었음.  
-
-
 
 
