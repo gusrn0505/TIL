@@ -159,7 +159,7 @@ class Policy_Evaluation:
             action[tuple(s)] = a_lst[np.argmax(lst)]
             # 일부 수도 코드 수정. 기존 상태라면 매번 이전행동 != action[s]를 비교해야함.
 
-        if before_action == action  or self.count == 1:
+        if before_action == action or self.count == 1:
             return self.v_list, self.S_A
 
         self.state_evaluate()
