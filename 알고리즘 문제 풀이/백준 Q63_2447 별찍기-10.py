@@ -17,19 +17,54 @@ N이 3보다 클 경우, 크기 N의 패턴은 공백으로 채워진 가운데�
 
 """
 
-# runtime 에러 발생
+# 런타임 에러. 리스트냐, 이중 리스트냐는 중요하지 않았나 보네
 import math
 import sys
-def draw_star(n) :
-    if n ==1 : return ["*"]
-    a = draw_star(n-1)
-    len_a = len(a)
-    b = a + [" "]*len_a + a
-    a = a*3
-    c = [a[i] + b[i] + a[i] for i in range(len(a))]
-    print(c)
-    return c
 
 num = math.log(int(sys.stdin.readline()), 3) +1
 
-for _ in draw_star(num) : print(_)
+def star(n) :
+    if n == 1 : return ["*"]
+    a = star(n-1) # list
+    b = a + [" "*len(a)]*len(a) + a
+    a = a*3
+    c = [a[i] + b[i] + a[i] for i in range(len(a))]
+    return c
+
+for _ in star(num) :
+    print(_)
+
+
+"""
+#이것은 정답 풀이. 좌우로 늘린 각 층별로 출력. list comprehension 없이 구현 가능. 
+# 상하 ↔ 좌우 방향을 잘 바꿀 수 있을 것  
+def draw_stars(n):
+  if n==1:
+    return ['*']
+
+  Stars=draw_stars(n//3)
+  L=[]
+
+  for star in Stars:
+    L.append(star*3)
+  for star in Stars:
+    L.append(star+' '*(n//3)+star)
+  for star in Stars:
+    L.append(star*3)
+
+  return L
+
+N=int(input())
+print('\n'.join(draw_stars(N)))
+"""
+
+"""
+def draw_star(n) :
+    if n ==1 : return [["*"]]
+    a = draw_star(n-1)
+    b = a + [[" "]*len(a)]*len(a) + a
+    a = a*3 # 위 아래로 복사
+    c = [a[i] + b[i] + a[i] for i in range(len(a))] # 좌우로 붙이기
+
+    return c
+"""
