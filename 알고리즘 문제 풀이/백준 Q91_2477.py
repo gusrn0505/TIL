@@ -16,10 +16,30 @@ import sys
 from collections import defaultdict
 
 num = int(input())
-dic = defaultdict(list)
+count_dic = defaultdict(int)
 
-for num in range(1,7) :
+for _ in range(1,5) : count_dic[_]=0
+
+length_lst = []
+dir_lst = []
+for _ in range(1,7) :
     way, length = list(map(int,sys.stdin.readline().split()))
-    dic[way].append(length)
+    count_dic[way] += 1
+    dir_lst.append(way)
+    length_lst.append(length)
 
-for lst
+# 한번씩만 지나는 변을 확인하여 밭의 모양 유추.
+count_1_lst = []
+for index, count in enumerate(count_dic.values()) :
+    if count == 1 : count_1_lst.append(index+1)
+
+# 유형별로 시작점 선정
+if count_1_lst == [1,3] : point = 1
+elif count_1_lst == [1,4] : point = 4
+elif count_1_lst == [2,3] : point = 3
+elif count_1_lst == [2,4] : point = 2
+
+start_index = dir_lst.index(point)
+length_lst = length_lst[start_index:] + length_lst[:start_index]
+volumn = length_lst[0]*length_lst[-1] - length_lst[2]*length_lst[3]
+print(volumn*num)
