@@ -2,15 +2,11 @@
 
 출처 : GSDS 문일철 교수님 - "Application of AI and DM Technology"
 
-
-
 ##### 용어 정리
 
 - $\sigma$ algebra : 모든 크기를 잴 수 있는 집합(가측 집합)들의 집합 
   
   ![](picture/1-2.png)
-
-
 
 - Measurable Space : 측정 가능한 공간 
   
@@ -20,21 +16,13 @@
   > 
   > > P(S) : 모든 부분집합의 집합(멱집합 - power set)
 
-
-
 - Lebesgue measure : 직육면체의 부피를 측정하는 **르벡 측도** 
   
   ![](picture/1-4.png)
 
-
-
 - Borel $\sigma - algebra$ 
   
   ![](picture/1-5.png)
-
-
-
-
 
 ##### 확률 기본 개념
 
@@ -44,13 +32,9 @@
 > 
 > - 위 개념들은 정의(Definition)으로 언제든 적용 가능하다. 
 
-
-
 ##### Bayesian Network
 
 - <mark>의의 : 설계도로서 사용되며, <u>Factorization을 간단하게 사용</u>하게 해준다. </mark>
-
-
 
 - Conditional Probability table 
   
@@ -67,8 +51,6 @@
   > 따라서, Parameter 수를 줄이는 등 Scalability 한 조치들을 진행해야 한다.
   > 
   > - 그 중에 하나가 <u>Parameter을 Indepence하게 선택</u>하는 것이다. 
-
-
 
 - **Independence** 
   
@@ -94,8 +76,6 @@
     > 
     > - => <mark>Independence 유무는 관측에 달려 있다!</mark>
 
-
-
 ###### Naive Bayes clasifier
 
 > $f_{NB}(x) = argmax_{Y=y} P(Y=y) \prod_{1<=i<=d} P(X_i = x_i|Y=y)$
@@ -107,8 +87,6 @@
   > independent feature $X \in R^d$  s.t. given the class Y 
   > 
   > For each $X_i,$ we have likelihood $P(X_i|Y)$
-
-
 
 - <mark>의의 : '좋은' Factorization을 하게 해준다. </mark>
   
@@ -123,8 +101,6 @@
     > 단, 지금 상태에선 X1, X2가 condi indep 인지 모른다. 
     > 
     > Y에 의해 indep 유무가 정해진다. 
-
-
 
 - 모델의 문법 
   
@@ -144,8 +120,6 @@
   
   - => **To obtain a compact representation of the full joint distribution** 
 
-
-
 - **Design model of Typocal Local Structures**
   
   - Common Parent 
@@ -155,28 +129,22 @@
     - **Alarm을 관측(Fixing) 시, John 과 Mary는 indep 하다**
       
       > J $\bot$ M|A
-  
-  
-  
-  - Cascading 
-    
-    ![](picture/1-10.png)
-    
-    - **Alarm을 관측(Fixing) 시, Buglary와 MaryCall은 indep 하다.**
-      
-      > B $\bot$ M|A
-    
-    
-  
-  - V-Structure
-    
-    ![](picture/1-11.png)
-    
-    - **Alarm을 관측(Fixing) 시, Buglary와 Earthquake는 not indep 하다.**
-    
-    - 특히<u> V-structure은 모델 안에 숨겨져 있기에 잘 찾아야 한다.</u>
 
+- Cascading 
+  
+  ![](picture/1-10.png)
+  
+  - **Alarm을 관측(Fixing) 시, Buglary와 MaryCall은 indep 하다.**
+    
+    > B $\bot$ M|A
 
+- V-Structure
+  
+  ![](picture/1-11.png)
+  
+  - **Alarm을 관측(Fixing) 시, Buglary와 Earthquake는 not indep 하다.**
+  
+  - 특히<u> V-structure은 모델 안에 숨겨져 있기에 잘 찾아야 한다.</u>
 
 - Ex)- Finding V-Structure 
   
@@ -188,8 +156,6 @@
   
   - <mark>=> 관측 유무를 잘 확인해야 한다! </mark>
 
-
-
 - **Bayes Ball Algorithm**
   
   - 목적 : Checking $X_A \bot X_B |X_C$ 
@@ -199,8 +165,6 @@
     ![](picture/1-13.png)
     
     > 빨간 선은 Indep을 의미, 파란 선은 dep 을 의미 
-
-
 
 - **D-Seperation**
   
@@ -213,8 +177,6 @@
     > > Blanket = {parents, children, children's other parents}
   
   - <mark>의의 : 절대적 Independe의 정의가 D-Seperation 에서 온다!</mark>
-
-
 
 - Factorization theorem 
   
@@ -229,7 +191,3 @@
     - Factorization의 방식은 매우 많다. 
     
     - 하지만 위의 경우 Conti-indep을 고려하여, 1) Parameter의 개수를 줄여 계산 양을 확 줄였으며, 2) 위의 확률 식을 시행착오를 줄이면서 찾을 수 있다. 
-    
-    
-
-
