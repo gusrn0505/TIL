@@ -1,12 +1,30 @@
 ### 1주차 - Introduction to Reconmmender System
 
+##### 
+
+#### 질문
+
+1. Repeated recommentdation of popular items 이 판매 상품의 다양성을 줄일 수 있다는 것은 정확히 어떤 맥락인가? popular 상품에만 집중하게 된다는 건가? 
+
+2. TF-IDF 에서 idf 속 log 분모에 +1 을 해주지 않아도 되나? 또한 tf 부분에 +1 을 더한 것은 0이 되는 것을 방지해주기 위함인가?
+
+
+
+
+
+#### 고민해볼 점
+
+1. RecSys의 유저별 최적화를 교육현장 속 맞춤형 교육과 어떻게 연결시킬 수 있을까?
+
+2. Matrix Completion 문제를 Clustering으로 해결할 수 있을 것 같은데 선행 연구들이 있나?  
+
+
+
 
 
 ##### 추천 시스템은 왜 배워야 하는가?
 
 - SNS를 통해서 무수히 많은 정보가 쏟아진다. 따라서 filtering을 거쳐서 한정된 시간 내에 유의미한 정보를 접할 수 있다. 
-
-
 
 - **목적 : To model people's preferences, opinions and behaviors**
   
@@ -18,8 +36,6 @@
   
   4. To personalize user experiences in response to user feedback 
 
-
-
 - 영향력 
   
   - 높은 비중의 물품 구매가 물품 추천으로부터 유래한다. 
@@ -27,6 +43,8 @@
   - Lex Fridman - <u>"Recommendation system affect the information we see, how we learn, what we think, how we communicate"</u>
 
 
+
+----
 
 ##### 추천 시스템의 문제 정의
 
@@ -36,35 +54,37 @@
    > 
    > 예측 문제를 **Matrix completion problem** 이라고도 부름  
 
-
-
 2. 순위 매기기(Ranking) : 개별 유저에게 맞춰 Top k 개의 우선순위를 제공하는 것 
    
    - 순위 측정으로, 예측된 값의 상대적 순위만 중요하다. 
 
 
 
+
+
 - **평가(Rating)의 종류**
   
-  - Explicit feedback : 선호 유무 및 정도를 명시 
+  - **Explicit feedback** : 선호 유무 및 정도를 명시 
     
     > Interval-based / Continuous value -based / Like or dislike(Binary)
     
-    - 장점 : 직접적으로 선호도를 표현했기 때문에 정확도가 높으며 많이 사용한다. 
+    - 장점 : 직접적으로 선호도를 표현했기 때문에 <mark>정확도가 높으며 많이 사용한다.</mark>
+      
+      - 경험적으로 예측 모델 속에서 수많은 Metadata 보다 소수의 Explicit feedback의 영향력이 더 크다. 
     
     - 문제점 : 유저들이 각 item 별로 항상 평가하는 것은 아니다. 사용가능한 평가의 수가 너무 적을 수 있다. 이 경우 추천 퀄리티가 낮아진다. 
-    
-    - **초점 : 어떻게 유주들이 보다 item에 대해 평가를 하도록 자극할 것인가?**
+      
+      - **초점 : 어떻게 유저들이 보다 item에 대해 평가를 하도록 자극할 것인가?**
   
-  - Implicit feedback : 선호에 대한 간접적인 증거 
+  - **Implicit feedback** : 선호에 대한 간접적인 증거 
     
     > Unary(ex- past purchase,  Click) 
     
     - 장점 : 유저의 행동을 이끌어 내는데 노력을 들일 필요 없으며, 수집하기 쉽다.
     
-    - 단점 : 유저의 선호 유무, 특히 불호(Dislike)를 구체화할 Mechanism이 없다. 
+    - 단점 : <mark>정확도가 낮다. 특히 불호(Dislike)를 구체화할 Mechanism이 없다.</mark> 
       
-      - 각 <u>유저의 행동들이 긍정적일 것 이란 가정 하에 예측</u>하여, 정확도가 낮다.
+      - 일반적으로 각 <u>유저의 행동들이 긍정적일 것 이란 가정 하에 예측</u>한다.
 
 
 
@@ -96,35 +116,40 @@
     
     - 대체한 특정값이 실제 관측값과의 차이가 클 수 있어 큰 오차를 만들 수 있다.
 
-
+----
 
 ##### 비지니스 관점에서의 추천 시스템의 목적
 
 - 상품을 더 파는 것! 
   
   - How? : 어떤 물품을 추천했을 때 상품 판매를 촉진시킬 수 있는가에 대한 해답 찾기! 
+  - 사람들이 해당 상품에 대해 **흥미**(Interesting)를 느껴야 구매한다. 
 
 
 
 - **4가지 목표치**
   
-  1. Relevance : 유저에게 친숙한 Item 추천 
+  1. **Relevance** : 유저에게 친숙한 Item 추천 
      
      - 가장 중요한 목표지만, 그 자체로 충분하지 않다. 
      
      - Relevance를 측정하는 두가지 지표 
      
-     > RMSE(RecoMmender System Error) : $\sqrt\frac {\sum^N_{i=1} (Predicted_i - Actual_i)^2} {N} $
+     > **RMSE**(RecoMmender System Error) : $\sqrt\frac {\sum^N_{i=1} (Predicted_i - Actual_i)^2} {N} $
      > 
-     > MAE(Mean Absolute Error) : $\frac{1} {N} \sum^N_{i=1} |Predicted_i - Actual_i|$
+     > **MAE**(Mean Absolute Error) : $\frac{1} {N} \sum^N_{i=1} |Predicted_i - Actual_i|$
      > 
      > - 오차의 크기가 커질 수록 RMSE는 MAE비해 증가율이 크다.
   
-  2. Novelty : 유저가 과거에 경험하지 못했던(보지 못했던) Item 추천 
+  2. **Novelty** : 유저가 과거에 경험하지 못했던(보지 못했던) Item 추천 
      
      - Novelty 한 물품을 지속적으로 추천하면 상품 다양성의 감소를 초래할 수 있다. 
+       
+       > 흠... 한번에 와닿지가 않네
   
-  3. Serendipity : (완전히) 새로운 Item을 추천하는 것 
+  
+  
+  3. **Serendipity** : (완전히) 새로운 Item을 추천하는 것 
      
      - 장점 : 장기적이고 전략적인 관점에서 이득이다. *(탐험 추구 느낌)*
      
@@ -132,11 +157,13 @@
        
        > ex)- 특정 분야를 좋아하는 유저에게, 해당 분야지만 아직 경험못한 것은 Novelty. 아예 새로운 분야를 추천하면 Serendipity. 
   
-  4. Diversity : 다양한 타입의 물품을 추천하기 
+  4. **Diversity** : 다양한 타입의 물품을 추천하기 
      
      - 관련된 물품을 모두 싫어할 최악의 경우에 대비하여, 적어도 하나는 유저의 흥미를 끌 수 있도록 안정성을 보장
 
 
+
+----
 
 ##### 추천 시스템의 기본 모델 종류
 
@@ -156,11 +183,11 @@
   
   - Sequential Recommendation & Graph-based Recommendation 
 
-
-
 *이번 주는 Content-based Recommendation 만을 다룸* 
 
 
+
+----
 
 ##### Content-based Recommendation
 
@@ -170,11 +197,7 @@
   
   > ex)- 영화 추천 / 웹사이트 / 블로그 / 뉴스 
 
-
-
 - **의의 : 사용자의 평가를 사용할 수 없을 때에도 사용할 수 있다.**
-
-
 
 - **유사도 측정 방식** 
   
@@ -202,8 +225,6 @@
       > 
       > - 각 값들에 +1 을 해주어 0이 되는 경우를 방지한다. 
 
-
-
 - **장점** 
   
   - 다른 유저 정보를 필요로 하지 않다 > Cold-start, Sparsity 등 정보가 부족하지 않다.
@@ -213,8 +234,6 @@
     - 새롭고 유명하지 않은 상품 또한 추천할 수 있다. 
   
   - 추천의 이유를 밝힐 수 있다. 
-
-
 
 - **단점**
   
@@ -229,7 +248,3 @@
   - <mark>=> 실제 환경에선 순수한 Content-based 추천 방식은 사용되지 않는다. </mark>
     
     - <u>많은 Metadata 보다 소수의 Rating이 성능이 좋다는게 경험적으로 증명</u>되었다. 
-
-
-
-
