@@ -24,8 +24,6 @@
   
   ![](picture/1-5.png)
 
-
-
 ----
 
 ##### 확률 기본 개념
@@ -35,8 +33,6 @@
 > Factorization : P(a,b,c,...,z) = P(a|b,c,...,z) P(b|c,...,z) P(c| ..., z)...P(z)
 > 
 > - 위 개념들은 정의(Definition)으로 언제든 적용 가능하다. 
-
-
 
 ##### Bayesian Network
 
@@ -57,8 +53,6 @@
   > 따라서, Parameter 수를 줄이는 등 Scalability 한 조치들을 진행해야 한다.
   > 
   > - 그 중에 하나가 <u>Parameter을 Indepence하게 선택</u>하는 것이다. 
-
-
 
 - **Independence** 
   
@@ -112,8 +106,6 @@
     > 
     > Y에 의해 indep 유무가 정해진다. 
 
-
-
 - **Optimal Factorization의 정의** 
   
   - 우리가 목표로 하는 것은 모집단의 값들과 표본을 통한 측정값의 오차를 최대한 줄여나가는 것이다. 
@@ -144,10 +136,6 @@
   
   - 즉, Optimal Factorizaion 이라 할 수 있는 이유는 <mark>"파라미터의 개수를 줄이는 것은 모델 성능 향상에 긍정적 영향을 주며"</mark> , **Bayesian Network는 Factorization 간 파라미터 개수를 가장 줄이는 방법이다.**
 
-
-
-
-
 - 모델의 문법 
   
   ![](picture/1-8.png)
@@ -171,8 +159,6 @@
     > ![](picture/1-16.png)
     > 
     > - 네모 칸에 들어가면 'For loop' 절 처럼 여러 경우를 다 포함한다는 의미이다.
-    
-     
 
 - **Design model of Typocal Local Structures**
   
@@ -210,8 +196,6 @@
   
   - <mark>=> 관측 유무를 잘 확인해야 한다! </mark>
 
-
-
 ----
 
 **Bayes Ball Algorithm**
@@ -224,8 +208,6 @@
   
   > 빨간 선은 Indep을 의미, 파란 선은 dep 을 의미 
 
-
-
 - **D-Seperation**
   
   ![](picture/1-14.png)
@@ -237,8 +219,6 @@
     > > Blanket = {parents, children, children's other parents}
   
   - <mark>의의 : 절대적 Independe의 정의가 D-Seperation 에서 온다!</mark>
-
-
 
 ----
 
@@ -256,8 +236,6 @@
   
   - 하지만 위의 경우 Conti-indep을 고려하여, **1) Parameter의 개수를 줄여 계산 양을 확 줄였으며, 2) 위의 확률 식을 시행착오를 줄이면서 찾을 수 있다.**
 
-
-
 ---- 
 
 ##### Making Q-A machine!
@@ -267,9 +245,6 @@
   > 이때 '그럼직한 답'이란 가장 높은 확률 값을 가지는 경우를 찾는 것이다.
   > 
   > $ex)- argmax_aP(A|B=True, C=True)$
-
-
-
 1. Likelihood 계산 ($p(x_v)$)
    
    > <mark>$P(X_V) = \sum_{X_H} P(X_H, X_V) = \sum_{x_1}... \sum_{x_k}P(x_1, ..., x_k, x_V)$</mark>
@@ -286,8 +261,6 @@
      > 
      >     $= \sum_E\sum_J\sum_A P(B) P(E) P(A|B,E) P(J|A) P(M|A)$ 
 
-
-
 2. Contidional Probability 계산 
    
    > $P(Y|x_V) = \sum_z P(Y,Z=z|x_V)$
@@ -300,27 +273,18 @@
    > > 
    > > Z : uninterested hidden variable 
 
-
-
 3. Contidionmal probability 중 argmax 값 찾기 
-
-
 
 -----
 
 ##### Marginalization and Elimination
 
 - 특정 확률 값을 구할 때 곱 연산이 너무 많아 Computation complexity가 높다! 
-
-
-
 1. Marginalization - 필요없는 값들을 앞으로 빼자! 
    
    ![](picture/1-17.png)
    
    ![](picture/1-18.png)
-
-
 
 2. Variable Elimination 
 
@@ -353,3 +317,121 @@
     > ![](picture/1-22.png)
   
   - 마지막으로 e의 모든 경우에 대해서 확률을 합한다. 이때 1이 나오도록 $\alpha$ 값을 조정한다. 
+
+
+
+---- 
+
+#### Potential Functions
+
+- 정의 : 확률모델은 아니나, Normalized를 하면 확률분포 모델로 될 수 있는 함수들 
+  
+  > 확률은 2가지 조건을 충족해야 한다. 
+  > 
+  > 1. 각 확률 분포값이 0 이상이여야 한다.
+  > 
+  > 2. 총 합이 1이여야 한다. 
+  
+  > 즉, Potential Function은1번 조건, 모든 값이 0 이상을 충족해야 한다. 
+  > 
+  > 2번 조건은 Normalized 를 통해서 달성될 수 있다. 
+  > 
+  > ex)- Lelu 
+
+
+
+- **Joint Distribution을 Sequel Model 형태로 표현함으로써 Potential func의 연산으로 구해낼 수 있다.**
+  
+  > P(A,B,C,D) = P(A|B) P(B|C) P(C|D) P(D)
+  
+  - <mark>P(A,B,C,D) = P(U) = $\frac {\prod_N \psi(N)}{\prod_L \phi(L)}$ = $\frac {\psi(a,b) \psi(b,c) \psi(c,d)}{\phi(b) \phi(c)}$</mark>
+    
+    - 이때 $\phi, \psi$ 은 다양한 형태를 띌 수 있다. 
+  
+  > **Potential function on Nodes** : $\psi(a,b), \psi(b,c), \psi(c,d)$
+  > 
+  > ![](picture/1-23.png)
+  > 
+  > 각 노드별 연결을 의미 (Check - 원이 노드가 맞나?)
+  
+  > **Potential Function on Link**: $\phi(b), \phi(c)$
+  > 
+  > ![](picture/1-24.png)
+  > 
+  > Potential functions on Node에서 방향성을 제거하며, Clique만 탐색하게 설정
+  > 
+  > > Clique : Graph간 Fully Connectd 된 Component 들의 집합 
+  > > 
+  > > Separator : 각 Clique 사이에서 Intersection을 의미. 공통 요소 외의 나머지에 대해 $\psi$를 Marginalization 하여 구할 수 있음. 
+  > > 
+  > > - (A,B) 에서 A를, (B,C) 에서 C를 Marginalization 한 것은 같아야 한다. 
+  > 
+  > 여기서 (B,C) Clique에서 B값이 갱신이 된다면, B / (A,B) 방향으로 값 갱신이 일어난다. <mark>(Message passing)</mark>
+  > 
+  > - **Clique 상황에서의 Inference를 "Message passing" 이라고 한다.**
+
+
+
+- 그럼 어떻게 Potential 함수를 통해서 확률 분포값을 어떻게 알아 낼 수 있을까?
+  
+  - **유일한 방식을 Absortion rule 또는 Update Rule이라고 부른다.**
+  
+  > $\psi(A,B)$ 에서만 Update가 진행되어 $\psi^*(A,B)$ 가 되었다고 하자. 
+  > 
+  > 그럼 다른 값들을 다음과 같이 업데이트 한다. 
+  > 
+  > > $\phi^*(B) = \sum_A \psi^*(A,B)$     [Update rule for separators]
+  > > 
+  > > $\psi^*(B,C) = \psi(B,C) \frac{\phi^*(B)}{\phi(B)}$   [Update rule for cliques]
+  > > 
+  > > ![](picture/1-25.png)
+  > > 
+  > > - $\sum_C \psi^*(B,C) = \sum_A \psi^*(A,B)$ 를 통해서 유추해낸 식 
+  > > 
+  > > - 위의 식은 local consistency 만을 보장하나, Message passing이 확장 및 반복을 통해서 Global consistency를 보장한다. 
+
+
+
+- **Ex)- Potential Function의 Message Passing을 통해서 확률값 구하기**
+  
+  > 사전지식이 아래와 같이 주어진다고 가정하자 
+  > 
+  > - $\psi(a,b) = P(a|b), \psi(b,c) = P(b|c) P(c)$
+  > 
+  > - $\phi(b) =1 $
+  
+  > P(b)를 구해보자! 
+  > 
+  > 이때, Update rule을 통해서 값을 갱신하며, Separator의 확률 값은 좌우 상관없이 동일해야 한다. 
+  > 
+  > <mark>$\phi^*(b)$</mark> $= \sum_a \psi(a,b) = \sum_a P(a|b) $= <mark>$ 1 $</mark>   [(a,b) → b 방향]
+  > 
+  > $\psi^*(b,c) = \psi(b,c) \frac{\phi^*(b)}{\phi(b)} = P(b|c) P(c) = P(b,c)$
+  > 
+  > <mark>$\phi^{**}(b)$ </mark>$= \sum_c \psi^*(b,c) = \sum_c P(b,c) $=<mark> $P(b)$ </mark>  [(b,c) → b 방향 ]
+  > 
+  > > $\phi^*(b) \neq \phi^{**}(b)$. **이때 $\psi(a,b)$ 도 Message Passing으로 업데이트 할 것**
+  > 
+  > $\psi^*(a,b) = \psi(a,b) \frac{\phi^{**} (b)}{\phi^*(b)} = \frac{P(a|b)P(b)}{1} = P(a,b)$
+  > 
+  > <mark>$\phi^{***}(b)$</mark> $= \sum_a \psi^*(a,b) $= <mark>$P(b)$</mark> 
+  > 
+  > - $\phi(b)$ 의 값이 좌우 공통으로 통일됨. <mark>즉, P(b)의 값을 Potential func의 연산으로 구할 수 있게 된다. </mark>
+
+
+
+- Ex2 - P(b|a =1, c=1) 계산하기 
+  
+  > $\phi^*(b)= \sum_a \psi(a,b) \delta(a=1) = P(a=1|b)$
+  > 
+  > > $\delta$ : 특정 값이면 1의 값을, 그 외의 값이면 0을 띄는 함수 
+  > 
+  > $\psi^*(b,c) = \psi(b,c) \frac{\phi^*(b)}{\phi(b)} = P(b|c=1)P(c=1) \frac{P(a=1|b)}{1}$
+  > 
+  > $\phi^{**}(b) = \sum_c \psi^*(b,c) \delta(c=1) $= <mark>$P(b|c=1) P(c=1) P(a=1|b)$</mark>
+  > 
+  > $\psi^*(a,b) = \psi(a,b) \frac{\phi^{**} (b)}{\phi^*(b)} = P(a=1|b) \frac{P(b|c=1)P(c=1)P(c=1|b)}{P(a=1|b)} = P(b|c=1)P(c=1)P(a=1|b)$
+  > 
+  > $\phi^{***}(b) = \sum_a \psi^*(a,b) \delta(a=1) $= <mark>$P(b|c=1) P(c=1) P(c=1|b)$</mark> 
+  
+  - 특정 값에 대해서 알기 위해 $\delta$ 함수를 도입! 그 외에는 동일하게 점검!
