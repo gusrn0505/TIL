@@ -4,11 +4,9 @@
 
 #### 질문
 
-1. Repeated recommentdation of popular items 이 판매 상품의 다양성을 줄일 수 있다는 것은 정확히 어떤 맥락인가? popular 상품에만 집중하게 된다는 건가? 
+1. Repeated recommentdation of popular items 이 판매 상품의 다양성을 줄일 수 있다는 것은 정확히 어떤 맥락인가? popular 상품에만 집중하게 된다는 건가? 그런듯 
 
 2. TF-IDF 에서 idf 속 log 분모에 +1 을 해주지 않아도 되나? 또한 tf 부분에 +1 을 더한 것은 0이 되는 것을 방지해주기 위함인가?
-
-
 
 
 
@@ -17,8 +15,10 @@
 1. RecSys의 유저별 최적화를 교육현장 속 맞춤형 교육과 어떻게 연결시킬 수 있을까?
 
 2. Matrix Completion 문제를 Clustering으로 해결할 수 있을 것 같은데 선행 연구들이 있나?  
-
-
+   
+   - 실제로 Clustering이 빈 값 매꾸기로 사용되고 있음! 
+   
+   - Matrix Completion 과 확률모델을 연계해볼 수 있겠는걸? 
 
 
 
@@ -42,29 +42,22 @@
   
   - Lex Fridman - <u>"Recommendation system affect the information we see, how we learn, what we think, how we communicate"</u>
 
-
-
 ----
 
 ##### 추천 시스템의 문제 정의
 
-1. 예측(Prediction) : 관측된 값을 기반으로 관측되지 않은 값을 예측하는 것 
+1. **예측(Prediction)** : 관측된 값을 기반으로 관측되지 않은 값을 예측하는 것 
    
    > ![](picture/1-2.png)
    > 
    > 예측 문제를 **Matrix completion problem** 이라고도 부름  
 
-2. 순위 매기기(Ranking) : 개별 유저에게 맞춰 Top k 개의 우선순위를 제공하는 것 
+2. **순위 매기기(Ranking)**: 개별 유저에게 맞춰 Top k 개의 우선순위를 제공하는 것 
    
    - 순위 측정으로, 예측된 값의 상대적 순위만 중요하다. 
-
-
-
-
-
 - **평가(Rating)의 종류**
   
-  - **Explicit feedback** : 선호 유무 및 정도를 명시 
+  - **Explicit feedback** : 선호 유무 및 정도를 구체적으로 명시 
     
     > Interval-based / Continuous value -based / Like or dislike(Binary)
     
@@ -86,21 +79,17 @@
       
       - 일반적으로 각 <u>유저의 행동들이 긍정적일 것 이란 가정 하에 예측</u>한다.
 
-
-
 - Ex)- 평가 종류 별 해석 
   
   ![](picture/1-3.png)
   
   > 동일한 경험을 한 유저들에 대해서 Explicit / Implicit rating 방식에 따라 평가함. 
   
-  - 동일한 경험을 해도 다른 해석을 할 수 있다. 
+  - <mark>동일한 경험을 해도 평가 방식에 따라 다른 해석을 할 수 있다. </mark>
     
     - U1 과 U3 의 경험을 분석할 때, 좌측은 선호도가 정 반대임을 알 수 있다. 
     
     - 하지만 우측은 동일한 선택지를 했기 때문에 선호도가 유사하다고 해석한다. 
-
-
 
 - **평가 종류 별로 Missing value을 특정 값(ex-0)으로 대체했을 때의 결과가 다르다.**
   
@@ -125,8 +114,6 @@
   - How? : 어떤 물품을 추천했을 때 상품 판매를 촉진시킬 수 있는가에 대한 해답 찾기! 
   - 사람들이 해당 상품에 대해 **흥미**(Interesting)를 느껴야 구매한다. 
 
-
-
 - **4가지 목표치**
   
   1. **Relevance** : 유저에게 친숙한 Item 추천 
@@ -145,9 +132,7 @@
      
      - Novelty 한 물품을 지속적으로 추천하면 상품 다양성의 감소를 초래할 수 있다. 
        
-       > 흠... 한번에 와닿지가 않네
-  
-  
+       > 흠... 한번에 와닿지가 않네. 이미 새로운 건 사용했으니까 그런건가? 
   
   3. **Serendipity** : (완전히) 새로운 Item을 추천하는 것 
      
@@ -160,8 +145,6 @@
   4. **Diversity** : 다양한 타입의 물품을 추천하기 
      
      - 관련된 물품을 모두 싫어할 최악의 경우에 대비하여, 적어도 하나는 유저의 흥미를 끌 수 있도록 안정성을 보장
-
-
 
 ----
 
@@ -185,8 +168,6 @@
 
 *이번 주는 Content-based Recommendation 만을 다룸* 
 
-
-
 ----
 
 ##### Content-based Recommendation
@@ -209,7 +190,7 @@
   
   - 다수의 특징 중 **중요도를 산정**하여 중요 특징들을 선택한다. 
     
-    - TF-IDF 등의 방법 등을 통해 중요도 산정한다. <u></u>
+    - TF-IDF, Cosign similarity 등의 방법 등을 통해 중요도 산정한다. 
       
       - <u>TD-IDF는 많이 사용되지만(TF), 전반적으로 적게 쓸수록(IDF)</u> 해당 상황에서 **중요한 단어라고 판단**한다. 
       
@@ -227,7 +208,7 @@
 
 - **장점** 
   
-  - 다른 유저 정보를 필요로 하지 않다 > Cold-start, Sparsity 등 정보가 부족하지 않다.
+  - 다른 유저 정보가 필요 없다 > Cold-start 등의 상황에도 정보가 부족하지 않다.
     
     - 유일한(Unique) 취향을 가진 유저에게도 추천이 가능하다. 
     

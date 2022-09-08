@@ -1,7 +1,5 @@
 ### 1주차 - Probability Theory
 
-
-
 ##### 서론
 
 - 통계와 확률 이론은 **불확실성을 다루기 위한 학문**이다. 
@@ -10,15 +8,11 @@
   
   - 따라서 불확실성을 다루는 모든 분야에 대해서 적용가능하다. 
 
-
-
 - 통계적 추론은 Descriptive / Inferential 과정을 모두 포함한다. 
   
   - Descriptive Statistics : Data의 특성을 알기 위한 것 
   
   - Inferential Statistics : 문제의 Sample로 부터 결정을 내리거나 추론하는 것
-
-
 
 ##### 용어 정리
 
@@ -36,8 +30,6 @@
 > 
 > Contidional Probability : $P(A|B) = \frac{P(A\cap B)}{P(B)}$ 
 
-
-
 - **Independence**
   
   - Mutual : $P(A_1 \cap ... \cap A_n) = P(A_1) P(A_2) ... P(A_n)$
@@ -48,13 +40,9 @@
   
   - Conditional : 관측 유무에 따라 Indep 결정됨. 
 
-
-
 - Law of Total Probability 
   
   > $P(B) = \sum^n_{i=1} P(A_i)P(B|A_i)$ 
-
-
 
 - <mark>Bayes' Theorem(사후 확률 계산)</mark>
   
@@ -65,7 +53,3 @@
   > > ex)- $A_i$ : parameter / Disease type 
   > > 
   > > ex)- B : observable random variable / Symptom 
-
-
-
-
