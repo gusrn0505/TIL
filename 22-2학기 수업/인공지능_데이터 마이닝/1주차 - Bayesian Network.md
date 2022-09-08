@@ -318,8 +318,6 @@
   
   - 마지막으로 e의 모든 경우에 대해서 확률을 합한다. 이때 1이 나오도록 $\alpha$ 값을 조정한다. 
 
-
-
 ---- 
 
 #### Potential Functions
@@ -337,8 +335,6 @@
   > 2번 조건은 Normalized 를 통해서 달성될 수 있다. 
   > 
   > ex)- Lelu 
-
-
 
 - **Joint Distribution을 Sequel Model 형태로 표현함으로써 Potential func의 연산으로 구해낼 수 있다.**
   
@@ -370,8 +366,6 @@
   > 
   > - **Clique 상황에서의 Inference를 "Message passing" 이라고 한다.**
 
-
-
 - 그럼 어떻게 Potential 함수를 통해서 확률 분포값을 어떻게 알아 낼 수 있을까?
   
   - **유일한 방식을 Absortion rule 또는 Update Rule이라고 부른다.**
@@ -389,8 +383,6 @@
   > > - $\sum_C \psi^*(B,C) = \sum_A \psi^*(A,B)$ 를 통해서 유추해낸 식 
   > > 
   > > - 위의 식은 local consistency 만을 보장하나, Message passing이 확장 및 반복을 통해서 Global consistency를 보장한다. 
-
-
 
 - **Ex)- Potential Function의 Message Passing을 통해서 확률값 구하기**
   
@@ -417,8 +409,6 @@
   > <mark>$\phi^{***}(b)$</mark> $= \sum_a \psi^*(a,b) $= <mark>$P(b)$</mark> 
   > 
   > - $\phi(b)$ 의 값이 좌우 공통으로 통일됨. <mark>즉, P(b)의 값을 Potential func의 연산으로 구할 수 있게 된다. </mark>
-
-
 
 - Ex2 - P(b|a =1, c=1) 계산하기 
   
