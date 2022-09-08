@@ -112,7 +112,7 @@
   
   - 둘의 오차를 줄이는 하나의 방법으로 Upper bound를 부여하는 것이 있다. 
     
-    > <Hoeffding's inequality> 
+    > **<Hoeffding's inequality>**
     > 
     > let $Z_1, ..., Z_n$ be independent bounded random variables with $Z_i \in [a,b]$ for all i, where $ -\infin < a <= b < \infin$. then 
     > 
@@ -152,7 +152,7 @@
     
     - Direct influence from the parent to the child 
   
-  - => **To obtain a compact representation of the full joint distribution*
+  - => *To obtain a compact representation of the full joint distribution*
   
   - Square - Plate Notation 
     
@@ -226,7 +226,7 @@
 
 - Bayesian network을 고려할 때, 가장 일반적인 형태의 Probability distribution
   
-  - P(x) = $\prod_i P(X_i|X_{\pi_i})$
+  - P(x) = $\prod_i P(X_i : child node|X_{\pi_i} : Parent node)$ 
   
   ![](picture/1-15.png)
 
