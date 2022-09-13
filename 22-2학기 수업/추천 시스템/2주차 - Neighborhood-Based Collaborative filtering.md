@@ -1,7 +1,5 @@
 #### 2주차 - Neighborhood-Based Collaborative filtering
 
-
-
 #### 이웃 기반의 Collaborative Filtering
 
 - 추천을 생성하는 데 있어 가장 유용한 방법
@@ -15,8 +13,6 @@
   1. 유저들은 Item에 대해 (Implicitly / Explicitly) 평가를 해야한다. 
   
   2. 과거에 유사한 성향을 가진 고객은 미래에도 동일한 취향을 가질 것이다.
-
-
 
 - **방식**
   
@@ -36,7 +32,7 @@
   
   - **Input : User-item의 평가 Matrix만 있으면 됨!** 
     
-    > 나중에 어떻게 User-item을 연결시키는 가 까지 논의할 예정 
+    > 나중에 '어떻게 User-item을 연결시키는가' 까지 논의할 예정 
   
   - Output 
     
@@ -46,41 +42,39 @@
 
 ****
 
-- **유저 기반 Collaborative filtering**
-  
-  - **목적 : 미경험 Item에 대한 Active User의 선호도를 예측 및 최고 선호도 Item 추천**
-  
-  - **방식** 
-    
-    - Active user와 유사한 Item을 좋아하며, 미경험 Item i를 평가한 유저군 탐색
-    
-    - 해당 유저군의 Item i에 대한 평가들의 대표값(ex- 평균)을 구한다. 
-    
-    - 가장 높은 예측 선호도를 가진 Item을 Active user에게 추천한다. 
-  
-  - **기본 전제와 아이디어**
-    
-    - 과거에 유사한 취향을 가진 사람은 미래에도 유사한 취향을 가질 것이다.
-    
-    - 유저 선호도는 시간에 대해 안정적이며 일관된다.
-  
-  - **고려할 점** 
-    
-    1. 어떻게 유사도(Similarity)를 측정할 것인가? > 아래 참고 
-    
-    2. 얼마나 많은 이웃을 고려해야 하는가? 
-       
-       - 유사도가 0 이상인 경우만 고려. 
-       
-       - 데이터 셋에 따라 다르지만 보통 50~200개 정도. 
-    
-    3. 이웃들의 평가로부터 어떻게 예측을 해야 하는가? 
-       
-       - Data type(Explicit / Implicit)에 따라 각각 어떤 예측 방법을 써야하는가?
-       
-       - 아래 참고!
+##### **유저 기반 Collaborative filtering**
 
+- **목적 : 미경험 Item에 대한 Active User의 선호도 예측 및 Top-k Item 추천**
 
+- **방식** 
+  
+  - Active user와 유사한 Item을 좋아하며, 미경험 Item i를 평가한 유저군 탐색
+  
+  - 해당 유저군의 Item i에 대한 평가들의 대표값(ex- 평균)을 구한다. 
+  
+  - 가장 높은 예측 선호도를 가진 Item을 Active user에게 추천한다. 
+
+- **기본 전제와 아이디어**
+  
+  - 과거에 유사한 취향을 가진 사람은 미래에도 유사한 취향을 가질 것이다.
+  
+  - 유저 선호도는 시간에 대해 안정적이며 일관된다.
+
+- **고려할 점** 
+  
+  1. 어떻게 유사도(Similarity)를 측정할 것인가? > 아래 참고 
+  
+  2. 얼마나 많은 이웃을 고려해야 하는가? 
+     
+     - 유사도가 0 이상인 경우만 고려. 
+     
+     - 데이터 셋에 따라 다르지만 보통 50~200개 정도. 
+  
+  3. 이웃들의 평가로부터 어떻게 예측을 해야 하는가? 
+     
+     - Data type(Explicit / Implicit)에 따라 각각 어떤 예측 방법을 써야하는가?
+     
+     - 아래 참고!
 
 - Notation
   
@@ -93,40 +87,44 @@
   > $I_u$ = {i|$R_{u,i} =1$} : 유저 u가 구매한 물건들의 집합
   > 
   > $U_i$ = {u|$R_{u,i} =1$} : Item i를 구매한 유저들의 집합
-  
-  
 
-- **유사도 측정하기!**
+
+
+
+
+- **Implicit Feedback의 경우 - 유사도 측정하기!**
   
-  - **Implicit Feedback의 경우**
-    
-    1. Euclidean distance 
-       
-       ![](picture/2-2.png)
-       
-       - 단점 : 공통 요소가 거의 없을 때에도, 작은 규모의 집합에만 적용할만하다.
-    
-    2. Jaccard Similarity <u>[Euclidean distance 단점 해결]</u>
-       
-       ![](picture/2-3.png)
-       
-       - 단점 : Binary 경우에만 사용할 수 있다. 
-    
-    3. **Cosine Similarity [임의의 벡터에도 사용가능 - Jaccard 의 확장버전]**
-       
-       ![](picture/2-4.png)
-       
-       - Cosine Similarity 의 값에 따라 두 Item / 두 유저간의 관계성을 알 수 있다. 
+  1. Euclidean distance 
+     
+     ![](picture/2-2.png)
+     
+     - 단점 : 공통 요소가 거의 없을 때에도, 작은 규모의 집합에만 적용할만하다.
   
+  2. Jaccard Similarity <u>[Euclidean distance 단점 해결]</u>
+     
+     ![](picture/2-3.png)
+     
+     - 단점 : Binary 경우에만 사용할 수 있다. 
   
+  3. **Cosine Similarity [임의의 벡터에도 사용가능 - Jaccard 의 확장버전]**
+     
+     ![](picture/2-4.png)
+     
+     - Cosine Similarity 의 값에 따라 두 Item / 두 유저간의 관계성을 알 수 있다. 
+
+
+
+
+
+- **Explicit Feedback의 경우 - Pearson Correltaion** 
   
-  - **Explicit Feedback의 경우 - Pearson Correltaion** 
-    
-    - **의의 : 서로 다른 유저들의 Explicit rating을 고려할 수 있다!** 
-    
-    > ![](picture/2-5.png)
-    > 
-    > - 각 유저 u, v에 대해 평균 값보다 클 때 +, 작을 때 - 값을 부여함. 
+  - **의의 : 서로 다른 유저들의 Explicit rating을 고려할 수 있다!** 
+  
+  > ![](picture/2-5.png)
+  > 
+  > - 각 유저 u, v에 대해 평균 값보다 클 때 +, 작을 때 - 값을 부여함. 
+
+
 
 
 
@@ -148,7 +146,9 @@
       > 
       > Social Network 상황 아래에서는 유저 기반도 이유를 댈 수 있게 됨. 
   
-  - Similarity가 각 평가치에 가중치로서 역할을 함. 
+  - Similarity가 각 평가치에 가중치로서 역할을 함 
+
+
 
 
 
@@ -164,6 +164,8 @@
 
 
 
+
+
 - **이웃 기반 CF 방식의 장단점**
   
   - 이웃 기반 CF는 **Memory-based CF** 라고도 불린다. 
@@ -172,7 +174,7 @@
   
   - **장점** 
     
-    - 최소한의 정보(Rating / Implicit feedback) 만을 요구한다.
+    - <u>최소한의 정보</u>(Rating / Implicit feedback) 만을 요구한다.
     
     - 대부분의 경우에서 좋은 성능을 가져온다. 
   
@@ -200,15 +202,11 @@
   
   - **New User problem** : 추천을 위해 유저의 선호도에 대한 평가를 수집해야만 한다. 
     
-    > ex)- watcha : 가입 시 이전에 봤던 영화 10개 고리기 
+    > ex)- watcha : 가입 시 이전에 봤던 영화 10개 고르기 
     
     - Hydrid RecSys 가 위의 문제 해결을 도울 수 있음 
   
   - **New Item Problem** : 새로운 Item에 대해 충분한 양의 평가가 들어오기 전에 추천을 할 수 없다.
-
-
-
-
 
 ---------------------
 
@@ -225,8 +223,6 @@
   - 따라서 Coefficient를 가중치($W^{item}_{i,j}$)로 표현하여, 선형 회귀와 유사하게 표현한다. 
     
     > ![](picture/2-9.png)
-
-
 
 - **Sparse Linear Models(SLIM)**
   
@@ -259,20 +255,16 @@
     > > ![](picture/2-12.png)
     > 
     > **규제 항으로 $\beta$ 가 들어갔기 때문에, $\beta$ 값도 점차 0으로 근접할 것이다.**
-  
-  
 
 - Ridge vs Rasso 
   
-  ![](picture/2-116.png)
+  ![](picture/2-16.png)
   
   > 왼쪽이 Lasso, 오른쪽이 Lidge 
   
   - 특정 값 RSS에 해당하는 Contour을 고려했을 때, 각 제약을 충족시킬 때의 접점이 다르다. 
   
   - 이는 반대로 말해, 주어진 제약 조건에 대해서 Lidge는 보다 작은 RSS 값으로도 접점을 만들어 낼 수 있다는 것. 
-
-
 
 ----------
 
@@ -286,8 +278,6 @@
   
   - 평가 방식 : RMSE / MAE [예전에 다뤘으므로 생략]
 
-
-
 - Top-k 추천 → Ranking 방식 적용 
   
   - Input : 추천하고자 하는 Item의 수(k),  유저 / Item 쌍의 Implicit 데이터
@@ -295,10 +285,6 @@
   - Output : 각 유저에 맞춰 가장 추천할 만한 k개의 Item들 
   
   - 평가 방식  : Precision , Recall, F1, AP, RR, NDCG 
-
-
-
-
 
 - Precision & Recall, F1
   
@@ -316,8 +302,6 @@
     
     > $F_1 = 2 * \frac {precision  * recall}{precision + recall}$
 
-
-
 - ROC & AUC 
   
   > ex)- ![](picture/2-19.png)
@@ -327,8 +311,6 @@
   > - 이때 파란색 선이 ROC Curve를, 파란색 선 아래의 영역을 AUC라고 한다. 
   > 
   > - AUC 가 클수록 좋다. 
-
-
 
 - **Rank position matter**
   
@@ -362,25 +344,3 @@
      > > $rel_i$ : i 위치에서의 관련 정도 
      > 
      > $IDCG_{pos} = rel_1 + \sum^{|h|-1}_{i=2} \frac{rel_i}{log_2i}$
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
