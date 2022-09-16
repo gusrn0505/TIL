@@ -69,6 +69,8 @@
 - k 개의 Binary Variance 중 1개를 선택하는 것. [Binomial distrubution 일반화]
 
 > $\sum_k x_k = 1, P(X|\mu) = \prod^K_{k=1} \mu_k^{x_k} s.t. \mu_k >=0, \sum_k \mu_k =1$
+> 
+> > $x_k : ${0,1}. 해당될 때에만 1의 값을 가진다. 
 
 - N개의 Selection을 할 경우,
   
@@ -97,6 +99,8 @@
     > $L(\mu, m, \lambda) = \sum^K_{k=1} m_k ln\mu_k + \lambda(\sum^K_{k=1} \mu_k -1) $
     > 
     > > $\mu_k$는 $\prod$ 연산을 거치기 때문에 반응 정도를 낮추기 위해 log를 사용 
+    > > 
+    > > *Q. 왜 $\lambda$ 부분에 -1을 하지?*
   
   - Lagrange function을 편미분하여 optimal value를 찾는다.
     
@@ -122,7 +126,7 @@
 
 -----
 
-**Multivariate Gaussian Distribution** 
+##### **Multivariate Gaussian Distribution**
 
 - ![](picture/2-1.png)
 
@@ -150,7 +154,7 @@
   > > 
   > > P(z) = $\prod^K_{k=1} \pi_k^{z_k}$  
   > 
-  > $P(X|z_k=1) = N(x|\mu_k, \sum_k)$       (이때 $\sum_k$ 는 k번쨰 공분산을 의미)
+  > $P(X|z_k=1) = N(x|\mu_k, \sum_k)$       (이때 $\sum_k$ 는 k번째 공분산을 의미)
   > 
   > → $P(X|Z) = \prod^K_{k=1} N(x|\mu_k, \sum_k)^{z_k}$
 
@@ -162,7 +166,7 @@
   > 
   > 즉, Latent variable인 z값만 Inference 대상이 됨
   > 
-  > 만약, 파라미터로 Distribution 형태가 된다면 Prior 모델이 된다.
+  > 만약, 파라미터가 Distribution 형태가 된다면 Prior(distribution) 모델이 된다?
   
   - **각 $x_n$이 특정 Cluster에 속할 확률 계산하기 [Conditional probability]**
     
@@ -192,7 +196,7 @@
   
   - <u>Gaussian Mixture Model의 목적은 Density estimation 이다! </u>
     
-    - 다른 Distribution을 적용할 때에도 동일하게 Density estimation을 추구한다. 
+    - 다른 Distribution을 적용할 때에도 동일하게 Density estimation을 추구한다.
 
 - **k-means 와 GMM의 관계**
   
@@ -249,6 +253,10 @@
   - 이것은 한편으로 Latent Variable이 존재할 때, **편미분을 통해 최적값으로 업데이트 하는 것이 아닌, EM 또는 다른 번거로운 방법을 써야만 하는 이유**이다.
     
     > *아직 완전히 이해가 안되는 기분. 뭔가 하나 부족해*
+    > 
+    > Latent Varible은 파라미터에 따라서 변화하며, 파라미터는 E에 따라 계속 변하기 때문?
+    > 
+    > Latent Variable은 Marginalization을 통해 고려하지 않으려고 하니, 고려하지 않는 상태에서 바로 해석적으로 최적값을 찾는 건 어렵다? 
   
   - 더 나아가, Latent Variable이 존재함에도 불구하고 EM, Evidence Low bound를 사용해야 하는데 사용 안했다면 잘못 접근한 것이다. 
     
@@ -266,7 +274,7 @@
 
 **Probability Decomposition** 
 
-- 'Log를 씌었을 때 미분이 잘 안된다'를 해소하기 위해 q(z)와 Jensen's equality를 적용 
+- **'Log를 씌었을 때 미분이 잘 안된다'를 해소하기 위해** q(z)와 Jensen's equality를 적용 
   
   > Likelihood($\theta$) = $ln P(X|\theta) = ln(\sum_Z P(X,Z|\theta) $= <mark>$ln(\sum_Z q(z) \frac{P(X,Z|\theta)}{q(z)})$</mark>
   > 
@@ -318,11 +326,15 @@
   
   > 둘다 상황에 따라 필요로 하는게 다르다. 
 
+
+
+
+
 **Maximizing the Lower Bound** 
 
 - Lower Bound를 크게 만들수록 값이 정밀해진다. 
 
-- 기존 식(l($\theta$) -check 필요)은 $\theta 과 z$ 가 주어지면 하나의 결과값이 정해진다. 
+- 기존 식(l($\theta$) -check 필요)은 $\theta$ 과 $z$ 가 주어지면 하나의 결과값이 정해진다. 
   
   - 대신, Lower bound에 제약을 추가함으로써 Q의 값을 최적화한다. 
   
@@ -351,3 +363,23 @@
 - 이제 Z값을 Sudo-known Variable 이 되었기 때문에, 이제는 Supervised learning의 Training과 동일하게 됨. 
   
   - 이제는 EM 과정 없이 바로 최적값을 찾을 수 있게 되버림. 
+
+
+
+--------------
+
+##### EM 과정의 시각화
+
+![](picture/2-11.png)
+
+- E- Step 
+  
+  - p의 근사 분포인 q를 최적화함으로써 Lower bound를 최대화 시킨다. 
+
+- M-Step 
+  
+  - q가 변화했기 때문에, 이에 맞춰서 걸맞는 Parameter $\theta$를 할당해준다. 
+  
+  - 이때 우리의 목표는 $lnP(X|\theta^{t+1})$ 을 키워주는 것으로, 변화한 q에 맞춰 더욱 크게 설정하게 된다. 
+  
+  - 이때 생겨나는 $lnP(X|\theta)$의 차이를 Variation R(?) Gap이라고 부른다. 
