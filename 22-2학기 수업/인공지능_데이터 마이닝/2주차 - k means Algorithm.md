@@ -272,6 +272,8 @@
   > 
   > - 즉, n번 미분하는데 계산이 많이 필요하다.
 
+-----
+
 **Probability Decomposition** 
 
 - **'Log를 씌었을 때 미분이 잘 안된다'를 해소하기 위해** q(z)와 Jensen's equality를 적용 
@@ -306,6 +308,8 @@
   > > 
   > > $KL(q(Z)||P(Z|X,\theta)) = \sum_Z(q(Z) ln \frac{q(Z)}{P(Z|X,\theta)} )$
 
+------
+
 **KL Divergence**
 
 - KL Divergence는 두 분포간의 차이를 측정한다. [Aymmetric]
@@ -325,10 +329,6 @@
      ![](picture/2-10.png)
   
   > 둘다 상황에 따라 필요로 하는게 다르다. 
-
-
-
-
 
 **Maximizing the Lower Bound** 
 
@@ -363,8 +363,6 @@
 - 이제 Z값을 Sudo-known Variable 이 되었기 때문에, 이제는 Supervised learning의 Training과 동일하게 됨. 
   
   - 이제는 EM 과정 없이 바로 최적값을 찾을 수 있게 되버림. 
-
-
 
 --------------
 
