@@ -18,21 +18,13 @@
   
   - 이때 Hidden Markov Model이 적용될 수 있다.
 
-
-
-
-
 - 추가로 Parameter $\theta$ 도 안주어질 때가 많다. 이땐 E-M Algorithm을 통해 점차 최적화해나가면 된다. 
-
-
 
 ##### HMM의 의의
 
 - Directed Model의 경우 Neural Network가 더 뛰어난 성능을 거둠 
 
 - 따라서 **HMM은 NN이 커버할 수 없는 Undirected model, Contidional random field 에서 유용성이 있다**. 
-
-
 
 -----------
 
@@ -50,9 +42,9 @@
   
   > Initial State prob : $P(z_i) \sim Mult(\pi_1, ... , \pi_{k})$
   > 
-  > > Q. $\pi$ 가 의미하는 건 무엇인가? 각 $z_i$에 속할 확률 값? 이게 맞는 듯. 
-  > > 
-  > > 각각의 Latent Variable이 분포할 확률을 의미하나? 
+  > > $\pi$ : $z_i$에 속할 확률 값
+  > 
+  > 각각의 Latent Variable이 분포할 확률을 의미하나? 
   > 
   > Transition prob $a_{i,j}$ : $P(z_t|z_{t-1}^i =1) \sim Mult(a_{i,1}, ..., a_{i,k})$
   > 
@@ -95,10 +87,10 @@
   > $P(X,Z) = P(x_1, ..., x_t, z_1, ..., z_t)$
   > 
   >                    $= P(z_1) P(x_1|z_1)P(x_2|z_2) .... P(x_t|z_t)$
-
-- 하지만 Latent Variable z 간에 dependence 할 경우 아래와 같이 된다. 
   
-  > $P(X,Z) =  P(z_1) P(x_1|z_1)P(z_2|z_1)P(x_2|z_2) .... P(z_t|z_{t-1}) P(x_t|z_t)$
+  - 하지만 Latent Variable z 간에 dependence 할 경우 아래와 같이 된다. 
+    
+    > $P(X,Z) =  P(z_1) P(x_1|z_1)P(z_2|z_1)P(x_2|z_2) .... P(z_t|z_{t-1}) P(x_t|z_t)$
 
 - 이는 $P(X)$ 를 구할 때 아래와 같이 계산해야 함을 의미한다. 
   
@@ -124,7 +116,7 @@
   > 
   > **By Markov Blanket,**
   > 
-  > -  $z_t$ 는 A 와 Indep :  $P(D|A,C) = P(D|C))$
+  > - $z_t$ 는 A 와 Indep :  $P(D|A,C) = P(D|C))$
   > 
   > - A,C는 D와 Indep : $P(B|A,C,D) = P(B|D)$ 
   > 
@@ -147,14 +139,10 @@
   > >                 = $\alpha_t^k /P(X)$   
   > 
   > > 또한 <mark>$\alpha_t^k$ 를 구할 때, $\alpha^i_{t-1}$ 만 알고 있다면 Lineal 한 계산양을 필요로 </mark>한다.
-  
-  
-  
-  > Dynamic Program : 수학적 귀납법 - 반복 계산식 활용 
-  > 
-  > 앞서 Markov Blanket으로 간소화한 식을 바탕으로, 한번 $\alpha^t_k$을 구한 것을 반복해서 잘 사용해먹는다 :)  
 
-
+> Dynamic Program : 수학적 귀납법 - 반복 계산식 활용 
+> 
+> 앞서 Markov Blanket으로 간소화한 식을 바탕으로, 한번 $\alpha^t_k$을 구한 것을 반복해서 잘 사용해먹는다 :)  
 
 - 단, 업데이트 방향이 t=1 > t=T 일방향적이라 반대 방향으로도 유사한 과정을 거쳐줘야 함. 
   
@@ -187,8 +175,6 @@
   > <mark>P($z_t^k=1, X) = P(A,B,C,D) $</mark> $= \alpha_t^k \beta_t^k$
   > 
   >                            <mark> $= (b_{t, x_t} \sum_i \alpha_{t-1}^i a_{i,k})$ * ($\sum_i \alpha_{k,i} b_{i, x_t}\beta_{t+1}^i$)</mark>
-  
-  
 
 ---------------
 
@@ -197,8 +183,6 @@
 - Since $P(z_t^k=1, X) =  (b_{t, x_t} \sum_i \alpha_{t-1}^i a_{i,k}) * (\sum_i \alpha_{k,i} b_{i, x_t}\beta_{t+1}^i) $
 
 - let <mark>$k_t^*$</mark> $= argmax_k P(z_t^k=1 |X) = argmax_k P(z_t^k=1, X) =$ <mark>$argmax_k \alpha_t^k \beta_t^k$</mark>
-
-
 
 - Let $V_t^k = max_{z_1, ..., z_{t-1}} P(x_1, ..., x_{t-1}, z_1, .., z_{t-1}, x_t, z_t^k=1)$
   
@@ -227,7 +211,5 @@
   >        $= P(B|D) max_{t \in z_{t-1}} P(z_t^k =1 | z_{t-1}^i =1) V_{t-1}^i$
   > 
   >       <mark> $= b_{k, idx(x_t)} max_{i \in z_{t-1}} a_{i,k} V^i_{t-1}$</mark>
-
-
 
 - 이렇게 Most assignable of Latent Variable도 Dynamic Probramming을 통해서 계산!
