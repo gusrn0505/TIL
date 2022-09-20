@@ -1,16 +1,16 @@
 #### 3주차 - 모델 기반의 Collaborative Filtering
 
-
-
 **모델 기반의 CF이란, 휴리스틱한 방식 대신에 데이터를 기반으로 모델을 학습하는 방법을 의미한다. 아래와 같은 종류가 있다**
 
 - Explicit feedback : Matrix factorization, SVD++, Probabliity Matrix Factorization 
+  
+  > 정확한 Rating을 기반으로 Latent feature을 추출하려는 시도! 
 
 - Implicit feedback 
   
   - MF-based 
     
-    - Pointwise : OCCF, WRMF 
+    - Pointwise : OCCF, WRMF  
     
     - Pairwise : BPR 
     
@@ -27,8 +27,6 @@
   - Deep learning-based 
     
     - NCF, CDAE 
-
-
 
 ----------------------
 
@@ -50,8 +48,6 @@
   
   <mark>→ 우리가 유저와 Item의 Latent Factor을 알면 반대로 Rating을 예측할 수 있을 것!</mark>
 
-
-
 - **목적 : 유저와 Item의 Latent Factor을 계산하자!**
   
   - 수단 : **Singular Value Decomposition(SVD)** 적용 
@@ -61,8 +57,6 @@
   > SVD는 차원 축소를 위해서도 자주 사용된다. 
   > 
   > 또한 $\sum$ 의 Diagonal 값 중에서 큰 값만 선택함으로써 주요 특징을 남기면서 근사시킬 수 있다. 단, 이때 근사값은 실제 값과 완전히 같진 않다. 
-
-
 
 - **MF에서의 Missing Value 해결 방법**
   
@@ -93,8 +87,6 @@
     - 이후 관측한 값($R_{ij}$)를 기반으로 Latent factor $u_i, v_j$ 를 갱신 
       
       ![](picture/3-6.png)
-
-
 
 ---
 
@@ -148,13 +140,13 @@
     
     > RR은 Non-smooth func로 Gradient-based optimization 이 불가능하다. 
     > 
+    > > Non-smooth : 무한번 미분이 불가능함. 즉, 미분을 기반으로 최적화시키는 Gradient-based optimization은 불가하다. 
+    > 
     > => <u>각각의 요소들($II(R_{ik} < R_{ij} ), \frac{1}{R_{ij}}$) 을 근사한 값으로 대체</u>한다. 
     > 
     > ![](picture/3-12.png)
     
     > ![](picture/3-13.png)
-
-
 
 ----- 
 
@@ -170,17 +162,13 @@
     
     - 따라서 특성별로 가중치를 부여함으로써 유사도를 측정한다. 
 
-
-
 - **목표 : 데이터를 기반으로 예측을 도와주는 Metric Matrix를 학습하는 것**
   
   > $d(x,y) = \sqrt{(x-y)^TM(x-y)}$
   
-  - 관측된 일부 자료를 기반으로 유사한 클래스 간의 거리는 작게, 다른 클래스 간은 크게 만들어 주는 Metric Matrix M을 찾고자 한다. 
+  - 관측된 일부 자료를 기반으로 유사한 클래스 간의 거리는 작게, 다른 클래스 간은 크게 만들어 주는 **Metric Matrix M**을 찾고자 한다. 
 
-
-
-- 문제점 : MF는 Inner Product의 경우  삼각부등식을 위반하여, 그대로 거리를 유사도로 고려할 수 없다. 
+- 문제점 : <u>MF는 Inner Product의 경우 삼각부등식을 위반하여, 유사도로 고려할 수 없다. </u>
   
   - 두 특정 관계 사이의 Positive relationship이 반영되지 않는 결과를 만들 수 있다. 
   
@@ -195,6 +183,8 @@
   > 하지만 U3은 v1, v2를 둘다 선호할 수 있다. 
   > 
   > *Q. 그래서 이걸 해결했다는 거야 안했다는 거야?*
+  > 
+  > - 아래 방법들로 해결한 거 같네 
 
 
 
@@ -244,7 +234,7 @@
     > 
     > ![](picture/3-24.png)
     > 
-    > -  $\alpha_u, \beta_i$의 값들이  $\alpha_u^{nbr}, \beta_i^{nbr}$ 에 근사할 수 있다면 <u>이웃(Neighborhood)의 정보가 보다 잘 반영 될 것</u>  
+    > - $\alpha_u, \beta_i$의 값들이  $\alpha_u^{nbr}, \beta_i^{nbr}$ 에 근사할 수 있다면 <u>이웃(Neighborhood)의 정보가 보다 잘 반영 될 것</u>  
     > 
     > - <mark>→ 규제항으로 추가</mark>
     > 
@@ -256,7 +246,7 @@
 
 
 
-- **Latent relational metric learning Via Mmory-based attention for collaborative ranking(LRML)**
+- **Latent relational metric learning Via Memory-based attention for collaborative ranking(LRML)**
   
   - Idea : 각각의 유저-Item의 관계를 묘사하는 Latent 관계를 학습하자 
     
@@ -268,13 +258,9 @@
     > 
     > 추후 자세히 다룰 예정 
 
-
-
 ---- 
 
 ##### Deep learning-based Methods
-
-
 
 **Neural collaborative Filtering(NCF)**
 
@@ -282,12 +268,8 @@
   
   ![](picture/3-27.png)
 
-
-
 **Collaborative Denoising Auto-Encoders for Top-N Recommender systems(CDAE)**
 
 - Idea : noise를 제거하는 Autoencoder를 도입한다 
   
   ![](picture/3-28.png)
-
-
