@@ -112,6 +112,8 @@
 
 - **Pairwise** : Pairwise preference over two items(observed / Unobserved)
   
+  - BPR : Bayesian Personalized ranking from implicit Feedback  
+  
   ![](picture/3-8.png)
   
   > 선택한 Item i를 선택하지 않은 Item j 보다 선호한다. 
@@ -186,8 +188,6 @@
   > 
   > - 아래 방법들로 해결한 거 같네 
 
-
-
 ###### Collaborative Metric Learning(CML)
 
 - Idea :유저는 싫어하는 Item 보다는 좋아하는 Item에 가까워야 한다. 
@@ -203,8 +203,6 @@
     ![](picture/3-18.png)
     
     > 이를 통해서 v1, v2의 가 u1-u3, u2-u3 사이에 오도록 조정한다. 
-
-
 
 - **Collaborative translational Metric Learning(TRANSCF)**
   
@@ -243,8 +241,6 @@
     > - <u>Negative Item을 밀어냄으로써 관련성 있는 객체들을 모을 수 있을 것</u>
     > 
     > - <mark>→ 규제항으로 추가 </mark>
-
-
 
 - **Latent relational metric learning Via Memory-based attention for collaborative ranking(LRML)**
   
