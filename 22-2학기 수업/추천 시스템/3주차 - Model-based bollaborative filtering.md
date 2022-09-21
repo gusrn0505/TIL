@@ -94,7 +94,7 @@
 
 **Learning to Rank** - Similar to supervised classification problem 
 
-- **Point wise** : Direct relevance of and item 
+- **Point wise** : Direct relevance of user and item 
   
   - Idea : Confidence level을 고려함 
     
@@ -120,7 +120,7 @@
   
   - 단점 : 모든 관찰되지 않는 Items들을 동일하게 고려한다. 
 
-- **Listwise** : Ranking loss over the entie list
+- **Listwise** : Ranking loss over the entire list
   
   - **List Lank**
     
