@@ -244,10 +244,10 @@
   
   > 이때 '그럼직한 답'이란 가장 높은 확률 값을 가지는 경우를 찾는 것이다.
   > 
-  > $ex)- argmax_aP(A|B=True, C=True)$
-1. Likelihood 계산 ($p(x_v)$)
+  > <mark>**$ex)- argmax_aP(A|B=True, C=True)$**</mark>
+1. **Likelihood 계산 ($p(x_v)$)**
    
-   > <mark>$P(X_V) = \sum_{X_H} P(X_H, X_V) = \sum_{x_1}... \sum_{x_k}P(x_1, ..., x_k, x_V)$</mark>
+   > <mark>$P(X_V) = \sum_{X_H} P(X_H, X_V) = \sum_{x_1}... \sum_{x_k}P(x_1, ..., x_k, X_V)$</mark>
    > 
    > > $X = [X_1, ... , X_N]$ : all random variables
    > > 
@@ -255,13 +255,13 @@
    > > 
    > > $X_H = X-X_V = [X_1, ... , X_k]$ : hidden variables
    
-   - Tip) 확률을 계산할 떄에는 Full Joint probability 에서 시작해라! 
+   - **Tip) 확률을 계산할 떄에는 Full Joint probability 에서 시작해라!**
      
      > ex)- P(B=True, M = True) = $\sum_E\sum_J\sum_A P(B,E,A,J,M)$
      > 
      >     $= \sum_E\sum_J\sum_A P(B) P(E) P(A|B,E) P(J|A) P(M|A)$ 
 
-2. Contidional Probability 계산 
+2. **Contidional Probability 계산**
    
    > $P(Y|x_V) = \sum_z P(Y,Z=z|x_V)$
    > 
@@ -273,7 +273,7 @@
    > > 
    > > Z : uninterested hidden variable 
 
-3. Contidionmal probability 중 argmax 값 찾기 
+3. **Contidionmal probability 중 argmax 값 찾기**
 
 -----
 
@@ -289,6 +289,8 @@
 2. Variable Elimination 
 
 > 전제 : $P(e|j,m) = \alpha P(e,j,m)$
+> 
+> > $\alpha$ 는 Normalizer 을 의미. 확률의 정의를 지키도록 만드는 값으로 봐야할 듯 
 > 
 > - j,m은 이미 관측된 값으로 Constant 값으로 부여할 수 있다. 
 > 
@@ -332,8 +334,8 @@
   
   > 즉, Potential Function은1번 조건, 모든 값이 0 이상을 충족해야 한다. 
   > 
-  > 2번 조건은 Normalized 를 통해서 달성될 수 있다. 
-  > 
+  > 2번 조건은 Normalized 를 통해서 달성될 수 있다. (즉, **Unnormalized Probability** 이다. )
+  
   > ex)- Lelu 
 
 - **Joint Distribution을 Sequel Model 형태로 표현함으로써 Potential func의 연산으로 구해낼 수 있다.**
@@ -365,6 +367,10 @@
   > 여기서 (B,C) Clique에서 B값이 갱신이 된다면, B / (A,B) 방향으로 값 갱신이 일어난다. <mark>(Message passing)</mark>
   > 
   > - **Clique 상황에서의 Inference를 "Message passing" 이라고 한다.**
+
+
+
+
 
 - 그럼 어떻게 Potential 함수를 통해서 확률 분포값을 어떻게 알아 낼 수 있을까?
   

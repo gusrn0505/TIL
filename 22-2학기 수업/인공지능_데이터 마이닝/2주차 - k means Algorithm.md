@@ -85,6 +85,8 @@
 - **Distribution을 알 때 할 수 있는 것**
   
   - 샘플을 생성할 수 있게 해준다.
+    
+    > *바로 이 말을 할 수 있나? CDF 랑 Inverse를 구할 수 있어야 할 텐데?* 
   
   - 밀도 측정(Density estimation)이 가능하게 해준다.
   
@@ -167,6 +169,8 @@
   > 즉, Latent variable인 z값만 Inference 대상이 됨
   > 
   > 만약, 파라미터가 Distribution 형태가 된다면 Prior(distribution) 모델이 된다?
+  > 
+  > - 여기서 파라미터가 Distribution 형태가 된다는 건, 확률 분포를 가진 Random variable가 된다는 것을 의미하나? 
   
   - **각 $x_n$이 특정 Cluster에 속할 확률 계산하기 [Conditional probability]**
     
@@ -254,6 +258,8 @@
     
     > *아직 완전히 이해가 안되는 기분. 뭔가 하나 부족해*
     > 
+    > 아직 Random variable으로 확정된 Instance가 아니기 때문에 싹 다 더해주는 것으로 밖에 제거를 못해서 
+    > 
     > Latent Varible은 파라미터에 따라서 변화하며, 파라미터는 E에 따라 계속 변하기 때문?
     > 
     > Latent Variable은 Marginalization을 통해 고려하지 않으려고 하니, 고려하지 않는 상태에서 바로 해석적으로 최적값을 찾는 건 어렵다? 
@@ -329,6 +335,8 @@
      ![](picture/2-10.png)
   
   > 둘다 상황에 따라 필요로 하는게 다르다. 
+
+
 
 **Maximizing the Lower Bound** 
 
