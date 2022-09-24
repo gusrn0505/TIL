@@ -18,8 +18,6 @@
 
 - Sampling-method은 이 문제를 해결할 수 있다. 
 
-
-
 --------
 
 ##### Sampling-based 방법의 종류
@@ -44,8 +42,6 @@
   
   - 단점 : P(x)의 값을 모르기 때문에 일단 M을 크게 잡아야 한다. 하지만 그러면 쓰지 못하고 버려지는 Sampling이 많이 발생하게 되어 효율이 떨어진다. 
 
-
-
 ------------
 
 #### Importance Sampling
@@ -57,8 +53,6 @@
   - 즉, 데이터를 버리지 않으면서 각각의 중요도를 고려할 수 있는 방법이 필요 
   
   - Importance Sampling은 인스턴스를 버리지 않기 떄문에 최대한의 (자료의) 효율성을 모델링하고자 한다. 
-
-
 
 - 과거에는 <u>확률의 분포(PDF)을 알아내어 데이터의 분포를 확인하는 것</u>을 목표로 했다. 
   
@@ -100,33 +94,347 @@
   > 
   > -> <mark>즉, $E_p(f(z))$ 은 p(z)을 모름에도 구할 수 있게 된다. </mark>
 
-
-
 - 이를 통해서 **q-분포를 통해서 나온 모든 값을 버리지 않고 반영한다.** 
   
   - 단, 매우 작은 weight를 부여! 
   
   - => IID 조건에서는 가장 효율적으로 정보를 사용하는 것일 것. 
 
-
-
 - 값이 이산인 경우에는 Likely load trick으로도 부르기도 한다. 
   
   - 각 Likelyhood를 가중치로 부여하여 계산한다. 
-
-
 
 ----- 
 
 ##### Markov Chain
 
-- Q-sampling : i.i.d. 조건에서 Efficiency를 최대로 올린 것 
-
-- 더 정보를 효율적으로 쓸 수 없을까? [문제]
+- GMM / Q-분포 탐색 : i.i.d. 조건에서 Efficiency를 최대로 올리고자 함 
   
-  - => 과거와 현재가 연관성이 없다고 가정하는 것은 현실과 다르다. (=IID 조건은 현실과 맞지 않다)
+  > 정말? 
 
-- 과거와 현재의 연관성을 받아들인 방법을 채택하자! - Markov Chain
+- **더 정보를 효율적으로 쓸 수 없을까? [문제]**
+  
+  - 과거와 현재가 연관성이 없다고 가정하는 것은 현실과 다르다. **(=IID 조건은 현실과 맞지 않다)**
+  - **=> 과거와 현재의 연관성을 받아들인 방법을 채택하자! - Markov Chain**
+
+
+
+*편의를 위해 이산 상황만 고려하겠음* 
+
+- Continuous 상황에서 Chaining하는 것이 Diffusion 모델이다. 
+
+
+
+##### Markov Chain의 특성
+
+- 용어 정리 
+  
+  > **Accessible** 
+  > 
+  > - i → j : State j is <u>accessible</u> from i if $T_{i,k}^k$ >= and k >=0  
+  > 
+  > > k번 Transition 이후에도 j로 넘어갈 확률이 0보다 커야 한다. 
+  > 
+  > - i ↔ j : State i and j <u>communicate</u> if i → j and j → i 
+  > 
+  > > i와 j가 서로 왔다 갔다 할 수 있다. 
+  
+  > **Reducibility**
+  > 
+  > - A Markov chain is <u>irreducible</u> if i ↔ j, $\forall i \in S, \forall j \in S$
+  > 
+  > > 한번 있었던 노드간의 연결성(Communicate)은 사라지지 않는다. 
+  
+  > **Periodicity**
+  > 
+  > - State i has <u>period d</u> if d = gcd{n: $T_{i,i}^n >0 $}
+  > 
+  > > i에서 다시 i로 주기성을 가지고 돌아온다. 
+  > 
+  > - if d=1, State i is <u>aperiodic</u>
+  > 
+  > > 주기성이 없다. 언제 돌아올지 모른다. 
+  
+  > **Transience**
+  > 
+  > - State j is <u>recurrent</u> if $P(inf(t>=1 : X_t = j) < \infin|X_0 =j ) =1$
+  > 
+  > > 최초 상태로 언젠가 돌아온다. 
+  > 
+  > - State which are not recurrent are <u>transient</u> 
+  > 
+  > > 최초 상태로 돌아오지 않는다. 
+  
+  > **Ergodicity**
+  > 
+  > - A tate is <u>ergodic</u> if the state is (positive) <u>recurrent</u> and <u>aperiodic</u>
+  > 
+  > > 언제 돌아올지 확답할 수 없지만 언젠가 오긴 온다. 
+  > 
+  > **→ Markov chain은 모든 State가 Ergodic 하면 Ergodic 하다고 할 수 있다.**
+
+
+
+
+
+- **Graph Structure 구조를 통해 Markov Chain을 설명해보자**
+  
+  - Graph Structure 에는 Node와 Link를 가지고 있다. 
+    
+    > Node : 특정 Distribution의 State(- PDF)를 의미
+    > 
+    > Ex)- ![](picture/4-3.png). $P(z_t)$ 로도 표현함. 
+    > 
+    > - 이때 Distribution으로 Multinomial distribution으로 보통 가정하나, 다른 분포도 가용함 
+    > 
+    > Link : 각 State 사에서 Transition이 일어나는 과정을 표현
+    > 
+    > ![](picture/4-4.png)
+    > 
+    > > $P(z_{t+1}|z_t)$ : Transition function(또는 Matrix) 
+    > 
+    > - 이때 Transition function의 Diagonal 부분은 각 항목들에 대해 얼마나 가중치를 매길 건지를 의미함. 
+  
+  - 위의 내용을 확률 관점으로 바라보면 다음과 같다. 
+    
+    - 먼저 Random Variable의 특성을 돌아보자 
+      
+      - 모든 Random Variable은 Distribution을 따른다. 
+      
+      - Sampling 될 때에는 특정 경우로 Fix 되어 버린다. 즉, Distribution에서 벗어난다. 
+      
+      - 이는 Most probable Assignment 될 때에도 동일하다. 
+    
+    ![](picture/4-5.png)
+    
+    - $z_t → z_{t+1}$ 과정도 Bayesian Network을 따른다. 
+    
+    > Bayesian Network 에서 원 형태의 Node는 Random variable을 의미한다. 
+    > 
+    > 즉, $z_t$ 또한 특정 Distribtuion(-[0.5, 0.2, 0.3]을 따르고 있음을 의미한다.  
+    
+    - 각 Expectation을 구할 때 각 Value에 확률 값을 곱한 것을 합한다. 이는 확률 값에 맞춰 Sampling 하며, 총 경우를 합하는 것과 동일한 의미를 가진다. 
+      
+      - 즉, 각 Value에 확률 값을 곱하는 것은, 확률 값에 맞춰 Sampling 하는 것과 동일하게 볼 수 있다. 
+
+
+
+- **우리는 그럼 어떻게 Markov Chain을 Sampling에 사용할 수 있을까?**
+  
+  - Markov Chain은 Prop(?) Distributin을 가지고 있다. 
+  
+  - <mark>우리는 이 Prop distribution을 Stationary Distribution을 바꾸고 싶다.</mark>
+    
+    - 어떤 Travel을 통해서 Stationary Distribution으로 바꿀 수 있을까? 
+    
+    - 또한 Stationary Distribution 상황에서는 어떤 특성을 가지나? 
+    
+    → Travel을 모델링 하는 것은 어려우니, **목표인 Stationary 상황에서 역순으로 고려해보자!**
+
+
+
+- **Limit Theorem of Markov Chain**
+  
+  - 만약 Markov Chain 이 irreducible 하고 Ergodic 하다면, 
+  
+  - **Stationary distribution $\pi$을 모델링함으로써 문제를 해결하자!**
+  
+  > $\pi_i$ : $lim_{n → \infin} T_{i,j}^{(n)} = \frac{1}{E[RT_i]}$. i node가 Stationary 상황 아래에서 존재할 확률
+  > 
+  > - Irreducible 하기 때문에 RT의 존재는 보장된다. 또한 T가 주어지는 RT의 Expectation을 할 수 있겠다. 
+  > 
+  > - 위의 Expectation을 기반으로 $\pi_i$ 를 정의한다. 
+  > 
+  > > $RT_i$ : min{$n>0 : X_n =i | X_0 =i$}
+  > 
+  > - $\pi_i$ 는 아래 식에 의해서만 Uniquely determined 된다. 
+  > 
+  > > $\pi_i >=0, \sum_{i \in S} \pi_i =1, \pi_j = \sum_{i \in S} \pi_i T_{i,j}$
+  > > 
+  > > T : Transition Matrix
+  > > 
+  > > - $\sum_{i\in S} \pi_i T_{i,j} $ 은 Node i가 모든 스테이트에서 Transition을 거쳐 j 로 이동하는 모든 경우를 고려한 것임. 즉, Transition을 1번, 2번, ... 무수히 거쳐서라도 j에 오는 경우까지 다 고려한 것
+  > > 
+  > > → 이때 위의 첨자 $(n)$ 이 사라져 있음. **즉, 아무리 Transition을 거쳐도 이 분포에서 벗어날 수 없음을 의미한다.** 
+  > 
+  > - Station distribution인 $\pi_i$ 의  Support 영역은 sigma algebra를 따른다(? )
+  >   
+  >   - 이걸 설명하려면 르벡 적분에 대해서 설명해야하니 Skip 
+  
+  
+
+- **남은 문제는 아래 2가지다.** 
+  
+  1) 어떻게 Stationary distribution $\pi$ 까지 가느냐
+     
+     → Balance한 조건을 충족시키도록 제한조건을 둔다. 
+  
+  2) $\pi$ 를 샘플링 할 수 있는 distribution의 형태로 만들 수 있을 것인가? 
+     
+     → Metropolis-Hastings Algorithm을 적용한다.
+     
+     
+
+- 주어진 Transition Matrix T를 통해 $\pi_i$ 계산하는 방법 
+  
+  - $\pi$ 의 Stationary 특성을 활용하여 아래 식을 만든다.  
+  
+  > (1) $\pi_i = \sum_{i \in S} \pi_i T_{i,j}$ ↔ $\pi_i - \sum_{i \in S} \pi_i T_{i,j} =0$ → <mark>$\pi(I_{|S|, |S|} -T)) =0$</mark>
+  > 
+  > - $\pi$ 는 Stationary 해서 한번 더 Transition한다 해도 동일한 값을 가진다. 
+  > 
+  > (2) $\sum_{i \in S} \pi_i =1$ →  <mark>$\pi 1_{|S|, |S|} = 1_{1, |S|}$</mark>  
+  > 
+  > > $1_{1, |S|}$ 는  크기 |S|의 [1,1,1,.... 1]  행렬을 의미함. 
+  > 
+  > By (1), (2), 
+  > 
+  > $\pi(I_{|S|, |S|} - T) + 1_{1, |S|} = 0 + 1_{1, |S|}$ 
+  > 
+  > <mark>→ $\pi(I_{|S|, |S|} - T- 1_{|S|, |S|}) = 1_{1, |S|}$</mark> 
+  
+  - 이후에 $\pi$ 좌측에 곱해진 Matrix의 Inverse를 양쪽에 곱하는 것으로 $\pi$ 를 구한다. 
+    
+    > Q. Inverse가 항상 존재하는 건가? 교수님께 질문 드려 볼까? 
+
+
+
+- 이때 두 가지 경우로 나눠짐. 
+  
+  1. Stationary를 만족하지만 Balance되어 있지 않다( $\pi_iT_{i,j} \neq \pi_iT_{j,i} $)
+     
+     - $\pi_j = \sum_{i \in S} \pi_i T_{i,j}$ 은 만족하나, Sum은 상태의 순서를 고려하지 않기 때문에 Balance가 안되어 있을 수 있다.
+     
+     → 기존의 Stationary 만으로는 충분한 제한 조건이 되지 못한다.
+  
+  2. **Stationary 하며, Balance 되어 있다.** 
+     
+     - 단, Balance 할 경우 반드시 Stationary를 보장한다. 
+     
+     - → Balance는 Stationary보다 강한 조건으로, <mark>Balance 한 조건을 달성하면 목표로 하는 Stationary는 자동으로 달성하게 된다.</mark>
+
+
+
+----
+
+**Markov chain theory vs Markov Chain Monte Carlo** 
+
+- Markov chain theory 
+  
+  - 조건 : Transition rule을 알 때, 
+  
+  - 목표 : Stationary distribution $\pi(z)$ 을 찾는 것
+
+
+
+- MCMC(Markoc Chain Monte Carlo) : Markov Chain을 통해서 Sampling 하는 것 
+  
+  - 조건 : 목표인 target stationary distribution $\pi(z)$ 을 알 때,  
+  
+  - 목표 : Stationary distribution에 도달하기 위한 효율적인 Transition rule을 찾는 것
+
+
+
+→ 둘의 방향이 다르다. 
+
+------ 
+
+##### Metropolis-Hastings Algorithms
+
+- MCMC의 매우 Generalization version의 알고리즘. 
+  
+  - MCMC 방법론의 근간이라 할 수 있음
+  
+  - 최근 방법들은 Metropolis-Hastings Algorithms의 특수한 Case임 
+
+
+
+- 상황 : 초기값($z_t$) 를 알 수 없다. 
+  
+  > 반대로, 초기값을 알면 충분히 Transition matrix를 통해 Travel 시키면 Stationary 하게 된다. 
+  
+  - $z_t$ 의 다음 candidate 상태를 $z_*$ 라고 하자 
+    
+    > $z^* \sim q(z^*|z^t)$ .
+    > 
+    > > $q_t$ 는 Proposal distribution로, Transition 역할을 함.
+    > > 
+    > > $q_t$ 에 따른 Transition을 Accept할 수도, Reject 할 수도 있음.  
+    > 
+    > $z^*$ 을 $z_{t+1}$ 로 표현하지 않는 것은 $q_t$ 의 수락 유무에 따라 달라지기 때문 
+    > 
+    > > Accept $q_t : z^{t+1} = z^*$
+    > > 
+    > > Reject $q_t : z^{t+1} = z^t$  [그대로 유지]
+    
+    > $q_t$ 를 수락하는가 Acceptance probability $\alpha$ 를 통해 결정한다. 
+
+<mark>→ 우리가 알아야 하는 것은 1) q-distribution, 2) $\alpha$ 를 알아야 함</mark> 
+
+> 이때의 q-distribution은 앞서 Important Weight의 q-distirubution과는 다름 
+
+
+
+- Metropolis-Hastings Algorithm 
+  
+  - 새로운 ratio $r(z^*|z_t)$ 를 고려하자  
+  
+  > $r(z^*|z_t) = \frac{q(z^t|z^*)P(z^*)}{q(z^*|z^t)P(z^t)}$.  [제한조건]
+  > 
+  > <mark>→ $r(z^*|z_t)$을 1로 보냄으로써 Balance 조건을 충족하겠다.</mark> 
+  
+  
+  
+  1) $r(z^*|z^t) <1 $ 일 때, $q(z^t|z^*)P(z^*) < q(z^*|z^t)P(z^t) $
+     
+     - <mark>$r(z^*|z^t)$ 의 값을 1로 보내기 위해서 $q(z^*|z^t)$ 을 줄인다.</mark>
+     
+     > $q(z^t|z^*), q(z^*|z^t)$ 두 값 중에서 우리는 후자만을 조정할 수 있다. 
+     > 
+     > 왜냐하면 우리가 조정 가능한 q-distribution은 과거($z^t$)에서 미래($z^*$)로 보낼 걸 제안하는 Proposal Transition으로, 수락 여부를 모르는 상태로 미래($z^*$) 에서 과거($z^t$)로 보내는 확률값을 건드릴 수 없다. 
+  2.  $r(z^*|z^t) > 1$ 일 때, $q(z^t|z^*)P(z^*) > q(z^*|z^t)P(z^t)$ 
+     
+     - <mark>$r(z^*|z^t)$ 의 값을 1로 보내기 위해서 $q(z^*|z^t)$ 을 키운다.</mark>
+     
+     
+  
+  **→ 위의 조건을 만족할 수 있는 Q-distribution을 정의해야 한다.**
+  
+  - 일반적으로 Gausian distibution을 가정한다. 
+  
+  - 단, 과거의 정보를 기반으로 현재의 정보를 업데이트 할 수 있도록 설정한다. 
+    
+    > ex- 과거의 평균값, 분산값을 현재, 다음 단계에 반영해준다. 
+
+
+
+- **위의 q-distribution의 조건은  $\alpha(z^*|z^t) $의 값을 조정함으로써 달성한다.** 
+  
+  - $r(z^*|z^t) >1$ 상황이 의미하는 것은 $z^t → z^*$로 보내는 확률 값이 반대보다 더 크다는 의미이다. 
+    
+    - 즉, 밸런스를 맞추기 위해 $z^t$ → $z^*$ 의 모든 경우를 100% 확률로 보내줘여 한다. 
+  
+  - $r(z^*|z^t) < 1$ 상황에선 반대로 $z^t → z^*$ 로 가는 경우를 줄여 밸런스를 맞춰준다.
+  
+  → 이 두 경우를 같이 고려하기 위해 $\alpha(z^*|z^t)$ = min{1, $r(z^*|z^t)$} 로 정의한다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
