@@ -5,6 +5,12 @@
 - 모델 추론에 있어서 대부분의 방법은 계산량 때문에 Infeasible 하다 
   
   > Why? 계산량이 얼마나 많길래? 
+  > 
+  > Bayesian Inference Algorithm에서, Likilihood인 P(D|H) 와 Prior인 P(H)이 주어진다 하더라도 Evidence term에 대한 계산하기란 매우 어렵다. 즉, 목표인 Posterior을 구하는데 제한이 있다. 
+  
+  > Evidence term : $\int_H P(D|H')P(H')dH'$
+  > 
+  > Posterior = $\frac{Likelihood * Prior}{Evidence form}$ 
 
 - 그나마 ELBO method가 Feasible 하나 단점이 있다. 
   
@@ -17,8 +23,8 @@
 **→ Gradient-based 외의 방법이 필요하다.**
 
 - Sampling-method은 이 문제를 해결할 수 있다. 
-
-
+  
+  > 추가로 Posterior의 High-dimensionality of sampling 때문에 Directly sampling은 어렵다. 따라서 근사할 수 있는 알고리즘을 사용한다. 
 
 --------
 
@@ -44,8 +50,6 @@
   
   - 단점 : P(x)의 값을 모르기 때문에 일단 M을 크게 잡아야 한다. 하지만 그러면 쓰지 못하고 버려지는 Sampling이 많이 발생하게 되어 효율이 떨어진다. 
 
-
-
 ------------
 
 #### Importance Sampling
@@ -57,8 +61,6 @@
   - 즉, 데이터를 버리지 않으면서 각각의 중요도를 고려할 수 있는 방법이 필요 
   
   - Importance Sampling은 인스턴스를 버리지 않기 떄문에 최대한의 (자료의) 효율성을 모델링하고자 한다. 
-
-
 
 - 과거에는 <u>확률의 분포(PDF)을 알아내어 데이터의 분포를 확인하는 것</u>을 목표로 했다. 
   
@@ -100,21 +102,15 @@
   > 
   > -> <mark>즉, $E_p(f(z))$ 은 p(z)을 모름에도 구할 수 있게 된다. </mark>
 
-
-
 - 이를 통해서 **q-분포를 통해서 나온 모든 값을 버리지 않고 반영한다.** 
   
   - 단, 매우 작은 weight를 부여! 
   
   - => IID 조건에서는 가장 효율적으로 정보를 사용하는 것일 것. 
 
-
-
 - 값이 이산인 경우에는 Likely load trick으로도 부르기도 한다. 
   
   - 각 Likelyhood를 가중치로 부여하여 계산한다. 
-
-
 
 ----- 
 
@@ -127,7 +123,3 @@
   - => 과거와 현재가 연관성이 없다고 가정하는 것은 현실과 다르다. (=IID 조건은 현실과 맞지 않다)
 
 - 과거와 현재의 연관성을 받아들인 방법을 채택하자! - Markov Chain
-
-
-
-
