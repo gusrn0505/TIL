@@ -1,0 +1,45 @@
+<Bayesian 의의>
+17 : 모르는 걸 모른다고 하자 
+> A baseline for detecting misclassified and out of distribution examples in neural networks
+
+27 : Bayesian 근사라도 충분히 모델을 구체화할 수 있다. 
+> Being Bayesian, even just a bit, fixes overconfidence in ReLU network
+
+<Bayesian 방법론>
+46 : How to represent learning algorithms using general PGM
+> Operations for learning with graphical models 
+22 : Unidentifiability in BNN 이해하기 위해! 
+> What are Bayesian neural network posteriors really like? 
+81 : HMC 이해
+> MCMC using Hamiltonian dynamics
+85 : SVI 이해 
+> Stochastic variational inference
+90 : probabilistic backpropagation 이해
+> Probabilistic backpropagation for scalable learning of Bayesian neural networks 
+111 : Rather than storing MCMC samples using a generative model G 
+> Adversarial distilation of Bayesian neural network posteriors 
+
+<Bayesian 기반 Inference method>
+24 : Generative model에 사용된 Bayesian 
+> Stochastic gradient VB and the variational autoencoder
+41, 42 : Active learning 
+> Deep Bayesian active learning with image data
+> Bayesian generative active deep learning 
+74 : Meta learning in Bayesian statistics 
+> Recasting gradient-based meta-learning as hierarchical Bayes
+98 : MC-dropout
+> Unlabelled data improves Bayesian uncertainty calibration under covariate shift
+99 : SGD can be reinterpreted as a Markov Chain algorithm 
+> Stochastic gradient descent as approximate Bayesian inference
+100 : Stochacstic gradient Langevin dynamic 
+> Bayesian learning via stochastic gradient Langevin dynamics 
+101 : Warm restart of the altorithm 
+> Towards cakubrated and scalable uncertainty representations for neural networks 
+108 : train non-stochastic ANN to predict the marginal probability p using a BNN as a teacher 
+> Bayesian dark knowledge 
+
+<측정수단>
+112 : The predictive performance for Bayesian
+> On loss functinos for deep neural networks in classification 
+113 : Calibration curve for measuring confidence
+ > Accurate uncertainties for deep learning using calibrated regression 
