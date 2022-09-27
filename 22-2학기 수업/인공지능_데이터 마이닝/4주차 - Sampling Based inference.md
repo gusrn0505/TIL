@@ -125,8 +125,6 @@
 
 - Continuous 상황에서 Chaining하는 것이 Diffusion 모델이다. 
 
-
-
 ##### Markov Chain의 특성
 
 - 용어 정리 
@@ -286,6 +284,12 @@
   - 이후에 $\pi$ 좌측에 곱해진 Matrix의 Inverse를 양쪽에 곱하는 것으로 $\pi$ 를 구한다. 
     
     > <mark>Q. Inverse가 항상 존재하는 건가? 교수님께 질문 드려 보자!</mark>
+    > 
+    > - 항상 Inverse가 존재하는 것이 아님! 
+    > 
+    > - 하지만 Closed 형태로, 이전 단계로 돌아갈 수 있음이 보장된다면 존재!
+    > 
+    > → Markov chain이 irreducible하고 Ergodic하면 inverse가 보장됨! 
 
 - 이때 두 가지 경우로 나눠짐. 
   
@@ -353,10 +357,6 @@
 
 > 이때의 q-distribution은 앞서 Important Weight의 q-distirubution과는 다름 
 
-
-
-
-
 - Metropolis-Hastings Algorithm 
   
   - 새로운 ratio $r(z^*|z_t)$ 를 고려하자  
@@ -391,3 +391,246 @@
   - $r(z^*|z^t) < 1$ 상황에선 반대로 $z^t → z^*$ 로 가는 경우를 줄여 밸런스를 맞춰준다.
   
   → 이 두 경우를 같이 고려하기 위해 $\alpha(z^*|z^t)$ = min{1, $r(z^*|z^t)$} 로 정의한다.
+
+---
+
+#### Random Walk M-H Algorithm
+
+- Random walk은 q-distribution의 Special Case이다.
+  
+  > $z^* \sim N(z^t, \sigma^2)$
+  > 
+  > $q(z^*|z^t) = \frac{1}{\sigma \sqrt{2\pi}} exp(-\frac{(z^*-z^t)^2}{2\sigma^2})$
+  > 
+  > - 이때 $\mu$ 대신 $z^*$ 가 나타남!
+
+> Transition probability : $T_{t, *}^{MH} = q(z^*|z^t)\alpha(z^*|z^t)$
+> 
+> 이 때, q는 임의의 Function이니 구할 수 있고, z를 Random walk로 정의하면 Transition probability를 계산할 수 있다!
+
+>  $\sigma$ 는 Hyperparameter임. 
+> 
+> - 따라서 Sensitive analysis를 진행하여 최적화시킴 
+>   
+>   - 큰 분산을 잡아 형태를 확인한 후에 줄여나갈 것
+>   
+>   - 단, 최소한 Likelihood(pdf)는 있어야 분석이 가능함. 
+> 
+> ![](picture/4-6.png)
+> 
+> - $\sigma$의 값이 너무 작으면 특정 모드에 Collapse 됨 (특정 Density만은 반환함)
+> 
+> - Model Collapse은 Gan 에서 자주 발생함. Gan에선 이를 벗어나기 위해서 MCT(?)를 적용함. 
+
+---
+
+#### Gibbs Sampling
+
+- 앞서 M-H Algorithm에서는 $\alpha$ 를 도입하여 샘플을 Accept/reject 하였다. 
+
+- 하지만 **Efficient Sampler를 추구하고자, $\alpha$를 없앨 순 없을까? [문제]**
+  
+  - 우리가 마음대로 다룰 수 있는 q-distiribution 잘 조정해보자. 
+  
+  - 또한 우리가 진정으로 구하고자 하는 건 <u>unobserved data의 분포인 p</u>이다. 
+  
+  → Gibbs Sampling을 통해서 $\alpha$ 를 없애면서도 p 자체에 대해 구해보자
+
+- $z^t$ 다음과 같이 정의해보자 
+  
+  > $z^t = (z^t_k, z^t_{-k}) → z^* = (z^*_k, z^t_{-k})$
+  > 
+  > > $z_{-k} : z_k$ 외에 다른 모든 것. k dim, 그리고 아닌 것들로 둘로만 고려하자!
+  > 
+  > - $z^t$ 모두를 표현하기는 어려우니까, 하나의 Latent variable만 표현하자!
+  > 
+  > → <mark>$q(z^*|z^t) = P(z^*_k, z^t_{-k}|z^t_k, z_{-k}^t) = P(z^*_k, z^t_{-k}|z^t_k) = P(z^*_k|z_{-k}^*)$</mark>
+
+- 위의 $z^t$ 정의를 기반으로 MH 알고리즘의 목표인 Balance 조건을 성립하는지 확인!
+  
+  > Balance : $P(z^t)q(z^*|z^t) = P(z^*)q(z^t|z^*)$ 성립
+  > 
+  > ![](picture/4-7.png) 
+  > 
+  > <mark>→ $\alpha$ 도입 없이도 항상 Balance 조건을 성립한다!</mark> 
+
+- **즉, 전체를 업데이트하는 것이 아니라 한 dim만 업데이트를 한다면 언제든 가능하다.**
+  
+  - 이를 Markov Blanket과 활용하여, 업데이트 하고자 대상과 관련된 것만 Sampling함으로써 값을 업데이트 할 수 있다. 
+    
+    > ex)- P(E,JC,M|A=F, MC=T) =? 
+    > 
+    > ![](picture/4-8.png)
+    
+    > ![](picture/4-9.png)
+    > 
+    > → 관련있는 것에 대해서 Sampling 해서 업데이트 한다. 그 결과는 Posterior distribution과 동일해진다. 
+
+- GMM에도 적용가능하다. 
+  
+  - GMM의 Latent variable은 z 하나임.
+  
+  - 예전에는 z의 값은 deterministic 하게 정했다(most assignment value.
+  
+  - 하지만 Stocastic하게 했을 때 다른 값을 가질 경우가 생김. 그 결과 학습 속도는 느려질 순 있지만, 여러 가능성을 고려하여 잠재성이 더 있다.   
+
+----
+
+##### Gibbs sampling 예시 - Latent Dirichlet Allocation
+
+- Topic Modeling : 사람들이 어떤 토픽으로 이야기하는지 알아내보자. 
+  - 각 단어들이 어떤 Topic으로 부터 유래한 것인가를 찾기 
+  - Likelihood를 통해서 어떤 단어가 많이 쓰이고 있는지 확인가능 
+
+
+
+- Dirichlet 은 Multinomial distribution의 확률을 모델링하는 분포이다. [Conjugate 관계]
+  
+  > ![](picture/4-10.png)[Dirichlet 분포]
+  > 
+  > - Dirichlet 분포에서 k개의 Conti random variables를 샘플링할 수 있다. 
+  > 
+  > - Dirichlet 특성(probabilistic k-simplex)에 따라, 이 Continuous random variable은 0보다 크거나 같으며, 합은 1이 된다. (확률의 정의를 따름)
+  > 
+  > - 따라서 이 k차원 벡터는 합이 1을 만족하기 떄문에, multinomial 분포의 모수인 $p_k(\sum p_k =1)$ 에 사용될 수도 있다. 
+  >   
+  >   - 즉, <u>Dirichlet분포에서 샘플링하면 Multinomial 분포가 나온다.</u>
+
+
+
+- Generative Process에서는 각각 다음과 같은 분포를 따른다. 
+  
+  > ![](picture/4-11.png)
+  > 
+  > ![](picture/4-12.png)
+  > 
+  > > w : 단어 
+  > > 
+  > > z : 단어의 Latent variable 
+  > > 
+  > > $\psi$ : 주제 내에서의 단어 분포 
+  > > 
+  > > $\theta$ : 문서 내에서의 주제 분포 
+  > > 
+  > > M : Document 별 Plate 
+  > > 
+  > > N : Document 별 Word Plate
+  
+  > > 단어 $w_{i,j}$ 는 word-topic 분포인 $\psi_z$ 로부터 생성된다. 
+  > > 
+  > > Topic z는 문서-주제 분포인 $\theta$ 분포로부터 생성된다. 
+  > > 
+  > > 문서-주제 분포인 $\theta$ 는 $\alpha$ 분포로부터 생성된다. 
+  > > 
+  > > 단어-주제 분포인 $\psi$는 $\beta$ 분포로부터 생성된다. 
+  > 
+  > - 만약 z 분포를 알고 있다면, 우린 most likely $\theta, \psi$ 값을 찾을 수 있다. 
+
+
+
+- Generative 모델에 Gibbs Sampling을 적용하자
+  
+  > 항상 시작은 Full-joint distribution을 Factorize하는 것에서 시작 
+  > 
+  > $P(W,Z,\theta, \psi, \alpha, \beta) = $ ![](picture/4-13.png) 
+  > 
+  > - 이때 V-structure 구조로, z 와 $\psi$ 는 Dependece 하다.
+  
+  - 이제 $\theta, \psi$를 Collapse(Marginalize) 시켜서 W,Z, $\alpha, \beta$ 만 남기겠다. <mark>[Collapsed Gibbs Sampling]</mark>
+    
+    - 왜냐면 z만 제대로 알고 있다고 하면, 
+    
+    - $\beta$, z를 이용하여  $\psi$ 를 구할 수 있고, $\alpha, z$를 활용하여 $\theta $ 를 구할 수 있다. 
+    
+    - → 따라서, 우리가 직접 계산할 수 있는 W,Z, $\alpha, \beta$ 만을 남겨 Z를 구한다. 
+      
+      ![](picture/4-14.png)
+
+
+
+- $P(W,Z;\alpha, \beta)$를 계산하자! 
+  
+  > 두 부분으로 나눠 계산한다.
+  > 
+  > ![](picture/4-15.png)
+  > 
+  > - 이때 좌우 식에서 $\int$ 와 $\prod$ 의 위치를 바꿀 수 있었던 것은 Finite 개수만 다루기 때문임. 
+  > 
+  > - Inifinite 경우에선 Limit가 각각 들어가는데, 하나의 Limit의 조건이 다른 limit 조건을 성립시키지 않을 수 있어 성립하지 않는다.
+  > 
+  > - 여기선 분배법칙을 통해서 공통된 곱의 부분은 앞으로 빼내는 것임. 
+  > 
+  > > Dirichlet 분포 대입 
+  > > 
+  > > $P(\psi_i; \beta) = \frac{\gamma(\sum^V_{v=1} \beta_v)}{\prod^V_{v=1}\gamma(\beta_v)}$
+  > 
+  > > $\prod^M_{j=1}\prod^N_{l=1} p(W_{j,l}| \psi_{z_j,l})$ = $\prod^V_{v=1}\psi_{i,v}^{n^i_{(.), v}}$
+  > > 
+  > > $n^i_{j, r}$ : i번째 주제의 j번째 문서의 r번째 unique 단어의 개수  
+  > 
+  > > $\prod^V_{v=1} \psi_{i,v}^{\beta_v -1}$ $\prod^V_{v=1}\psi_{i,v}^{n^i_{(.), v}}$ = $\prod^V_{v=1}\psi_{i,v}^{n^i_{(.), v +\beta_v -1}}$
+  > 
+  > (1) = ![](picture/4-16.png)
+  > 
+  >       = ![](picture/4-17.png)
+  
+  > (2) 부분도 1번과 유사한 과정을 통해 계산한다. 
+  > 
+  > ![](picture/4-18.png)
+  
+  > (1), (2)을 곱하여 목표했던 바를 구한다. 
+  > 
+  > ![](picture/4-19.png)
+  
+  > 이제 Z를 구할 수 있는 Joint Distribution을 구했다. 그러니 이젠 z 1개 원소에 대한 확률로 바꿔낸다. 
+  > 
+  > ![](picture/4-20.png)
+  > 
+  > - Normalize 부분은 $\alpha$ 상수로 둬 계산에서 제거해줄 수 있다.(Variable Elimination) 
+  
+  
+
+- 지금까지 구한 $P(W,Z; \alpha, \beta)$ 와 $P(Z_{(m,l)} = k, Z_{-(m,l)}, W; \alpha, \beta) $ 를 Gibbs Sampling에 맞게 조정해준다. 
+  
+  > ![](picture/4-21.png)
+  > 
+  > > $\prod$ 에 걸리지 않는 것들은 다 앞으로 빼주기. 
+  > > 
+  > > 그리고 변하지 않는 값들은 상수 처리하기 
+  
+  > P(W,Z';$\alpha, \beta$)를 활용하여 k dim에 관련된 것들만 남기기
+  > 
+  > ![](picture/4-22.png)
+  > 
+  > > k -dim에 맞게 Document를 m으로, Word를 I로 고정하기 
+  > > 
+  > > 분모에 Normalization 역할하는 것은 상수 취급하기 
+  > 
+  > → 이걸 계산하여 Normalization을 하면 Gibbs의 Prop distribution을 구하게 된다.
+  > 
+  > ![](picture/4-23.png)
+  > 
+  > - 계산 과정은 각각의 상황에서 Counting 하는 형태로 구할 수 있음. 
+  > 
+  > → 이후에는 Gibbs Sampling을 여럿 적용하여 Statinary distribution을 구할 것이다.
+
+
+
+- 위의 과정으로 우리는 2가지 특성을 확인할 수 있다. 
+  
+  1. 새로운 데이터를 받아들이며 Bayesian Frame을 활용하여 Posterior distribution을  업데이트하는 Mechanism이다.
+  
+  2. 이전 데이터를 활용한다는 점에서 MCMC임을 확인할 수 있다. 
+  
+     
+
+![](picture/4-24.png)
+
+
+
+**Sampling 방식의 의의** 
+
+1. Smapling 방식은 Black box를 다룰 수 있다. 
+- V.I는 Likelihood를 필요로 한다.
+2. Diffusion problem에선 Sample efficiency이 낮다. 
+- 즉, Efficient sampler design을 위해서 Sampling method를 이용할 수 있다.
