@@ -170,10 +170,6 @@
   
   > Training Data의 비중이 줄어들수록 두 방법의 평가 지표 차이가 벌어진다. 
 
-
-
-
-
 ##### Recommender systems with social Regularization(SOREG)
 
 - **Idea : Social network 정보를 규제항으로서 여기기** 
@@ -194,10 +190,6 @@
   > 
   > ![](picture/4-16.png)
 
-
-
-
-
 ##### Leveraging Social Connections to improve personalized Ranking For Collaborative Filtering(SBPR)
 
 - Idea : BRP Top-k 랭킹 추천을 위해 Social network 정보 사용  
@@ -216,8 +208,6 @@
   
   ![](picture/4-19.png)![](picture/4-20.png)
 
-
-
 - 추가 가정 : 친구를 통해 알게된 Item을 선택안한 경우는, 평범하게 모르는 경우보다 더 나쁜 것으로 여긴다. 
   
   ![](picture/4-21.png)
@@ -225,10 +215,6 @@
   > $x_{ui} : $ 그냥 모르는 것 
   > 
   > $x_{uj}$ : 이웃(친구)들이 알려준 건데 선택안한 것 
-
-
-
-
 
 #### Social Recommendation with Strong and Weak Ties(TBPR)
 
@@ -242,13 +228,9 @@
   > 
   > 또한 Strong / Weak ties 유무는 Threshold 관점에서 판단한다. 
 
-
-
 > Loss function 
 > 
 > ![](picture/4-25.png)
-
-
 
 - Weak Tie / Strong Tie 중 각각 무엇을 더 선호할 지 검증 결과, Weak Tie의 결과가 더 좋았다.  
   
@@ -256,30 +238,264 @@
   
   <mark>→ Weak tie의 경우 연결점이 적어 보다 새로운(Novelty) 정보를 전달해줄 수 있다!</mark> 
 
+----
+
+#### Text information : CTR, CDL, ConvMF
+
+- Idea : **1) Reviews** written by users and **2) item description text** can be helpful for modeling user and item latent factors 
+
+**Collaborative Topic modeling for recommending scientific articles(CTR)**
+
+- Idea : Latent Dirichlt Allocation(LDA)과 PMF를 활용하여 주제별 Word를 모델링함 
+  
+  > PMF : Probabilistic Matrix Factorixation 
+
+- Background : LDA 
+  
+  - 해결한 문제 : 각 서류별로 어떻게 Topic을 매칭시켜야할지 모른다. 
+  
+  - → 각 문서별로 사용한 단어와 빈도를 통해서 Topic을 예측한다.
+    
+    - **What is LDA? - Dirichlet distributions**
+      
+      - 새로운 문서를 Sampling하는 **수많은 Machine 중에서 가장 Original과 유사한 것을 Topic으로 선정**한다.
+      
+      - ![](picture/4-34.png)
+      
+      - ![](picture/4-27.png)
+      
+      - ![](picture/4-32.png)
+        
+        - 1). Dirichlet $\alpha$ 로부터 각 Topic의 확률분포 $\theta_j$ 를 추출한다. $P(\theta_j; \alpha)$
+        
+        - 2). $\theta_j$분포에 맞춰 Topic을 Random하게 샘플링한다. $\prod_{i=1}^N P(Z_{j,i}|\theta_j)$
+        
+        - 3). 샘플링한 Topic을 단어별 유사도 비율을 추출한다.$\prod_{i=1}^KP(\psi_i;\beta)$
+        
+        - 4). $\psi_{z_{j,i}}$에 맞춰 단어를 샘플링하여 문서를 제작한다. $P(W_{j,i}|\psi_{z_{j,i}})$
+        
+        - → Dirichlet 분포에 따라 샘플링한 $\alpha$들 중 가장 Topic, 단어에 가깝게 모으게 한 $\alpha$ 를 Topic으로 선정한다.
+          
+          ![](picture/4-33.png)
+      
+      > **Dirichlet distribution**
+      > 
+      > ![](picture/4-28.png)
+      > 
+      > ![](picture/4-29.png)
+      > 
+      > 각 점을 잘 포함하는 것을 꼭지로 삼았을 때 점으로 모여든다.
+      > 
+      > 반대로 잘 포함하지 못할 경우 중간으로 모이게 된다.
+      > 
+      > → 즉, Topic을 잘 설정하였을 경우 중간의 사례처럼 모이게 된다. 
+      > 
+      > → 또는 각 단어별로 Topic의 위치를 파악하는데 사용한다.
+      > 
+      > ![](picture/4-30.png)
+      > 
+      > + Dirichlet distribution은 Topic의 개수만큼의 dim을 필요로 한다. 
+    
+    - **How to train? - Gibbs sampling** 
+      
+      - 각 문서의 Word들이 어떤 Topic으로 많이 분류되었는지를 기반으로, 해당 문서의 Topic의 확률로 계산한다 .
+      
+      - 반대로 동일한 Word가 서류 전체에서 어떤 Topic으로 많이 분류되었는지를 기반으로, 해당 Word이 특정 Topic으로 할당될 확률로 계산한다.
+        
+        → 각 단어와 문서가 가능한 단일 Topic으로 정리하고자 한다. 
+      
+      - Gibbs Sampling은 한번에 1개씩만 수정하도록 문제를 축소해준다. 
+        
+        ![](picture/4-35.png)
+        
+        > 한 단어에 대해서 Topic이 지정이 안되었다고 가정하고, 
+        > 
+        > 1). 해당 문서에서 단어들이 어떤 주제로 가장 많이 분류되었나,
+        > 
+        > 2). 전체 문서해서 해당 단어가 어떤 주제로 가장 많이 분류되었나
+        > 
+        > 를 곱하여 가장 높은 값을 가진 것으로 할당하자! 
+        > 
+        > *이때, 1).2). 중 1개라도 0이면 아예 값이 사라짐. 이를 방지하고자 상수 $\alpha, \beta$ 를 더해 막아줌. 
+        > 
+        > **→ 이 과정을 통해서 점차 좋은 값으로 할당해나갈 것임!**
+
+- **LDA와 PMF을 함께 사용하여 Item에 대한 Update를 진행하자!** 
+  
+  ![](picture/4-36.png)
+  
+  > $v_j$ : Item Latent Vector. LDA와 PMF의 연결점 
+  > 
+  > - LDA는 Item update에만 영향을 준다. 
+  > 
+  > $u_i$ : User Latent Vector 
+  
+  - Item Latent Vector $v_j$ 는 Topic 별 확률분포 $\theta_j$ 에 근처에 있다. 
+    
+    > $v_j \sim N(\theta_j, \lambda_v^{-1}I_K)$
+    > 
+    > > $v_j = \epsilon_j + \theta_j$
+    > > 
+    > > $\epsilon_j \sim N(0, \lambda_V^{-1}I_k)$
+  
+  - $v_j$가 $\theta_j$ 와의 연관성을 고려해야한다는 것 외에는 $u_i$ 와 유사한 식을 사용한다. 
+    
+    > ![](picture/4-37.png)
+
+- CTR은 Collaborative learning과 다르게 Cold-start 문제를 해결할 수 있다.
+  
+  ![](picture/4-38.png)
+  
+  > Collaborative learning은 다른 사람들의 평가를 꼭 필요로 함. 
+  
+  - CTR에서는 평가($r_{ij}^*$)를 아래와 같이 계산하여, Cold-start에서도 활용가능하다 
+    
+    > $r_{ij}^* \sim (u_i^*)^T(\theta_j^* + \epsilon_j^*) = (u_i^*)^Tv_j^*$
+    > 
+    > $r_{ij} \sim (u_i^*)^T\theta_j^*$   [Cold Start 상황으로 $\epsilon_j^*$ 값이 없음]
+
+#### Collaborative deep learning for recommender systems(CDL)
+
+- **Idea : Model documents with stacked denoising autoencoder(SDAE), and combine it with PMF**
+  
+  > ![](picture/4-39.png)
+  > 
+  > CTR과 동일하게 Item Latent variable $v$ 를 통해서 SDAE를 통해 학습한 것을 PMF에 넘겨준다. 
+  
+  > ![](picture/4-40.png)
+  > 
+  > 각 작업별 Regularization이 붙는다. 
+  > 
+  > 추가로 정보를 고려하고 싶으면 Regularizion form으로 추가할 수 있다. 
+  > 
+  > <mark>Q. Regularization 끼리 서로 상충되는 경우가 발생안하나? Regualization끼리 상성이 있을 것 같은데? 질문하고 싶군!</mark>
+
+##### Convolutional MF For Document Context-Aware Recommendation (CONVMF)
+
+- 문제제기 : 이전 방식인 CTR, CDL의 경우 단어의 순서와 맥락을 고려하지 못했다
+
+- Idea : Convolution Network를 통해 맥락을 고려하고 이를 PMF와 연결한다. 
+  
+  ![](picture/4-41.png)
+  
+  > 이때 문서를 서로 다른 Chunk로 나눠 입력한다.
+  > 
+  > ex)- 원본 : People trust the man. people betray his trust finally. 
+  > 
+  > 1). People trust the man
+  > 
+  > 2). trust the man. people
+  > 
+  > 3). the man. people betray 
+  > 
+  > .... 
+
+- Loss 함수는 앞서 도입한 방법과 크게 다르지 않다. CNN 도입에 따른 Regularization form이 변경되었다. 
+  
+  ![](picture/4-42.png)
+
+----
+
+#### Image information : HDC, VBPR, DVBPR, VPOI
+
+- Idea : Item Images가 Item의 Latent variable을 학습하는 데 도움이 될 것! 
+
+##### Learning Visual clothing style with <mark>h</mark>eterogeneous <mark>D</mark>yadic <mark>c</mark>ooccurrences (HDC)
+
+- Task : "어떤 옷이 신발과 잘 어울릴까"에 대해 답해보자! 
+
+- Idea : user behavior data에서 Co-occurrence에 기반하여 모델 호환성을 쌓자
+  
+  ![](picture/4-43.png)
+  
+  > 함께 구매했던 것을 fit(+) 으로 고려하며, 함께 구매하지 않은 것을 (-)로 부여함 
+  > 
+  > 각각을 CNN을 통해서 학습한 다음 Top-K Item에 대해서 추천한다.
 
 
 
+##### <mark>V</mark>isual <mark>B</mark>ayesian <mark>p</mark>ersonalized <mark>R</mark>anking from Implicit feedback(VMPR)
+
+- Idea : 시각적 특성을 BPR에 함께 반영한다. 
+
+> ![](picture/4-44.png)
+> 
+> - 이때 Visual latent vector of item i $\theta_i$ 은 CNN을 통해서 생성한다! 
+
+> ![](picture/4-45.png)
+> 
+> 여기서 Item Visual Factor을 $f_i$(D-dimension)를 의미한다. 
+> 
+> $\theta_i$(f-dim) 는 $f_i$에  Transformation Matrix(F x D) E를 곱함으로서 계산한다. 
+> 
+> > $\theta_i = Ef_i$
+
+> 추가로 BRP Loss를 추가하여 Fit(+), not fit(-)의 차이를 부각시킨다. 
+> 
+> ![](picture/4-46.png)
+> 
+> > $\hat x_{u,i} : $ Fit data (+)
+> > 
+> > $\hat x_{u,j}$ : Not fit data (-)
+
+- VMPR은 다른 방법에 비해 성과가 많이 향상시킨다.
+  
+  ![](picture/4-47.png)
+  
+  - 특히 Cold Start에서도 상당한 성능을 내고 있음을 확인할 수 있다. 
 
 
 
+##### Visualy-Aware fashion Recommendation and Design with generative Image models(DVBPR)
+
+- Idea : Item 추천을 넘어 유저가 선호할 만한 상품의 이미지를 생성하자! 
+  
+  ![](picture/4-49.png)
+
+- VBPR의 문제 : Item visual feature vector가 고정되어 있다. 
+  
+  - VBPR에서 Visual Image의 특성을 학습한 Deep CNN을 end-to-end로 연결하자
+  
+  ![](picture/4-48.png)
+  
+  > $f_i$ 가 고정되어 있다! 
+  
+  - 여기서 $x_{u,i} = \theta_u^T \phi(X_i)$ 로 바꾼다. 
+    
+    > $\phi$ 은 CNN을 의미하며, $X_i$은 Input을 의미함. 
+    > 
+    > 즉, CNN을 통해서 Item visual feature vector의 여러 형태를 가져온다. 
+    
+      
+
+- 또한 Personlized fashion recommendation을 넘어, Gan, CGAN을 통해 Personlized fashion design을 제공하자! 
+  
+  ![](picture/4-50.png)
+  
+  > 둘의 차이는 조건부 확률을 쓰냐, 안쓰냐의 차이임. 
+  > 
+  > ![](picture/4-51.png)
 
 
 
+- 마지막으로 유저의 선호도를 maximize하는 realistic image를 생성한다.
+  
+  ![](picture/4-52.png)
+  
+  > 기존의 Top-k Item을 추천하는 것의 구조와 동일. 
+  > 
+  > Argmax 대상만 실제 데이터에서 생성 데이터로 바꾼 것 
+  > 
+  > upscaling operator은 중요하지 않음
 
 
 
+##### What your Images reveal : Exploiting visual contents for point-of-interest recommendation(VPOI)
 
-
-
-
-
-
-
-
-
-
-
-
-
+- Idea : 시각적 정보와 함께 Point-of-interest(POI) 추천을 향상시키자
+  
+  ![](picture/4-53.png)
+  
+  > 유저가 평소 관심있던 것(POI)와 시각적 정보의 관련성(Q)과 시각적 정보와 유저특성관의 관련성(P)를 추가적으로 고려해준다. 
 
 
