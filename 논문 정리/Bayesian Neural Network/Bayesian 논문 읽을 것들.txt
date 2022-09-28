@@ -43,3 +43,26 @@
 > On loss functinos for deep neural networks in classification 
 113 : Calibration curve for measuring confidence
  > Accurate uncertainties for deep learning using calibrated regression 
+
+
+<Bayesian 관점 해석>
+Gal & Ghahramain, 2015 / 2016 : Dropout에 대해서 Baysian approximation으로 해석함 
+> Bayesian convolutional neural networks with bernoulli appromate variational inference 
+>Dropout as a Bayesian approximation : Representing model uncertainty in deep learning 
+
+ Gal et al., 2017 ; Boluko et al., 2020 : model parameter W은 Bayesian inference based 로 여겨질 수 있다. 
+>Concrete dropout  [o]
+>Learnable Bernoulli dropout for Bayesian deep learning  
+
+Zhang et al (2019) : Bayesian framework로 관측된 graph을 재해석하여 의미를 도출함. 
+> Bayesian graph convolutional neural networks for semi-supervised classification 
+
+<Direct Optimization>
+필수 : ARM 논문 확인필요  Augment-REINFORCE-Merge(
+=> Stochastic binary layer을 Backprobagation 할 때 unbiased / low variance / low computational complexity를 가져온다
+> ARM: augment-Reinforcement gradient for stochastic binary networks 
+
+<CGN 새로운 해석>
+Kipf & Welling, 2017 : GCN은 Laplacian smoothing의 Special form이다. 
+> Semi-supervised classification wigh graph convolution networks
+
