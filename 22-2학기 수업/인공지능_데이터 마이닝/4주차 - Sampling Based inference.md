@@ -479,10 +479,9 @@
 ##### Gibbs sampling 예시 - Latent Dirichlet Allocation
 
 - Topic Modeling : 사람들이 어떤 토픽으로 이야기하는지 알아내보자. 
+  
   - 각 단어들이 어떤 Topic으로 부터 유래한 것인가를 찾기 
   - Likelihood를 통해서 어떤 단어가 많이 쓰이고 있는지 확인가능 
-
-
 
 - Dirichlet 은 Multinomial distribution의 확률을 모델링하는 분포이다. [Conjugate 관계]
   
@@ -495,8 +494,6 @@
   > - 따라서 이 k차원 벡터는 합이 1을 만족하기 떄문에, multinomial 분포의 모수인 $p_k(\sum p_k =1)$ 에 사용될 수도 있다. 
   >   
   >   - 즉, <u>Dirichlet분포에서 샘플링하면 Multinomial 분포가 나온다.</u>
-
-
 
 - Generative Process에서는 각각 다음과 같은 분포를 따른다. 
   
@@ -526,8 +523,6 @@
   > 
   > - 만약 z 분포를 알고 있다면, 우린 most likely $\theta, \psi$ 값을 찾을 수 있다. 
 
-
-
 - Generative 모델에 Gibbs Sampling을 적용하자
   
   > 항상 시작은 Full-joint distribution을 Factorize하는 것에서 시작 
@@ -545,8 +540,6 @@
     - → 따라서, 우리가 직접 계산할 수 있는 W,Z, $\alpha, \beta$ 만을 남겨 Z를 구한다. 
       
       ![](picture/4-14.png)
-
-
 
 - $P(W,Z;\alpha, \beta)$를 계산하자! 
   
@@ -587,8 +580,6 @@
   > ![](picture/4-20.png)
   > 
   > - Normalize 부분은 $\alpha$ 상수로 둬 계산에서 제거해줄 수 있다.(Variable Elimination) 
-  
-  
 
 - 지금까지 구한 $P(W,Z; \alpha, \beta)$ 와 $P(Z_{(m,l)} = k, Z_{-(m,l)}, W; \alpha, \beta) $ 를 Gibbs Sampling에 맞게 조정해준다. 
   
@@ -614,19 +605,15 @@
   > 
   > → 이후에는 Gibbs Sampling을 여럿 적용하여 Statinary distribution을 구할 것이다.
 
-
-
 - 위의 과정으로 우리는 2가지 특성을 확인할 수 있다. 
   
   1. 새로운 데이터를 받아들이며 Bayesian Frame을 활용하여 Posterior distribution을  업데이트하는 Mechanism이다.
   
   2. 이전 데이터를 활용한다는 점에서 MCMC임을 확인할 수 있다. 
-  
-     
+     
+        
 
 ![](picture/4-24.png)
-
-
 
 **Sampling 방식의 의의** 
 
