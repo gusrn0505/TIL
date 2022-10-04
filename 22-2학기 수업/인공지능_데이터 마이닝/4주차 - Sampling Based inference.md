@@ -60,7 +60,7 @@
   
   - 즉, 데이터를 버리지 않으면서 각각의 중요도를 고려할 수 있는 방법이 필요 
   
-  - Importance Sampling은  최대한 자료의 정보를 반영함과 동시에, 모든 데이터를 활용한다는 비효율성을 고른 만큼 그외 부분에서 효율성을 얻고자 한다. 
+  - Importance Sampling은  최대한 자료의 정보를 반영함과 동시에, 모든 데이터를 활용한다는 비효율성을 고른 만큼 그 외 부분에서 효율성을 얻고자 한다. 
 
 - 과거에는 <u>확률의 분포(PDF)을 알아내어 데이터의 분포를 확인하는 것</u>을 목표로 했다. 
   
@@ -182,7 +182,7 @@
     > Ex)- ![](picture/4-3.png). $P(z_t)$ 로도 표현함. 
     > 
     > - 이때 Distribution으로 Multinomial distribution으로 보통 가정하나, 다른 분포도 가용함 
-    > 
+    
     > Link : 각 State 사이에서 Transition이 일어나는 과정을 표현
     > 
     > ![](picture/4-4.png)
@@ -207,7 +207,7 @@
     
     > Bayesian Network 에서 원 형태의 Node는 Random variable을 의미한다. 
     > 
-    > 즉, $z_t$ 또한 특정 Distribtuion(-[0.5, 0.2, 0.3]을 따르고 있음을 의미한다.  
+    > 즉, $z_t$ 또한 특정 Distribtution(-[0.5, 0.2, 0.3])을 따르고 있음을 의미한다.  
     
     - 각 Expectation을 구할 때 각 Value에 확률 값을 곱한 것을 합한다. 이는 확률에 맞춰 Sampling 하며, 모든 경우의 결과를 평균내는 것과 동일한 의미를 가진다. 
       
@@ -234,6 +234,12 @@
   > $\pi_i$ : $lim_{n → \infin} T_{i,j}^{(n)} = \frac{1}{E[RT_i]}$. i node가 Stationary 상황 아래에서 존재할 확률
   > 
   > - Irreducible 하기 때문에 RT의 존재는 보장된다. 또한 T가 주어지는 RT의 Expectation을 할 수 있겠다. 
+  >   
+  >   > *How? 무수히 많은 양의 샘플링을 통해서? 어떻게 Expectation을 한다는 거지? 결국 경험해봐야 하는 거잖아. 즉, Stationary까지 일단 무작정 뽑는 건가?* ㅇㅇㅇ 그런듯. 
+  >   > 
+  >   > 아 아래에서 $\pi$ 를 해석적으로 구하기 때문에 무작정 Sampling 안해도 될듯 
+  >   > 
+  >   > 아래 $RT_i$ 를 보면 Stationary할 때까지 뽑아야 하는 듯. 
   > 
   > - 위의 Expectation을 기반으로 $\pi_i$ 를 정의한다. 
   > 
@@ -434,13 +440,13 @@
   
   - 또한 우리가 진정으로 구하고자 하는 건 <u>unobserved data의 분포인 p</u>이다. 
   
-  → Gibbs Sampling을 통해서 $\alpha$ 를 없애면서도 p 자체에 대해 구해보자
+  → Gibbs Sampling을 통해서 $\alpha$ 를 없애면서도 p 자체에 대해 Directly 구해보자
 
 - $z^t$ 다음과 같이 정의해보자 
   
   > $z^t = (z^t_k, z^t_{-k}) → z^* = (z^*_k, z^t_{-k})$
   > 
-  > > $z_{-k} : z_k$ 외에 다른 모든 것. k dim, 그리고 아닌 것들로 둘로만 고려하자!
+  > > $z_{-k} : z_k$ 외에 다른 모든 것. k dim, 그리고 아닌 것들 둘로만 고려하자!
   > 
   > - $z^t$ 모두를 표현하기는 어려우니까, 하나의 Latent variable만 표현하자!
   > 
@@ -470,7 +476,7 @@
   
   - GMM의 Latent variable은 z 하나임.
   
-  - 예전에는 z의 값은 deterministic 하게 정했다(most assignment value.
+  - 예전에는 z의 값은 deterministic 하게 정했다(most assignment value).
   
   - 하지만 Stocastic하게 했을 때 다른 값을 가질 경우가 생김. 그 결과 학습 속도는 느려질 순 있지만, 여러 가능성을 고려하여 잠재성이 더 있다.   
 
@@ -481,8 +487,6 @@
 - Topic Modeling : 사람들이 어떤 토픽으로 이야기하는지 알아내보자. 
   - 각 단어들이 어떤 Topic으로 부터 유래한 것인가를 찾기 
   - Likelihood를 통해서 어떤 단어가 많이 쓰이고 있는지 확인가능 
-
-
 
 - Dirichlet 은 Multinomial distribution의 확률을 모델링하는 분포이다. [Conjugate 관계]
   
@@ -495,8 +499,6 @@
   > - 따라서 이 k차원 벡터는 합이 1을 만족하기 떄문에, multinomial 분포의 모수인 $p_k(\sum p_k =1)$ 에 사용될 수도 있다. 
   >   
   >   - 즉, <u>Dirichlet분포에서 샘플링하면 Multinomial 분포가 나온다.</u>
-
-
 
 - Generative Process에서는 각각 다음과 같은 분포를 따른다. 
   
@@ -526,8 +528,6 @@
   > 
   > - 만약 z 분포를 알고 있다면, 우린 most likely $\theta, \psi$ 값을 찾을 수 있다. 
 
-
-
 - Generative 모델에 Gibbs Sampling을 적용하자
   
   > 항상 시작은 Full-joint distribution을 Factorize하는 것에서 시작 
@@ -545,8 +545,6 @@
     - → 따라서, 우리가 직접 계산할 수 있는 W,Z, $\alpha, \beta$ 만을 남겨 Z를 구한다. 
       
       ![](picture/4-14.png)
-
-
 
 - $P(W,Z;\alpha, \beta)$를 계산하자! 
   
@@ -587,8 +585,8 @@
   > ![](picture/4-20.png)
   > 
   > - Normalize 부분은 $\alpha$ 상수로 둬 계산에서 제거해줄 수 있다.(Variable Elimination) 
-  
-  
+  > 
+  > > 여기서 분모 부분이 상수가 맞나? 다 관찰된 값이라 상수로 둬도 되는 건가?
 
 - 지금까지 구한 $P(W,Z; \alpha, \beta)$ 와 $P(Z_{(m,l)} = k, Z_{-(m,l)}, W; \alpha, \beta) $ 를 Gibbs Sampling에 맞게 조정해준다. 
   
@@ -614,23 +612,19 @@
   > 
   > → 이후에는 Gibbs Sampling을 여럿 적용하여 Statinary distribution을 구할 것이다.
 
-
-
 - 위의 과정으로 우리는 2가지 특성을 확인할 수 있다. 
   
   1. 새로운 데이터를 받아들이며 Bayesian Frame을 활용하여 Posterior distribution을  업데이트하는 Mechanism이다.
   
   2. 이전 데이터를 활용한다는 점에서 MCMC임을 확인할 수 있다. 
-  
-     
+     
+        
 
 ![](picture/4-24.png)
-
-
 
 **Sampling 방식의 의의** 
 
 1. Smapling 방식은 Black box를 다룰 수 있다. 
 - V.I는 Likelihood를 필요로 한다.
-2. Diffusion problem에선 Sample efficiency이 낮다. 
+2. Diffusion problem에선 Sample efficiency가 낮다. 
 - 즉, Efficient sampler design을 위해서 Sampling method를 이용할 수 있다.

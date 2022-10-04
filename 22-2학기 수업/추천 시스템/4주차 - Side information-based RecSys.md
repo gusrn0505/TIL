@@ -30,9 +30,13 @@
   
   - 수치화되어 있지 않는 특성, 각 수치가 특성의 차이를 고려하지 못할 경우(ex-categorical value)위의 방법은 사용할 수 없겠다. 
     
-    - 아 Categorical value는 괜찮겠다. one-hot incoding을 적용해주면 될 거니까 
+    - 아 Categorical value는 괜찮겠다. one-hot encoding을 적용해주면 될 거니까 
     
     - 한편으론 one-hot incoding을 적용하면 over confidence이 발생할 것으로 보이는데? 이 부분에서 confi 개념으로 접근해볼 수 있을까? 
+      
+      - 음.. Most assignable Variable로 Fix 할 때 Over-confidence 문제가 일어나는 것 아닌가? 
+      
+      - 이미 Categorical value로 1개의 값이 주어져 있는걸 one-hot encoding으로 표현하는데 Over confidence가 일어날 것 같진 않은걸 
     
     - Probability & in-out distribution 확인해보자 
   
@@ -70,7 +74,7 @@
     > 
     > <$v_i, v_j$> : i번째, j번째 Item 간의 특성 내적값 
 
-- Polynomial Regression 형태에서 FM으로 바꿨으며 계산양을 대폭 줄였다.
+- Polynomial Regression 형태에서 FM으로 바꿔 계산양을 대폭 줄였다.
   
   > $w_0 + \sum_{i=1}^nw_ix_i + \sum_{i=1}^n \sum_{j=i+1}^n $ <mark>$W_{ij}$</mark> $x_ix_j$ : Polynomial Regression 
   > 
@@ -144,7 +148,7 @@
     > 
     > <mark>   + $\frac{\lambda_C}{2} \sum_{i=1}^m\sum_{k=1}^m I_{ik}^C (c_{ik}^* - g(U_i^TZ_k))^2 + \frac{\lambda_Z}{2}||Z||^2_F$</mark>
     > 
-    > - <u>위의 항은 Rating Matrix에 대한 Loss 식</u>이며, <u>아래 항은 Social Recommendation에 Loss 식</u>임. 
+    > - <u>위의 항은 Rating Matrix에 대한 Loss 식</u>이며, <u>아래 항은 Social Recommendation에 대한 Loss 식</u>임. 
     > 
     > - 그리고 **두 항목들은 공통된 U를 기반으로 정보를 주고 받을 것**
     
@@ -412,8 +416,6 @@
   > 
   > 각각을 CNN을 통해서 학습한 다음 Top-K Item에 대해서 추천한다.
 
-
-
 ##### <mark>V</mark>isual <mark>B</mark>ayesian <mark>p</mark>ersonalized <mark>R</mark>anking from Implicit feedback(VMPR)
 
 - Idea : 시각적 특성을 BPR에 함께 반영한다. 
@@ -443,8 +445,6 @@
   ![](picture/4-47.png)
   
   - 특히 Cold Start에서도 상당한 성능을 내고 있음을 확인할 수 있다. 
-
-
 
 ##### Visualy-Aware fashion Recommendation and Design with generative Image models(DVBPR)
 
@@ -476,8 +476,6 @@
   > 
   > ![](picture/4-51.png)
 
-
-
 - 마지막으로 유저의 선호도를 maximize하는 realistic image를 생성한다.
   
   ![](picture/4-52.png)
@@ -488,8 +486,6 @@
   > 
   > upscaling operator은 중요하지 않음
 
-
-
 ##### What your Images reveal : Exploiting visual contents for point-of-interest recommendation(VPOI)
 
 - Idea : 시각적 정보와 함께 Point-of-interest(POI) 추천을 향상시키자
@@ -497,5 +493,3 @@
   ![](picture/4-53.png)
   
   > 유저가 평소 관심있던 것(POI)와 시각적 정보의 관련성(Q)과 시각적 정보와 유저특성관의 관련성(P)를 추가적으로 고려해준다. 
-
-
