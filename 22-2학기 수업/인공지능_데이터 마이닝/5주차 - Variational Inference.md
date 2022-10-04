@@ -156,8 +156,6 @@
 > 
 > - 따라서 <u>$\lambda$ 를 Optimization 함으로써 모델을 발전시킬 것</u>이다.
 
-
-
 > $\lambda_j$ 에 대한 값으로 뽑아내자! 
 > 
 > ![](picture/5-6.png)
@@ -174,8 +172,6 @@
 >   
 >   → Meanfield 가정 하에 Closed form을 형성한다.
 
-
-
 ##### Simple Example Model
 
 ![](picture/5-9.png)
@@ -187,8 +183,6 @@
 > ![](picture/5-11.png)
 > 
 > ![](picture/5-12.png)
-
-
 
 > $\mu$ ,$\tau$ 를 각각 Inference를 하기 위해선, Inference 대상 외의 것은 다 없애줘야한다.
 > 
@@ -208,13 +202,11 @@
 > 
 > > $ln(N(x)) = -\frac{1}{2}[\frac{(x-\mu)}{2\sigma^2}] +  log\sigma + \frac{log(2\pi)}{2}$
 > 
-> -  "$\frac{\lambda_0\mu_0 + \sum_{i <= N}x_i}{\lambda_i + N}$"은 평균이, $\frac{1}{(\lambda_0 + N)*E_\tau[\tau]}$ 는 분산이 된다. 
+> - "$\frac{\lambda_0\mu_0 + \sum_{i <= N}x_i}{\lambda_i + N}$"은 평균이, $\frac{1}{(\lambda_0 + N)*E_\tau[\tau]}$ 는 분산이 된다. 
 >   
 >   > ![](picture/5-15.png)
 >   > 
 >   > **→ 이 식은 데이터가 추가될 수록 정확도가 올라갈 것임을 의미한다.**
-
-
 
 - 마지막으로 $lnq_\mu^*(\mu)$ 를 구하기 위해선 $E_\tau[\tau]$ 만 구하면 된다. 
   
@@ -232,8 +224,6 @@
   > 
   > **→ $\mu, \tau$를 번갈아 가며 계산한다. [E-M Step과 유사]**
 
-
-
 - $\mu$와 $\tau$ 번갈아 update하기 
   
   > ![](picture/5-18.png)
@@ -241,10 +231,6 @@
   > ![](picture/5-20.png)
   > 
   > ![](picture/5-19.png)
-
- 
-
-
 
 ---- 
 
@@ -258,10 +244,4 @@
   
   - Exact Model을 구할 수 있어 정확도가 높지만, Burn-in 비용이 든다.
 
-
-
 -----
-
-
-
-
