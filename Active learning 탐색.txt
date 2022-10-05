@@ -1,0 +1,66 @@
+Deep AL & with Bayesian NN
+
+Query Strategy 와 Batch Strategy 두개를 잘 설정해줘야 함. 
+
+<DEEP AL 전반적인 문제>
+1. Model Uncertainty in Deep larning : BNN 관점에서 접근
+
+
+2. Insufficient data for labeled samples : Generative 모델의 활용 
+
+3. Processing pipeline inconsistency : 전체 구조 살펴볼 필요가 있음. BNN의 결과값을 그대로 Active learning에서 활용할 방법은 없을까? 
+
+=> 1,2번 중에서 집중하여 문제를 정의하고 풀어보자! 
+
+
+<Query Strategy>
+- Batch Mode DeepAL(BMDAL) : batch-based. 단점이 많아서 제외. 
+
+- Uncertainty-based and Hybrid Query Strategies : Uncertainty를 중심으로 Query 산정. Only Uncertainty 고려는 샘플 간 관계 고려 x. 따라서 Hybrid 까지 적용
+> Check VAAL[204] - autobalancing btw 탐험과 활용. 이번엔 보류 
+
+- Deep Bayesian Active learning : AL based Bayesian convolutional neural network 
+> 70, Active link(156), ACS-FW(162)
+> [예비] 72, 115, 165, 223
+
+- Density-based Methods : core set을 찾고자 시도. p-norm limitation for high-dimen data 
+> 161(core set) : 필수 
+
+
+<Data expansion>
+Pseudo Lable[229] : 
+VAAL[204] : Generative 모델과 SSL을 통해 보다 많은 정보 획득
+SSAL[202] : 데이터 알뜰히 사용 
+
+<목표>
+Data expansion -> Density-based Methods 로 대표값 산출 -> Oracle로 Label 부여 -> Similarity를 기반으로 pseudo label 부여 -> BNN 기반으로 AL과 DL 결과값 통합 -> 반복 
+
+
+<앞으로 할 것- 초록 및 Intro 확인. 깊게 들어갈 점이라면 방법론까지! >
+1. 161(core set) : Core set 개념 이해하기 
+2. Deep Baysian Active learning : 구조 이해하기 
+ > 70, Active link(156), ACS-FW(162)
+> [예비] 72, 115, 165, 223
+3. Data Expansion : 병행 가능성 점검하기 
+> Pseudo Lable[229] : 
+> VAAL[204] : Generative 모델과 SSL을 통해 보다 많은 정보 획득
+> SSAL[202] : 데이터 알뜰히 사용 
+
+
+
+
+
+문제 정리하기 
+
+문제 관련하여 풀수 있는 아이디어 고민하기 
+- 이전 해결방안 
+- 제시하는 방안 
+> 2개 관점으로 고민하기 
+
+관련된 아이디어를 직접적으로 묘사하는 논문이 있는지 확인하기 
+
+없다면 Proposal을 작성하기 
+1. 문제점
+2. 이전 해결방안 
+3. 제시하는 방안 
+4. Background 
