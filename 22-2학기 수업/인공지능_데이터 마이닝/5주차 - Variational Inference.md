@@ -56,6 +56,8 @@
   
   > $P(S) = \prod_iP(S_i|S_{\pi(i)}) = min_\lambda \prod_i P^U(S_i|S_{\pi(i)}, \lambda^U_i)$
   > 
+  > > 이렇게 정의를 한 듯 
+  > 
   > $P(S) = \prod_iP(S_i|S_{\pi(i)}) <= \prod_i P^U(S_i|S_{\pi(i)}, \lambda^U_i)$
   > 
   > 이처럼 형태를 바꾸는 것을 **Variational Transform**이라 한다.
@@ -67,6 +69,8 @@
   > > E : Evidence. observed, fixed, and hard fact 
   > > 
   > > H : Estimated, inferred, and floating 
+  > > 
+  > > S : E, H의 합집합
   
   > $ln P(E) = ln \sum_H P(H,E) = ln \sum_H Q(H|E) \frac{P(H,E)}{Q(H|E)}$
   > 
@@ -98,9 +102,17 @@
 
 - Example 1 - Suppose $Q(H|E, \lambda) = P(H|E, \theta)$
   
+  > 아래 부분 식이 맞는지 검토가 필요함 
+  > 
+  > Since 
+  > 
+  > $ln P(E) >= E_{Q(H|E)}lnP(E|H) - KL(Q(H|E)||P(H))$
+  > 
+  >                 $>= E_{Q(H|E, \lambda)}lnP(E|H, \lambda) - KL(Q(H|E, \lambda)||P(H))$ [임의]
+  > 
   > lnP(E|Q) >=
   > 
-  > ![](file://C:\Users\user\Desktop\TIL\22-2학기 수업\인공지능_데이터 마이닝\picture\5-1.png?msec=1664838787315)
+  > ![](picture/5-1.png)
   
   - 1). 이 경우 Q 분포의 inference는 P와 동일하다.
     
@@ -124,7 +136,7 @@
       
       - 두번째 항($\sum_Z[q(Z)ln \frac{q(Z)}{p(Z|X,\theta)}]$) 이 최소화되어야 $L(\theta, q)$가 최대가 된다. 
       
-      > $KL(q(Z)||P(X,Z|\theta^t)=0 →$ <mark>$q^t(z) = P(Z|X, \theta^t)$</mark>
+      > $KL(q(Z)||P(X,Z|\theta^t))=0 →$ <mark>$q^t(z) = P(Z|X, \theta^t)$</mark>
       
       → $H(\theta, q^T) = E_{q^t(z)}lnP(X, Z|\theta^t) + H(q^t)$
     
@@ -135,6 +147,8 @@
 ##### Factorizing Q
 
 - 지금까지 Q에 대해서 어떠한 가정도 하지 않았다. 
+  
+  > Q. 앞에서 $q^t(z) = P(Z|X, \theta^t)$ 로 정의한 건 뭐지?  structure을 정의한 건가?
 
 - **모델의 Complexity를 낮추기 위해 Hidden value 간의 Independence를 가정**한다.
   
@@ -176,7 +190,7 @@
 
 ![](picture/5-9.png)
 
-> $\mu, \tau$ Random variable이자 Variational parameter임. 임의로  분포를 정의해줌  
+> $\mu, \tau$ 는 Random variable이자 Variational parameter임. 임의로  분포를 정의해줌  
 
 > Mean field Assumption 아래에서, 
 > 
