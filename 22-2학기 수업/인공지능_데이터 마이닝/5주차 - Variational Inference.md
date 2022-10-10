@@ -340,7 +340,7 @@
   > 
   > $q(\theta, z) = q(\theta, z | \gamma, \phi)$. - 2번째 줄 
   > 
-  > - <mark>Why? E와 H가 독립이라는 건가? 어떻게 이걸 보장해줄 수 있지? </mark>
+  > - <mark>Why? $\lambda$와 H가 독립이라는 건가? 성립안하지 않나?</mark>
   > 
   > - 오타인가..? $q(\theta, z) $ 가 아니라 $q(\theta, z|\gamma, \phi)$ 로 내려와야 함 
   > 
@@ -348,13 +348,13 @@
   
   - 위의 식은 $q(\theta, z | \gamma, \phi)$ 분포에 따른 기댓값(expectation)을 구하는 것과 같다. 
   
-  - → 기댓값 형태로 나왔기 때문에 Free-fom optimization이 가능하다! 
+  - → 기댓값 형태로 나왔기 때문에 Free-form optimization이 가능하다! 
     
     이젠 ELBO를 maximize 해서 MLE를 구하자!
     
-    > Free-form optimization이 뭐지..? E-M Step을 말하는 것 같기도 하고 
+    > Q. Free-form optimization이 뭐지..? E-M Step을 말하는 것 같기도 하고 
 
-###### Derivcation of $E_q(logP(\theta|\alpha))$ 구하기
+###### Derivation of $E_q(logP(\theta|\alpha))$ 구하기
 
 ![](picture/5-23.png)
 
@@ -396,8 +396,6 @@
   
   > $E_q(log \theta_{d,i})$ 을 계산한 것을 처음 식에 대입
 
-
-
 - $E_q(logP(\theta|\alpha))$ 구하기! 
   
   ![](picture/5-31.png)
@@ -409,8 +407,6 @@
 - $H(q)$ 구하기! 
   
   ![](picture/5-33.png)
-
-
 
 - 지금까지 구한 값들을 한꺼번에 정리하면 아래와 같다 
   
@@ -442,11 +438,7 @@
     
     - 즉, $\gamma, \phi$는 끝까지 계산하지 않아도 된다. 
 
-
-
 - 만약 우리가 계산을 정확히, tight 하게 하고 싶다면 "Held-out log likelihood"를 계산하면 된다. 
-
-
 
 - $\beta$ 업데이트 해주기 
   
@@ -465,8 +457,6 @@
     - 따라서 $\rho$ 를 사용하여 분산을 줄여준다. 
       
       ![](picture/5-39.png)
-
-
 
 -----
 
