@@ -485,6 +485,7 @@
 ##### Gibbs sampling 예시 - Latent Dirichlet Allocation
 
 - Topic Modeling : 사람들이 어떤 토픽으로 이야기하는지 알아내보자. 
+  
   - 각 단어들이 어떤 Topic으로 부터 유래한 것인가를 찾기 
   - Likelihood를 통해서 어떤 단어가 많이 쓰이고 있는지 확인가능 
 
