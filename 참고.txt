@@ -1,0 +1,23 @@
+문일철 교수님께 연락드리기 준비 
+
+목적 
+1. 연구 방향성 및 조언 구하기 
+ - 연구 Briefing 필요.
+ - 앞으로의 실험 방안 등 구체화 필요 
+ => Overleaf에 구체화시킬 것. 지금 word에 정리한 것이면 내용 적으론 어느정도 찬 듯. 
+
+2. 연구실 조인 희망 말씀드리며, 연구 인턴 및 TO가 있는지 문의드리기
+- 연구 방향성 
+
+Random sampling & Lable 부여 
+Pretraining - 학습 모델 Parameter 학습 
+for AL cycles 
+- Semi - Supervised learning & pseudo labeling - 학습 모델 Parameter 학습
+- Batch sampling 
+
+
+총 3개의 모델 필요 
+ 1. Pretraining : 하나로 통일. 
+ 2. SSL 방법 
+ 3. Batch sampling 
+ 4. Learning model 
