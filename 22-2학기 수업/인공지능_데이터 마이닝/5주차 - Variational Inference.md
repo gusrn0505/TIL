@@ -58,7 +58,7 @@
 
 ##### Applying to Probability Function
 
-- 확률 함수에도 Variational parameter를 도입해보자 
+- 확률 함수에도 Vartional parameter를 도입해보자 
   
   - 이때, 간단한 형태는 꼭 선형일 필요는 없다. 
   
@@ -100,6 +100,8 @@
   
   - **→ 따라서 둘의 차이를 최소화하는 것을 목표로 한다.** 
 
+<br>
+
 - 이때 $KL(Q||P)$ 을 최소화하여 Lower bound를 최대화하는 데 목적을 두겠다. 
   
   > $L(\lambda, \theta) = \sum_H Q(H|E, \lambda) lnP(H,E|\theta) - Q(H|E, \lambda) lnQ(H|E, \lambda)$
@@ -111,6 +113,8 @@
   > > $\lambda$ 는 실제 값와 근사의 차이를 줄이는 Hypothesis의 파라미터
   > > 
   > > $\theta$ 는 실제값의 Parameter을 의미하나? 즉, P의 patameter 인듯 
+
+<br>
 
 - 방법은 크게 **2가지**가 있다.
   
@@ -124,11 +128,11 @@
   > 
   >  = $\sum_H P(H|E, \theta) ln \frac{P(H,E|\theta)}{P(H|E, \theta)}$  <mark>*[$Q(H|E, \lambda) = P(H|E, \theta)$]</mark>
   > 
-  > ![](./picture/5-1.png)
+  > ![](file://C:\Users\user\Desktop\TIL\22-2학기 수업\인공지능_데이터 마이닝\picture\5-1.png?msec=1664838787315)
   
   - 1). 이 경우 Q 분포의 inference는 P와 동일하다.
     
-    - 단,아직 단순화하지 않았아
+    - 단,아직 단순화하지 않았아서 Variational distribution의 목적 "단순화" 가 아직 달성되지 못했다. 
   
   - 2). $\lambda$ 는 아래 과정을 통해 최적화한다.
     
@@ -157,6 +161,8 @@
     - 이후 $\theta$는 Lower bound을 최대화하도록 최적화시킨다.
       
       ![](picture/5-4.png)
+
+<br> 
 
 ##### Factorizing Q
 
@@ -205,6 +211,10 @@
 > - i <= |H| 을 $H_j$, $H_{-j}$ 로 나눠서 고려했기에  <mark>Gibbs sampling </mark>이 가능하다.
 >   
 >   → Meanfield 가정 하에 Closed form을 형성한다.
+
+
+
+<br>
 
 ##### Simple Example Model
 
