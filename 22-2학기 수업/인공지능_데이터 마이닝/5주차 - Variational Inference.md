@@ -58,7 +58,7 @@
 
 ##### Applying to Probability Function
 
-- 확률 함수에도 Vartional parameter를 도입해보자 
+- 확률 함수에도 Variational parameter를 도입해보자 
   
   - 이때, 간단한 형태는 꼭 선형일 필요는 없다. 
   
@@ -124,11 +124,11 @@
   > 
   >  = $\sum_H P(H|E, \theta) ln \frac{P(H,E|\theta)}{P(H|E, \theta)}$  <mark>*[$Q(H|E, \lambda) = P(H|E, \theta)$]</mark>
   > 
-  > ![](file://C:\Users\user\Desktop\TIL\22-2학기 수업\인공지능_데이터 마이닝\picture\5-1.png?msec=1664838787315)
+  > ![](./picture/5-1.png)
   
   - 1). 이 경우 Q 분포의 inference는 P와 동일하다.
     
-    - 단,아직 단순화하지 않았아서 Variational distribution의 목적 "단순화" 가 아직 달성되지 못했다. 
+    - 단,아직 단순화하지 않았아
   
   - 2). $\lambda$ 는 아래 과정을 통해 최적화한다.
     
