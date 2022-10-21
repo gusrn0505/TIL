@@ -66,6 +66,8 @@
     
     > Marginal indep : P(A|B) = P(A) <=> P(A,B) = P(A) P(B) <=> P(B|A) = P(B)
     > 
+    > > mutual Independence 이기도 함. 
+    > 
     > Contidional indep : P(A|B,C) = P(A|C) 
     > 
     > ![](picture/1-6.png)
@@ -80,7 +82,7 @@
 
 ---
 
-#### Naive Bayes clasifier
+#### Naive Bayes classifier
 
 > $f_{NB}(x) = argmax_{Y=y} P(Y=y) \prod_{1<=i<=d} P(X_i = x_i|Y=y)$
 
@@ -106,11 +108,15 @@
     > 
     > Y에 의해 indep 유무가 정해진다. 
 
+<br>
+
 - **Optimal Factorization의 정의** 
   
-  - 우리가 목표로 하는 것은 모집단의 값들과 표본을 통한 측정값의 오차를 최대한 줄여나가는 것이다. 
+  - 우리는 모집단의 값을 추측할 뿐 알 수 없다. 
+    
+    - 따라서 모집단의 값들과 표본을 통한 측정값의 오차를 최대한 줄여나가는 것을 목표로 한다. 
   
-  - 둘의 오차를 줄이는 하나의 방법으로 Upper bound를 부여하는 것이 있다. 
+  - 둘의 오차를 줄이는 하나의 방법으로 Upper bound를 부여한다. 
     
     > **<Hoeffding's inequality>**
     > 
@@ -136,6 +142,8 @@
   
   - 즉, Optimal Factorizaion 이라 할 수 있는 이유는 <mark>"파라미터의 개수를 줄이는 것은 모델 성능 향상에 긍정적 영향을 주며"</mark> , **Bayesian Network는 Factorization 간 파라미터 개수를 가장 줄이는 방법이다.**
 
+<br>
+
 - 모델의 문법 
   
   ![](picture/1-8.png)
@@ -160,6 +168,8 @@
     > 
     > - 네모 칸에 들어가면 'For loop' 절 처럼 여러 경우를 다 포함한다는 의미이다.
 
+<br>
+
 - **Design model of Typocal Local Structures**
   
   - Common Parent 
@@ -169,36 +179,38 @@
     - **Alarm을 관측(Fixing) 시, John 과 Mary는 indep 하다**
       
       > J $\bot$ M|A
-
-- Cascading 
   
-  ![](picture/1-10.png)
-  
-  - **Alarm을 관측(Fixing) 시, Buglary와 MaryCall은 indep 하다.**
+  - Cascading 
+    
+    ![](picture/1-10.png)
+    
+    - **Alarm을 관측(Fixing) 시, Buglary와 MaryCall은 indep 하다.**
     
     > B $\bot$ M|A
-
-- V-Structure
   
-  ![](picture/1-11.png)
+  - V-Structure
+    
+    ![](picture/1-11.png)
+    
+    - **Alarm을 관측(Fixing) 시, Buglary와 Earthquake는 not indep 하다.**
+    
+    - 특히<u> V-structure은 모델 안에 숨겨져 있기에 잘 찾아야 한다.</u>
+      
+      > ex)- Hidden layer들은 input과 V-Structure 구조를 가진다. 
   
-  - **Alarm을 관측(Fixing) 시, Buglary와 Earthquake는 not indep 하다.**
-  
-  - 특히<u> V-structure은 모델 안에 숨겨져 있기에 잘 찾아야 한다.</u>
-
-- Ex)- Finding V-Structure 
-  
-  ![](picture/1-12.png)
-  
-  - 정답은 V-Structure 이며, W가 관측되었기 때문에 not indep 하다.
-  
-  - 만약 W가 관측되지 않았다면 Z와 $\beta$ 는 Indep 한 관계이다.
-  
-  - <mark>=> 관측 유무를 잘 확인해야 한다! </mark>
+  - Ex)- Finding V-Structure 
+    
+    ![](picture/1-12.png)
+    
+    - 정답은 V-Structure 이며, W가 관측되었기 때문에 not indep 하다.
+    
+    - 만약 W가 관측되지 않았다면 Z와 $\beta$ 는 Indep 한 관계이다.
+    
+    - <mark>=> 관측 유무를 잘 확인해야 한다! </mark>
 
 ----
 
-**Bayes Ball Algorithm**
+#### **Bayes Ball Algorithm**
 
 - 목적 : Checking $X_A \bot X_B |X_C$ 
 
@@ -207,6 +219,8 @@
   ![](picture/1-13.png)
   
   > 빨간 선은 Indep을 의미, 파란 선은 dep 을 의미 
+  > 
+  > 통하지 않으면 independence 한 것. 
 
 - **D-Seperation**
   
@@ -218,7 +232,7 @@
     > 
     > > Blanket = {parents, children, children's other parents}
   
-  - <mark>의의 : 절대적 Independe의 정의가 D-Seperation 에서 온다!</mark>
+  - <mark>의의 : 절대적 Independece의 정의가 D-Seperation 에서 온다!</mark>
 
 ----
 
@@ -244,7 +258,17 @@
   
   > 이때 '그럼직한 답'이란 가장 높은 확률 값을 가지는 경우를 찾는 것이다.
   > 
+  > -> 조건 $x_v$ 가 주어졌을 때, 가장 바람직한 Y는 무엇인가?  ($argmaxP(Y|x_v)$)
+  > 
   > <mark>**$ex)- argmax_aP(A|B=True, C=True)$**</mark>
+
+<br>
+
+- Q-A machine인 $argmaxP(Y|x_V))$ 을 알기 위해 아래와 같이 계산할 수 있다. 
+  
+  > 우리가 알고 싶은 값을 계산하기 위해서, 알고 있는 값들을 활용할 수 있다. 
+  > 
+  > 확률 값을 Full joint 형식으로 바꾼 다음에 Condi independence 조건을 통해서 계산을 간편화할 수 있다. 
 1. **Likelihood 계산 ($p(x_v)$)**
    
    > <mark>$P(X_V) = \sum_{X_H} P(X_H, X_V) = \sum_{x_1}... \sum_{x_k}P(x_1, ..., x_k, X_V)$</mark>
@@ -253,13 +277,15 @@
    > > 
    > > $X_V = [X_{K+1}, ... , X_N]$ : evidence variables
    > > 
-   > > $X_H = X-X_V = [X_1, ... , X_k]$ : hidden variables
+   > > $X_H = X-X_V = [X_1, ... , X_k]$ : hidden variables 
    
    - **Tip) 확률을 계산할 떄에는 Full Joint probability 에서 시작해라!**
      
      > ex)- P(B=True, M = True) = $\sum_E\sum_J\sum_A P(B,E,A,J,M)$
      > 
      >     $= \sum_E\sum_J\sum_A P(B) P(E) P(A|B,E) P(J|A) P(M|A)$ 
+   
+   <br>
 
 2. **Contidional Probability 계산**
    
@@ -280,23 +306,25 @@
 ##### Marginalization and Elimination
 
 - 특정 확률 값을 구할 때 곱 연산이 너무 많아 Computation complexity가 높다! 
-1. Marginalization - 필요없는 값들을 앞으로 빼자! 
+1. **Marginalization - 필요없는 값들을 앞으로 빼자!**
    
    ![](picture/1-17.png)
    
    ![](picture/1-18.png)
+   
+   > 계산 과정을 나눠서 따로 따로 진행할 수 있다. 
 
-2. Variable Elimination 
+<br>
 
-> 전제 : $P(e|j,m) = \alpha P(e,j,m)$
+2. **Variable Elimination** 
+
+> 전제 : $P(e|j,m) = \frac{P(e,j,m)}{p(j,m)} = \alpha P(e,j,m)$
 > 
-> > $\alpha$ 는 Normalizer 을 의미. 확률의 정의를 지키도록 만드는 값으로 봐야할 듯 
+> > $\alpha = p(j,m)$ 는 Normalizer 의 역할을 한다. 
 > 
 > - j,m은 이미 관측된 값으로 Constant 값으로 부여할 수 있다. 
 > 
 > - 단, 아직 관측이 안된 값일 경우 그럴 수 없다. 
-
-> ![](picture/1-19.png)
 
 - 각 P들을 Topological 순서대로 나열한다. 
   
@@ -304,11 +332,15 @@
   
   - 이는 컴퓨터에서 계산할 때 leaf node(Child) 부터 시작하기 위함이다.
 
-- 각 확률 분포를 함수(Function)으로서 고려한다. 
+- <u>각 확률 분포를 함수(Function)으로서 고려한다. </u>
   
   > ![](picture/1-20.png)
   
-  - 함수로서 고려하여 $f_J, f_M$ 에서 입력 부분을 통일할 수 있다. <u>즉, 각각의 경우의 수를 일괄적으로 고려하여, 총 필요로 하는 경우의 수를 줄일 수 있다.</u> 
+  - 함수로서 고려한다면, 동일한 입력값을 필요로 하는  $f_J, f_M$ 을 통합하여 $f_{JM}$ 로 표현할 수 있다. <u>즉, 총 필요로 하는 경우의 수를 줄일 수 있다.</u>
+    
+    > $f_J(a)f_M(a) = f_{JM}(a)$
+    > 
+    > $f_A(a,b,e)f_{JM}(a) = f_{AZM}(a,b,e)$
   
   - $\sum$ 별로 하나의 함수로 통합한 다음 Marginalization을 통해 변수를 줄인다.
     
@@ -338,25 +370,33 @@
   
   > ex)- Lelu 
 
+<br>
+
 - **Joint Distribution을 Sequel Model 형태로 표현함으로써 Potential func의 연산으로 구해낼 수 있다.**
   
   > P(A,B,C,D) = P(A|B) P(B|C) P(C|D) P(D)
   
   - <mark>P(A,B,C,D) = P(U) = $\frac {\prod_N \psi(N)}{\prod_L \phi(L)}$ = $\frac {\psi(a,b) \psi(b,c) \psi(c,d)}{\phi(b) \phi(c)}$</mark>
     
+    > $\phi$ : ex)조건부 확률 . 내가 원하는 대로 형태를 정할 수 있다. 
+    > 
+    > $\psi$ : ex)각 상황별 확률. 내가 원하는 대로 형태를 정할 수 있다 
+    
     - 이때 $\phi, \psi$ 은 다양한 형태를 띌 수 있다. 
   
-  > **Potential function on Nodes** : $\psi(a,b), \psi(b,c), \psi(c,d)$
-  > 
-  > ![](picture/1-23.png)
-  > 
-  > 각 노드별 연결을 의미 (Check - 원이 노드가 맞나?)
-  
-  > **Potential Function on Link**: $\phi(b), \phi(c)$
-  > 
   > ![](picture/1-24.png)
   > 
+  > > **Potential function on Nodes** : $\psi(a,b), \psi(b,c), \psi(c,d)$
+  > > 
+  > > **Potential Function on Link**: $\phi(b), \phi(c)$
+  > 
+  > > Q. 흠.. 노드와 링크를 다른 형태로도 표현해줄 수 있을 텐데 이렇게 정의한 이유가 있나?  
+  
+  
+  
   > Potential functions on Node에서 방향성을 제거하며, Clique만 탐색하게 설정
+  > 
+  > > Q. 흠.. 조건부 확률은 방향성이 있는데 어떻게 방향성을 제거해주는 거지? 
   > 
   > > Clique : Graph간 Fully Connectd 된 Component 들의 집합 
   > > 
@@ -368,9 +408,7 @@
   > 
   > - **Clique 상황에서의 Inference를 "Message passing" 이라고 한다.**
 
-
-
-
+<br>
 
 - 그럼 어떻게 Potential 함수를 통해서 확률 분포값을 어떻게 알아 낼 수 있을까?
   
@@ -389,6 +427,8 @@
   > > - $\sum_C \psi^*(B,C) = \sum_A \psi^*(A,B)$ 를 통해서 유추해낸 식 
   > > 
   > > - 위의 식은 local consistency 만을 보장하나, Message passing이 확장 및 반복을 통해서 Global consistency를 보장한다. 
+
+<br>
 
 - **Ex)- Potential Function의 Message Passing을 통해서 확률값 구하기**
   
@@ -410,11 +450,11 @@
   > 
   > > $\phi^*(b) \neq \phi^{**}(b)$. **이때 $\psi(a,b)$ 도 Message Passing으로 업데이트 할 것**
   > 
-  > $\psi^*(a,b) = \psi(a,b) \frac{\phi^{**} (b)}{\phi^*(b)} = \frac{P(a|b)P(b)}{1} = P(a,b)$
+  > $\psi^{**}(a,b) = \psi^*(a,b) \frac{\phi^{**} (b)}{\phi^*(b)} = \frac{P(a|b)P(b)}{1} = P(a,b)$
   > 
-  > <mark>$\phi^{***}(b)$</mark> $= \sum_a \psi^*(a,b) $= <mark>$P(b)$</mark> 
+  > <mark>$\phi^{***}(b)$</mark> $= \sum_a \psi^{**}(a,b) $= <mark>$P(b)$</mark> 
   > 
-  > - $\phi(b)$ 의 값이 좌우 공통으로 통일됨. <mark>즉, P(b)의 값을 Potential func의 연산으로 구할 수 있게 된다. </mark>
+  > - $\phi(b)$ 의 값이 좌우 공통으로 통일됨. <mark>P(b)을 새로 알게 된 값($\phi^*(b)$)과 Potential func의 연산으로 구할 수 있다. </mark>
 
 - Ex2 - P(b|a =1, c=1) 계산하기 
   
