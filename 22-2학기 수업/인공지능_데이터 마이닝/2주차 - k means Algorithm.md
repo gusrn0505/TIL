@@ -168,11 +168,11 @@
   > > 
   > > <mark>$z_k$</mark> : New variable s.t. $z_k \in$ {0,1}. x가 k번째 분포에서 유래했는가 여부
   > > 
-  > > -  $\sum_k z_k = 1, P(z_k =1 ) = \pi_k$. P(z) = $\prod^K_{k=1} \pi_k^{z_k}$  
+  > > - $\sum_k z_k = 1, P(z_k =1 ) = \pi_k$. P(z) = $\prod^K_{k=1} \pi_k^{z_k}$  
   
   > $P(X|z_k=1) = N(x|\mu_k, \sum_k)$       ($\sum_k$ 는 k번째 분포의 공분산을 의미)
   > 
-  > → $P(X|Z) = \prod^K_{k=1} N(x|\mu_k, \sum_k)^{z_k}$
+  > → $P(X|Z) = \prod^K_{k=1} N(x|\mu_k, \sum_k)^{z_k}$  [by mean-field Assumption]
 
 <br>
 
@@ -188,15 +188,13 @@
   > 
   > - Parameter의 Randomize 화! 확률 분포를 지닌 random variable이다.   
 
-
-
 - [E- step]**각 $x_n$이 특정 Cluster에 속할 확률 계산하기 [$p(z_k=1|x_n)$ 구하기]**
   
   > $\gamma(z_{nk})$을 $p(z_k =1 |x_n)$ 이라 하자 
   > 
   > $\gamma(z_{nk}) = \frac{P(z_k=1) P(x_n|z_k=1)}{\sum^K_{j=1} P(z_j=1)p(x_n|z_j=1)}$     [by Law of total probability]
   > 
-  >               $= \frac{\pi_k N(x|\mu_k, \sum_k)}{ \sum^K_{j=1} \pi_i N(x|\mu_j, \sum_j)}$
+  >               $= \frac{\pi_k N(x_n|\mu_k, \sum_k)}{ \sum^K_{j=1} \pi_i N(x_n|\mu_j, \sum_j)}$
   > 
   > - 원하는 $\gamma(z_{nk})$ 를 계산할 수 있도록 맞춰서 함수의 형태를 구성했다. 
   > 
@@ -280,8 +278,6 @@
     
     > ex)- $P(x|\theta)$ 가 우리가 익히 아는 정규 분포, 이산 분포 등을 따르지 않는다
 
-
-
 - Evidence Lower bound를 통해 계산을 해준다. 자세한 것은 아래에 다시 설명. 
   
   > $P(X|\theta) = \sum_ZP(X,Z|\theta)$
@@ -298,8 +294,6 @@
   > 
   >                                                 $= \sum_Zq(Z) lnP(X,Z|\theta) - q(Z) lnq(Z)$
 
-
-
 - 또한 $P(X|\theta)$ 를 최적화 하는 것은 Latent variable Z가 있을 때,  $\sum_Z P(X,Z|\theta)$ 를 최적화하는 것과 동일하다.  이는 **편미분을 통해 최적값으로 업데이트 하는 것이 아닌, EM 또는 다른 번거로운 방법을 써야만 하는 이유**이다.
   
   > Latent variable이 존재해야한 하는 상황은 언제인가? 조건은 무엇인가? 
@@ -309,8 +303,6 @@
   > Latent Varible은 파라미터에 따라서 변화하며, 파라미터는 E에 따라 계속 변하기 때문?
   
   - 더 나아가, Latent Variable이 존재함에도 불구하고 EM, Evidence Low bound를 사용해야 하는데 사용 안했다면 잘못 접근한 것이다. 
-
-
 
 - 또한 likehood를 알기 위해 Log를 사용하면 미분이 잘 적용되지 않는다. 
   
@@ -343,14 +335,12 @@
   > > H(q) = $-\sum_Z P(Z) ln q(Z)$. Cross Entropy와 동일한 형태를 띈다. 
   > 
   > - $q(Z)$ 는 우리가 아는 분포이기 때문에 Sampling을 통한 근사값 계산이 가능하다. 
-  
-  
-  
-  > $Q(\theta, q) = E_{q(Z)} ln P(X,Z|\theta) + H(q)$
-  > 
-  > - $Q(\theta, q)$ 는 모든 q 분포에 성립하며, 이러한 분포를 우린 Posteriority(사후 확률)이라 한다. 
-  > 
-  > - 사후 확률은 Basian Network를 통해서 사전 확률로 바꿀 수 있다.
+
+> $Q(\theta, q) = E_{q(Z)} ln P(X,Z|\theta) + H(q)$
+> 
+> - $Q(\theta, q)$ 는 모든 q 분포에 성립하며, 이러한 분포를 우린 Posteriority(사후 확률)이라 한다. 
+> 
+> - 사후 확률은 Basian Network를 통해서 사전 확률로 바꿀 수 있다.
 
 <br>
 
@@ -422,8 +412,6 @@
   >   > 위의 식에서 X, Z를 모두 알고 있으니 $\theta$ 를 갱신할 준비가 되었다.
   >   > 
   >   > 주어진 X,Z 를 통해 $\theta$ 를 구하는 것은 Supervised learning 과 동일하다.
-  
-   
 
 --------------
 

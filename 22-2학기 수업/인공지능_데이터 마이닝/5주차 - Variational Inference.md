@@ -212,8 +212,6 @@
 >   
 >   → Meanfield 가정 하에 Closed form을 형성한다.
 
-
-
 <br>
 
 ##### Simple Example Model
