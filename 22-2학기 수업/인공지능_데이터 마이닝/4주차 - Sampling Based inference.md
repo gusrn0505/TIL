@@ -6,17 +6,21 @@
   
   > Why? 계산량이 얼마나 많길래? 
   > 
-  > Bayesian Inference Algorithm에서, Likilihood인 P(D|H) 와 Prior인 P(H)이 주어진다 하더라도 Evidence term에 대한 계산하기란 매우 어렵다. 즉, 목표인 Posterior을 구하는데 제한이 있다.
-  
-  > Evidence term : $\int_H P(D|H')P(H')dH'$
+  > - 파라미터 갱신 및 Posterior 값을 구하는 과정에서 많은 양의 계산 양을 필요로 한다. 
   > 
-  > Posterior = $\frac{Likelihood * Prior}{Evidence form}$
+  > - 1). 파라미터 갱신에는 미분값을 활용한다. 미분값 자체가 상수가 아닌 복잡한 형태로 나오는 함수의 경우, 조치가 필요하다.
+  > 
+  > - 2). Bayesian inference Algorithm에서 Evidence form을 계산하기가 매우 어렵다. 
+  >   
+  >   > Evidence term : $\int_H P(D|H')P(H')dH'$
+  >   > 
+  >   > Posterior = $\frac{Likelihood * Prior}{Evidence form}$
 
 - 그나마 ELBO method가 Feasible 하나 단점이 있다. 
   
   1. 직접적으로 Optimizing을 못한다.
   
-  2. Jensen's equaility & Variatinal Error(?) 로 Optimal Solution과 차이가 생긴다
+  2. Jensen's equaility & Mean-field assumption로 Optimal Solution과 차이가 생긴다
   
   3. <mark>Local Optima에서 못 빠져나온다.(- 모든 Gradient based method에게 해당)</mark>
 
@@ -44,7 +48,7 @@
   > 
   > - M이 작다면 중간에 p(x)와 Mq(x)가 겹치는 부분 이후는 고려하지 못한다. 
   > 
-  > - 왜냐하면, q를 nomal distribution으로 고려하며, 조건 식을 $u < \frac{p(x_{(i)})}{Mq(x_{(i)})}$ 로 두었기에 때문에, M이 충분히 크지 않다면 고려해야 하는 상황인데도 잘라버릴 수 있다. 
+  > - 왜냐하면, q를 nomal distribution으로 고려하며, accept 조건을 $u < \frac{p(x_{(i)})}{Mq(x_{(i)})}$ 로 두었기에 때문에, M이 충분히 크지 않다면 고려해야 하는 상황인데도 잘라버릴 수 있다. 
   >   
   >   ![](picture/4-2.png)[좌 : p(x), 우 : p(x)를 덮지 못한 m(qx)] 
   
@@ -56,7 +60,7 @@
 
 - VAE 등과 같이 현재에도 쓰이는 방법 
 
-- <u>Rejection 방법은 필요할 수도 있는 데이터를 버려 비효율성이 발생할 수 있다.</u> 
+- <u>Rejection 방법은 필요할 수도 있는 데이터를 버려 데이터 비효율성이 발생할 수 있다.</u> 
   
   - 즉, 데이터를 버리지 않으면서 각각의 중요도를 고려할 수 있는 방법이 필요 
   
@@ -66,13 +70,15 @@
   
   - 그러나 최종적으로 <u>우리의 목적은 Query에 대해서 Most Probable Answer을 하는 것을 목표</u>로 하며, 따라서 중간 단계로 **Expectation을 구하는 것을 목표로 한다.** 
   
-  - 즉, PDF를 굳이 만들기 위해 샘플링을 많이 하지 말고, **"샘플링 한 것을 버리지 않고서 Expectation을 구해볼 수는 없을까"** 가 해결하고자 하는 문제이다. 
-  
-  -> Expectation을 확장하여 고민해보자! 
+  - 즉, PDF를 굳이 만들기 위해 샘플링을 많이 하지 말고, **"샘플링 한 것을 버리지 않고서 Expectation을 구해볼 수는 없을까"** 는 관점에서 접근한다. 
+
+<br>
+
+- Expectation을 확장하여 고민해보자! 
   
   > $E_p(f(z)) = \int f(z)p(z)dz $
   > 
-  >                   $= \int f(z) \frac{p(z)}{q(z)} q(z) dz$   (= $E_q (f(z)\frac{p(z)}{q(z)})$)<mark>[like ratio trick]</mark>
+  >                   $= \int f(z) \frac{p(z)}{q(z)} q(z) dz$   (= $E_{q(z)} (f(z)\frac{p(z)}{q(z)})$)<mark>[like ratio trick]</mark>
   > 
   >                   $\sim \frac{1}{L} \sum_{l=1}^L \frac{p(z^l)}{q(z^l)}f(z^l)$ 
   
@@ -90,9 +96,13 @@
   > 
   > - P(z)의 값은 "like ratio trick" 을 통해 <u>q-sampling으로 변환시 계산가능</u>하다. 
   
-  > $P(z>1) = \int^\infin_1 1_{z>1} p(z) dz$
+  > $P(z>1) = E_{p(z)}[1_{z>1}] $ 
+  > 
+  >                    $= \int^\infin_1 1_{z>1} p(z) dz$
   > 
   >                    $= \int^\infin_1 1_{z>1} \frac{p(z)}{q(z)} q(z) dz$
+  > 
+  >                     $= E_{q(z)} [1_{z>1} \frac{p(z)}{q(z)}] $
   > 
   >                    $\sim \frac{1}{L} \sum^L_{l=1} \frac{p(z^l)}{q(z^l)} 1_{z^l>1}$
   > 
@@ -106,7 +116,7 @@
   
   - 단, 매우 작은 weight를 부여! 
   
-  - => IID 조건에서는 가장 효율적으로 정보를 사용하는 것일 것. 
+  - => IID 조건에서는 데이터 활용 측면에서 가장 효율적으로 정보를 사용하는 것일 것. 
 
 - 값이 이산인 경우에는 Likely load trick으로도 부르기도 한다. 
   
@@ -117,13 +127,18 @@
 ##### Markov Chain
 
 - **더 정보를 효율적으로 쓸 수 없을까? [문제]**
-
-- - I.I.D 조건은 과거/현재와의 관련이 없다 가정한다.**(=IID 조건은 현실과 맞지 않다)**
+  
+  - I.I.D 조건은 과거/현재와의 관련이 없다 가정한다.**(=IID 조건은 현실과 맞지 않다)**
+  
   - **=> 과거와 현재의 연관성을 받아들인 방법을 채택하자! - Markov Chain**
+
+
 
 *편의를 위해 이산 상황만 고려하겠음* 
 
 - Continuous 상황에서 Chaining하는 것이 Diffusion 모델이다. 
+
+<br>
 
 ##### Markov Chain의 특성
 
@@ -173,6 +188,8 @@
   > 
   > **→ Markov chain은 모든 State가 Ergodic 하면 Ergodic 하다고 할 수 있다.**
 
+<br>
+
 - **Graph Structure 구조를 통해 Markov Chain을 설명해보자**
   
   - Graph Structure 에는 Node와 Link를 가지고 있다. 
@@ -211,13 +228,15 @@
     
     - 각 Expectation을 구할 때 각 Value에 확률 값을 곱한 것을 합한다. 이는 확률에 맞춰 Sampling 하며, 모든 경우의 결과를 평균내는 것과 동일한 의미를 가진다. 
       
-      - 즉, 각 Value에 확률 값을 곱하는 것은, 확률 값에 맞춰 Sampling 하는 것과 동일하게 볼 수 있다. 
+      - 즉, 각 <u>Value에 확률 값을 곱하는 것은, 확률 값에 맞춰 Sampling 하는 것과 동일하게 볼 수 있다.</u> 
+
+<br>
 
 - **우리는 그럼 어떻게 Markov Chain을 Sampling에 사용할 수 있을까?**
   
-  - Markov Chain은 Prop(?) Distributin을 가지고 있다. 
+  - 현재 Graph의 Node 값은 시간이 흐름에 따라 달라지는 분포를 가지고 있다. 
   
-  - <mark>우리는 이 Prop distribution을 Stationary Distribution을 바꾸고 싶다.</mark>
+  - <mark>우리는 이 변하는 distribution을 Stationary Distribution을 바꾸고 싶다.</mark>
     
     - 어떤 Travel을 통해서 Stationary Distribution으로 바꿀 수 있을까? 
     
@@ -225,39 +244,51 @@
     
     → Travel을 모델링 하는 것은 어려우니, **목표인 Stationary 상황에서 역순으로 고려해보자!**
 
+<br>
+
 - **Limit Theorem of Markov Chain**
   
-  - 만약 Markov Chain 이 irreducible 하고 Ergodic 하다면, 
+  > Q. 애가 무슨 문제를 해결한 거지? $\pi_i$ 가 Stationary 한 속성을 띄도록 모델링! 
   
-  - **Stationary distribution $\pi$을 모델링함으로써 문제를 해결하자!**
+  - 만약 Markov Chain 이 irreducible 하고 Ergodic 하다면, **Stationary distribution $\pi$을 모델링함으로써 문제를 해결하자!**
   
   > $\pi_i$ : $lim_{n → \infin} T_{i,j}^{(n)} = \frac{1}{E[RT_i]}$. i node가 Stationary 상황 아래에서 존재할 확률
   > 
-  > - Irreducible 하기 때문에 RT의 존재는 보장된다. 또한 T가 주어지는 RT의 Expectation을 할 수 있겠다. 
-  >   
-  >   > *How? 무수히 많은 양의 샘플링을 통해서? 어떻게 Expectation을 한다는 거지? 결국 경험해봐야 하는 거잖아. 즉, Stationary까지 일단 무작정 뽑는 건가?* ㅇㅇㅇ 그런듯. 
-  >   > 
-  >   > 아 아래에서 $\pi$ 를 해석적으로 구하기 때문에 무작정 Sampling 안해도 될듯 
-  >   > 
-  >   > 아래 $RT_i$ 를 보면 Stationary할 때까지 뽑아야 하는 듯. 
+  > > $RT_i$ : 다시 원점으로 돌아오는 데 걸리는 시간 
   > 
+  > - Irreducible 하기 때문에 RT의 존재는 보장된다. 또한 T가 주어지는 RT의 Expectation을 할 수 있다. 
+  >   
+  >   > *How? 무수히 많은 양의 샘플링을 통해서? 어떻게 Expectation을 한다는 거지? 
+  >   > 
+  >   > 원점으로 돌아올때까지($T_{ii}  =! 0$) 계속 Transition matrix를 적용함. 
+  
   > - 위의 Expectation을 기반으로 $\pi_i$ 를 정의한다. 
   > 
   > > $RT_i$ : min{$n>0 : X_n =i | X_0 =i$}
-  > 
+  
   > - $\pi_i$ 는 아래 식에 의해서만 Uniquely determined 된다. 
   > 
-  > > $\pi_i >=0, \sum_{i \in S} \pi_i =1, \pi_j = \sum_{i \in S} \pi_i T_{i,j}$
+  > > $\pi_i >=0, \sum_{i \in S} \pi_i =1, \pi_j = \sum_{i \in S} \pi_i T_{i,j}$ **[Stationary 속성]**
   > > 
   > > T : Transition Matrix
   > > 
   > > - $\sum_{i\in S} \pi_i T_{i,j} $ 은 Node i가 모든 스테이트에서 Transition을 거쳐 j 로 이동하는 모든 경우를 고려한 것임. 즉, Transition을 1번, 2번, ... 무수히 거쳐서라도 j에 오는 경우까지 다 고려한 것
   > > 
   > > → 이때 위의 첨자 $(n)$ 이 사라져 있음. **즉, 아무리 Transition을 거쳐도 이 분포에서 벗어날 수 없음을 의미한다.** 
+  
+  
+  
+  > Station distribution인 $\pi_i$ 의  Support 영역은 sigma algebra를 따른다
   > 
-  > - Station distribution인 $\pi_i$ 의  Support 영역은 sigma algebra를 따른다(? )
-  >   
-  >   - 이걸 설명하려면 르벡 적분에 대해서 설명해야하니 Skip 
+  > > support : 확률 분포의 공간. $\Omega = \{x|\pi_i(s)=x, s \in S\}$ . S는 표본 공간
+  > > 
+  > > ![](./picture/4-25.png)
+  > 
+  > 이걸 설명하려면 르벡 적분에 대해서 설명해야하니 Skip
+
+
+
+<br>
 
 - **남은 문제는 아래 2가지다.** 
   
@@ -268,6 +299,8 @@
   2) $\pi$ 를 샘플링 할 수 있는 distribution의 형태로 만들 수 있을 것인가? 
      
      → Metropolis-Hastings Algorithm을 적용한다.
+
+<br>
 
 - 주어진 Transition Matrix T를 통해 $\pi_i$ 계산하는 방법 
   
@@ -291,11 +324,13 @@
     
     > <mark>Q. Inverse가 항상 존재하는 건가? 교수님께 질문 드려 보자!</mark>
     > 
-    > - 항상 Inverse가 존재하는 것이 아님! 
+    > - 항상 Inverse가 존재하는 것이 아님! 1 to 1 관계가 보장되어야 함 
     > 
     > - 하지만 Closed 형태로, 이전 단계로 돌아갈 수 있음이 보장된다면 존재!
     > 
     > → Markov chain이 irreducible하고 Ergodic하면 inverse가 보장됨! 
+
+<br>
 
 - 이때 두 가지 경우로 나눠짐. 
   
@@ -303,13 +338,13 @@
      
      - $\pi_j = \sum_{i \in S} \pi_i T_{i,j}$ 은 만족하나, Sum은 상태의 순서를 고려하지 않기 때문에 Balance가 안되어 있을 수 있다.
      
-     → 기존의 Stationary 만으로는 충분한 제한 조건이 되지 못한다.
+     → 기존의 Stationary 만으로는 충분한 제한 조건이 되지 못한다. 또는 <u>Stationary 자체만을 제한 조건을 수식화하기 어렵다. </u>
   
   2. **Stationary 하며, Balance 되어 있다.** 
      
      - 단, Balance 할 경우 반드시 Stationary를 보장한다. 
      
-     - → Balance는 Stationary보다 강한 조건으로, <mark>Balance 한 조건을 달성하면 목표로 하는 Stationary는 자동으로 달성하게 된다.</mark>
+     - → Balance는 Stationary보다 강한 조건으로, <mark>Balance 한 조건을 달성하면 목표로 하는 Stationary는 자동으로 달성</mark>한다.
 
 ----
 
@@ -343,7 +378,7 @@
   
   > 반대로, 초기값을 알면 충분히 Transition matrix를 통해 Travel 시켜 Stationary 하게 된다. 
   
-  - $z_t$ 의 다음 candidate 상태를 $z_*$ 라고 하자 
+  - $z_t$ 의 다음 candidate 상태를 $z^*$ 라고 하자 
     
     > $z^* \sim q(z^*|z^t)$ .
     > 
@@ -359,25 +394,32 @@
     
     > $q_t$ 를 수락하는가 Acceptance probability $\alpha$ 를 통해 결정한다. 
 
-<mark>→ 우리가 알아야 하는 것은 1) q-distribution, 2) $\alpha$ 를 알아야 함</mark> 
+- <mark>→ 우리가 알아야 하는 것은 1) q-distribution, 2) $\alpha$ 를 알아야 함</mark> 
+  
+  > 이때의 q-distribution은 앞서 Important Weight의 q-distirubution과는 다름 
 
-> 이때의 q-distribution은 앞서 Important Weight의 q-distirubution과는 다름 
 
-- Metropolis-Hastings Algorithm 
+
+<br>
+
+- **Metropolis-Hastings Algorithm** 
   
   - 새로운 ratio $r(z^*|z_t)$ 를 고려하자  
   
-  > $r(z^*|z_t) = \frac{q(z^t|z^*)P(z^*)}{q(z^*|z^t)P(z^t)}$.  [제한조건]
+  > $r(z^*|z^t) = \frac{q(z^t|z^*)P(z^*)}{q(z^*|z^t)P(z^t)} =$ q 분포에 따라 $\frac{z^* -> z^t}{z^t -> z^*}$ 될 확률.  [제한조건]
   > 
   > <mark>→ $r(z^*|z_t)$을 1로 보냄으로써 Balance 조건을 충족하겠다.</mark> 
-1) $r(z^*|z^t) <1 $ 일 때, $q(z^t|z^*)P(z^*) < q(z^*|z^t)P(z^t) $
+
+<br>
+
+1) $r(z^*|z^t) > 1 $ 일 때, $q(z^t|z^*)P(z^*) < q(z^*|z^t)P(z^t) $
    
    - <mark>$r(z^*|z^t)$ 의 값을 1로 보내기 위해서 $q(z^*|z^t)$ 을 줄인다.</mark>
    
    > $q(z^t|z^*), q(z^*|z^t)$ 두 값 중에서 우리는 후자만을 조정할 수 있다. 
    > 
    > 왜냐하면 우리가 조정 가능한 q-distribution은 과거($z^t$)에서 미래($z^*$)로 보낼 걸 제안하는 Proposal Transition으로, 수락 여부를 모르는 상태로 미래($z^*$) 에서 과거($z^t$)로 보내는 확률값을 건드릴 수 없다. 
-2. $r(z^*|z^t) > 1$ 일 때, $q(z^t|z^*)P(z^*) > q(z^*|z^t)P(z^t)$ 
+2. $r(z^*|z^t) < 1$ 일 때, $q(z^t|z^*)P(z^*) > q(z^*|z^t)P(z^t)$ 
    
    - <mark>$r(z^*|z^t)$ 의 값을 1로 보내기 위해서 $q(z^*|z^t)$ 을 키운다.</mark>
    
@@ -385,9 +427,12 @@
    
    - 일반적으로 Gausian distibution을 가정한다.
    
-   - 단, 과거의 정보를 기반으로 현재의 정보를 업데이트 할 수 있도록 설정한다. 
+   - 단, 과거의 정보로 현재의 정보를 업데이트 할 수 있도록 설정한다[Markov Chain]. 
    
    > ex- 과거의 평균값, 분산값을 현재, 다음 단계에 반영해준다. 
+
+<br>
+
 - **위의 q-distribution의 조건은  $\alpha(z^*|z^t) $의 값을 조정함으로써 달성한다.** 
   
   - $r(z^*|z^t) >1$ 상황이 의미하는 것은 $z^t → z^*$로 보내는 확률 값이 반대보다 더 크다는 의미이다. 
@@ -440,13 +485,19 @@
   
   - 또한 우리가 진정으로 구하고자 하는 건 <u>unobserved data의 분포인 p</u>이다. 
   
-  → Gibbs Sampling을 통해서 $\alpha$ 를 없애면서도 p 자체에 대해 Directly 구해보자
+  → **Gibbs Sampling을 통해서 $\alpha$ 를 없애면서도 p 자체에 대해 Directly 구해보자**
+
+
+
+<br>
 
 - $z^t$ 다음과 같이 정의해보자 
   
   > $z^t = (z^t_k, z^t_{-k}) → z^* = (z^*_k, z^t_{-k})$
   > 
   > > $z_{-k} : z_k$ 외에 다른 모든 것. k dim, 그리고 아닌 것들 둘로만 고려하자!
+  > > 
+  > > k-dim의 값만을 업데이트 해줄 것이다. 
   > 
   > - $z^t$ 모두를 표현하기는 어려우니까, 하나의 Latent variable만 표현하자!
   > 
@@ -460,7 +511,9 @@
   > 
   > <mark>→ $\alpha$ 도입 없이도 항상 Balance 조건을 성립한다!</mark> 
 
-- **즉, 전체를 업데이트하는 것이 아니라 한 dim만 업데이트를 한다면 언제든 가능하다.**
+<br>
+
+- **즉, 한 dim만 업데이트를 한다면 Balance 조건은 언제나 성립한다.**
   
   - 이를 Markov Blanket과 활용하여, 업데이트 하고자 대상과 관련된 것만 Sampling함으로써 값을 업데이트 할 수 있다. 
     
@@ -478,7 +531,15 @@
   
   - 예전에는 z의 값은 deterministic 하게 정했다(most assignment value).
   
-  - 하지만 Stocastic하게 했을 때 다른 값을 가질 경우가 생김. 그 결과 학습 속도는 느려질 순 있지만, 여러 가능성을 고려하여 잠재성이 더 있다.   
+  - 하지만 Stocastic하게 했을 때 다른 값을 가질 경우가 생김. 그 결과 학습 속도는 느려질 순 있지만, 여러 가능성을 고려하여 잠재성이 더 있다.  
+
+
+
+Q. Gibbs와 VI 의 주요 차이점 중 하나는 Exact 하냐 아니냐였다. 
+
+- 그런데 Gibbs로 Sampling을 하기 때문에 실제 분포에 근사하는 것이다. 
+
+- 이때 Sampling 과정에서 생기는 오차 값은 허용해주는 건가? Bias가 0이니까? 
 
 ----
 
@@ -547,6 +608,8 @@
       
       ![](picture/4-14.png)
 
+<br>
+
 - $P(W,Z;\alpha, \beta)$를 계산하자! 
   
   > 두 부분으로 나눠 계산한다.
@@ -587,7 +650,9 @@
   > 
   > - Normalize 부분은 $\alpha$ 상수로 둬 계산에서 제거해줄 수 있다.(Variable Elimination) 
   > 
-  > > 여기서 분모 부분이 상수가 맞나? 다 관찰된 값이라 상수로 둬도 되는 건가?
+  > > 다 관찰된 값이라 상수로 둬도 되는 건가? oo
+
+<br>
 
 - 지금까지 구한 $P(W,Z; \alpha, \beta)$ 와 $P(Z_{(m,l)} = k, Z_{-(m,l)}, W; \alpha, \beta) $ 를 Gibbs Sampling에 맞게 조정해준다. 
   
@@ -613,11 +678,17 @@
   > 
   > → 이후에는 Gibbs Sampling을 여럿 적용하여 Statinary distribution을 구할 것이다.
 
-- 위의 과정으로 우리는 2가지 특성을 확인할 수 있다. 
+
+
+<br>
+
+- **위의 과정으로 우리는 2가지 특성을 확인할 수 있다.**
   
   1. 새로운 데이터를 받아들이며 Bayesian Frame을 활용하여 Posterior distribution을  업데이트하는 Mechanism이다.
   
   2. 이전 데이터를 활용한다는 점에서 MCMC임을 확인할 수 있다. 
+     
+     > MCMC가 맞나? MC 아닌가? 
      
         
 
@@ -625,7 +696,7 @@
 
 **Sampling 방식의 의의** 
 
-1. Smapling 방식은 Black box를 다룰 수 있다. 
-- V.I는 Likelihood를 필요로 한다.
+1. <mark>Smapling 방식은 Black box를 다룰 수 있다. </mark>
+- V.I는 Likelihood를 필요로 한다.    
 2. Diffusion problem에선 Sample efficiency가 낮다. 
-- 즉, Efficient sampler design을 위해서 Sampling method를 이용할 수 있다.
+- 즉, <mark>Efficient sampler design을 위해서 Sampling method를 이용할 수 있다.</mark>
