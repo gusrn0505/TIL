@@ -132,8 +132,6 @@
   
   - **=> 과거와 현재의 연관성을 받아들인 방법을 채택하자! - Markov Chain**
 
-
-
 *편의를 위해 이산 상황만 고려하겠음* 
 
 - Continuous 상황에서 Chaining하는 것이 Diffusion 모델이다. 
@@ -275,18 +273,14 @@
   > > - $\sum_{i\in S} \pi_i T_{i,j} $ 은 Node i가 모든 스테이트에서 Transition을 거쳐 j 로 이동하는 모든 경우를 고려한 것임. 즉, Transition을 1번, 2번, ... 무수히 거쳐서라도 j에 오는 경우까지 다 고려한 것
   > > 
   > > → 이때 위의 첨자 $(n)$ 이 사라져 있음. **즉, 아무리 Transition을 거쳐도 이 분포에서 벗어날 수 없음을 의미한다.** 
-  
-  
-  
-  > Station distribution인 $\pi_i$ 의  Support 영역은 sigma algebra를 따른다
-  > 
-  > > support : 확률 분포의 공간. $\Omega = \{x|\pi_i(s)=x, s \in S\}$ . S는 표본 공간
-  > > 
-  > > ![](./picture/4-25.png)
-  > 
-  > 이걸 설명하려면 르벡 적분에 대해서 설명해야하니 Skip
 
-
+> Station distribution인 $\pi_i$ 의  Support 영역은 sigma algebra를 따른다
+> 
+> > support : 확률 분포의 공간. $\Omega = \{x|\pi_i(s)=x, s \in S\}$ . S는 표본 공간
+> > 
+> > ![](./picture/4-25.png)
+> 
+> 이걸 설명하려면 르벡 적분에 대해서 설명해야하니 Skip
 
 <br>
 
@@ -398,8 +392,6 @@
   
   > 이때의 q-distribution은 앞서 Important Weight의 q-distirubution과는 다름 
 
-
-
 <br>
 
 - **Metropolis-Hastings Algorithm** 
@@ -487,8 +479,6 @@
   
   → **Gibbs Sampling을 통해서 $\alpha$ 를 없애면서도 p 자체에 대해 Directly 구해보자**
 
-
-
 <br>
 
 - $z^t$ 다음과 같이 정의해보자 
@@ -532,8 +522,6 @@
   - 예전에는 z의 값은 deterministic 하게 정했다(most assignment value).
   
   - 하지만 Stocastic하게 했을 때 다른 값을 가질 경우가 생김. 그 결과 학습 속도는 느려질 순 있지만, 여러 가능성을 고려하여 잠재성이 더 있다.  
-
-
 
 Q. Gibbs와 VI 의 주요 차이점 중 하나는 Exact 하냐 아니냐였다. 
 
@@ -677,8 +665,6 @@ Q. Gibbs와 VI 의 주요 차이점 중 하나는 Exact 하냐 아니냐였다.
   > - 계산 과정은 각각의 상황에서 Counting 하는 형태로 구할 수 있음. 
   > 
   > → 이후에는 Gibbs Sampling을 여럿 적용하여 Statinary distribution을 구할 것이다.
-
-
 
 <br>
 

@@ -269,6 +269,9 @@
   > 우리가 알고 싶은 값을 계산하기 위해서, 알고 있는 값들을 활용할 수 있다. 
   > 
   > 확률 값을 Full joint 형식으로 바꾼 다음에 Condi independence 조건을 통해서 계산을 간편화할 수 있다. 
+
+<br>
+
 1. **Likelihood 계산 ($p(x_v)$)**
    
    > <mark>$P(X_V) = \sum_{X_H} P(X_H, X_V) = \sum_{x_1}... \sum_{x_k}P(x_1, ..., x_k, X_V)$</mark>
@@ -298,6 +301,8 @@
    > > Y : interested hidden variables 
    > > 
    > > Z : uninterested hidden variable 
+
+<br>
 
 3. **Contidionmal probability 중 argmax 값 찾기**
 
@@ -391,22 +396,20 @@
   > > **Potential Function on Link**: $\phi(b), \phi(c)$
   > 
   > > Q. 흠.. 노드와 링크를 다른 형태로도 표현해줄 수 있을 텐데 이렇게 정의한 이유가 있나?  
-  
-  
-  
-  > Potential functions on Node에서 방향성을 제거하며, Clique만 탐색하게 설정
-  > 
-  > > Q. 흠.. 조건부 확률은 방향성이 있는데 어떻게 방향성을 제거해주는 거지? 
-  > 
-  > > Clique : Graph간 Fully Connectd 된 Component 들의 집합 
-  > > 
-  > > Separator : 각 Clique 사이에서 Intersection을 의미. 공통 요소 외의 나머지에 대해 $\psi$를 Marginalization 하여 구할 수 있음. 
-  > > 
-  > > - (A,B) 에서 A를, (B,C) 에서 C를 Marginalization 한 것은 같아야 한다. 
-  > 
-  > 여기서 (B,C) Clique에서 B값이 갱신이 된다면, B / (A,B) 방향으로 값 갱신이 일어난다. <mark>(Message passing)</mark>
-  > 
-  > - **Clique 상황에서의 Inference를 "Message passing" 이라고 한다.**
+
+> Potential functions on Node에서 방향성을 제거하며, Clique만 탐색하게 설정
+> 
+> > <mark>Q. 흠.. 조건부 확률은 방향성이 있는데 어떻게 방향성을 제거해주는 거지?</mark> 
+> 
+> > Clique : Graph간 Fully Connectd 된 Component 들의 집합 
+> > 
+> > Separator : 각 Clique 사이에서 Intersection을 의미. 공통 요소 외의 나머지에 대해 $\psi$를 Marginalization 하여 구할 수 있음. 
+> > 
+> > - (A,B) 에서 A를, (B,C) 에서 C를 Marginalization 한 것은 같아야 한다. 
+> 
+> 여기서 (B,C) Clique에서 B값이 갱신이 된다면, B / (A,B) 방향으로 값 갱신이 일어난다. <mark>(Message passing)</mark>
+> 
+> - **Clique 상황에서의 Inference를 "Message passing" 이라고 한다.**
 
 <br>
 

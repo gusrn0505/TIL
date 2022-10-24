@@ -6,7 +6,9 @@
 
 2. Mean-field auumption 
    
-   => Variational inference를 쓰는 많은 논문에서 Theoritically 보이려면, 언제 위의 2개의 조건이 Tight 해질 수 있는가를 다뤄야만 한다. 
+   => Variational inference를 쓰는 많은 논문에서 이론적으로 정확도를 높이기 위해선, 언제 위의 2개의 조건이 Tight 해질 수 있는가를 다뤄야만 한다. 
+
+<br>
 
 ##### Variational Inference 라고 이름붙인 이유는 무엇인가?
 
@@ -16,6 +18,8 @@
   
   - 가능하다! <u>"특정 x의 위치에 한해"</u> 접선은 <u>Concave/convex 함수</u>와 동일하다.
     
+    > <Legendre Transformation 예시>
+    > 
     > f = lnx
     > 
     > y = $min_x(\lambda x + b - lnx)$
@@ -24,15 +28,19 @@
     > > 
     > > $\lambda = \frac{1}{x}$
   
-  - 비선형 함수를 이에 근사하는선형 함수로 간편하게 만들 수 있다. 단, 이때 $\lambda$ 라는 새로운 parameter을 추가하게 된다. 
+  - 비선형 함수를 이에 근사하는 선형 함수로 간편하게 만들 수 있다. 단, 이때 $\lambda$ 라는 새로운 parameter을 추가하게 된다. 
   
   <mark>→ 즉, 파라미터를 1개 내어주는 대신 모델의 Complexity를 낮출 수 있다.</mark> 
   
   > 이때 추가하는 Parameter(- $\lambda$)를 Variational parameter이라고 한다. 
 
-- 만약 Nonlinear 함수가 Concave/Convex가 아니라도 조치해줄 수 있다. 
+- 만약 Nonlinear 함수가 Concave/Convex가 아니라도 조치해줄 수 있다.
   
   - 함수에 Log를 씌움으로써 항상 Concave/Convex하게 만들어 줄 수 있다.
+    
+    > Q. Log를 씌어도 Concave/Convex 하지 않을 땐 어떻게 하나? 
+    > 
+    > ex)- $e^{(x-1)(x-2)(x-3)}$ log를 씌어도 1~3 구간에서 성립하지 않는다. 
   
   - 물론 이때 접선의 방정식에도 log를 씌워줘야 한다. 
 
@@ -67,6 +75,10 @@
   > $P(S) = \prod_iP(S_i|S_{\pi(i)}) <= \prod_i P^U(S_i|S_{\pi(i)}, \lambda^U_i)$
   > 
   > 이처럼 형태를 바꾸는 것을 **Variational Transform**이라 한다.
+  > 
+  > > Q. $P^U$ 에서의 U의 의미가 뭐지?  
+  > > 
+  > > 르장도르 변환한 것과 아닌 것을 구분하는 목적인듯 하다! 
   
   > $P(E) = \sum_H P(H,E) = \sum_HP(S)$ 
   > 
@@ -88,9 +100,11 @@
   > 
   >                     $= E_{Q(H|E)}lnP(E|H) - KL(Q(H|E)||P(H))$
   > 
-  > > $KL(Q||P) = -\sum_iQ(i) ln [\frac{P(i)}{Q(i)}]$ $= \sum_{Q(H|E)} \frac{lnQ(H|E)}{lnP(H)}$
+  > > $KL(Q(H|E)||P(H)) = -\sum_iQ(i) ln [\frac{P(i)}{Q(i)}]$ $= \sum_{Q(H|E)} \frac{lnQ(H|E)}{lnP(H)}$
   > > 
-  > > Q : Variational distribution 
+  > > $Q(i)$ : Variational distribution 
+  > 
+  > > $L$
   > 
   > <mark>Q에 대해 어떤 가정을 하느냐에 따라 2차 Vatriational Gap이 발생한다. </mark>
   > 
@@ -106,29 +120,33 @@
   
   > $L(\lambda, \theta) = \sum_H Q(H|E, \lambda) lnP(H,E|\theta) - Q(H|E, \lambda) lnQ(H|E, \lambda)$
   > 
-  > > $P(H,E|\theta) = P(H|\theta) 인가?$ 어차피 E는 observed data라 큰 상관은 없는 듯 함. 
+  > >  여기서 $L(\lambda, \theta)$ 는 Lower bound를 의미함. 
+  > > 
+  > > $lnP(E|\theta) >= L(\lambda, \theta)$ 
   > 
-  > > Q. $\lambda$와 $\theta$ 사이에는 어떤 차이가 있나? 
+  > > $\lambda$ 는 실제 값와 근사의 차이를 줄이는 Hypothesis의 파라미터, 또는 Variational parameter
   > > 
-  > > $\lambda$ 는 실제 값와 근사의 차이를 줄이는 Hypothesis의 파라미터
-  > > 
-  > > $\theta$ 는 실제값의 Parameter을 의미하나? 즉, P의 patameter 인듯 
+  > > $\theta$ 는 실제 P의 patameter 인듯 
 
 <br>
 
-- 방법은 크게 **2가지**가 있다.
-  
-  1. **Q의 pdf 구조를 잘 구성하여 P의 inference를 잘 구할 것**
-  
-  2. **Variational parameter $\lambda$를 잘 선정하는 것** 
+##### 방법은 크게 **2가지**가 있다.
 
-- Example 1 - Suppose $Q(H|E, \lambda) = P(H|E, \theta)$
+1. **P와 동일하게 inference를 할 수 있도록 Q의 pdf 구조를 잘 구성할 것**
+
+2. **Variational parameter $\lambda$를 잘 선정하는 것** 
+
+<br>
+
+- **Q의 PDF 구조 모델링** : Suppose $Q(H|E, \lambda) = P(H|E, \theta)$
   
   > lnP(E|$\theta$) >= $\sum_H Q(H|E, \theta) ln \frac{P(H,E|\lambda)}{Q(H|E, \lambda)}$ 
   > 
   >  = $\sum_H P(H|E, \theta) ln \frac{P(H,E|\theta)}{P(H|E, \theta)}$  <mark>*[$Q(H|E, \lambda) = P(H|E, \theta)$]</mark>
   > 
-  > ![](file://C:\Users\user\Desktop\TIL\22-2학기 수업\인공지능_데이터 마이닝\picture\5-1.png?msec=1664838787315)
+  > ![](.\picture\5-1.png)
+  > 
+  > > $ln[P(H|E, \theta)P(E|\theta)] - lnP(H|E,\theta) = lnP(E|\theta)$
   
   - 1). 이 경우 Q 분포의 inference는 P와 동일하다.
     
@@ -140,9 +158,23 @@
     
     > ![](picture/5-3.png)
     > 
-    > Entropy P : $H(q) = - \sum_z q(Z) lnq(Z) = -E_{q(Z)} lnq(Z)$ 
+    > Entropy P : $H(q) = - \sum_z q(Z) lnq(Z) = -E_{q(Z)} lnq(Z)$
     > 
     > $L(\theta, q)$ : log p inference - KL term(q(z), P(Z|X, $\theta$)
+    > 
+    > <mark>Q. 이 $L(\theta, q)$ 는 어디에서 온 건가?</mark> 먼저 Loss 인가, Lower bound 인가?
+    > 
+    > - 앞에서는 $KL(Q(Z|X)|| P(Z))$ 를 구했는데, 왜 여기선 $KL(Q(Z), P(Z|X, \theta))$ 로 사용하는 건지? 
+    > 
+    > - 둘의 값이 같은 것도 아닌데, 왜 바꿔준 거지? 
+    > 
+    > $lnP(X) >= \sum_z q(z|x) ln(\frac{p(x,z)}{q(z|x)})$
+    > 
+    >                     $= \sum_z [q(z|x) lnP(x) - q(z|x) ln(\frac{q(z|x)}{p(z|x)})]$
+    > 
+    >                     $= lnP(x) - \sum_zq(z|x) ln(\frac{q(z|x)}{p(z|x)})$
+    > 
+    > 여기서 $q(z|x)$ 은 $q(z)$ 와 다르다. 그런데 위의 $L(\theta, q)$ 는 갑작스레 $q(z)$ 로 바꿔서 사용하지? z와 x가 indep 을 보장 못해줄 텐데. 
     
     - 우린 q(Z)에 대한 정보 없이는 $Q(\theta, q)$를 최적화할 수 없다. 
     
@@ -178,41 +210,49 @@
   
   - 다른 가정을 기반으로 해도 됨(ex- HMM 에서 Emission 간의 연결성만 끊음)
 
-> $L(\lambda, \theta)$ 에 Meanfield Assumption을 가정하자 
-> 
-> ![](picture/5-5.png)
-> 
-> ![](picture/5-10.png)
-> 
-> - $\theta$는 M-step에서 일어나며, h가 다 known 상태이기 때문에 발전 가능성이 없다. 
-> 
-> - 따라서 <u>$\lambda$ 를 Optimization 함으로써 모델을 발전시킬 것</u>이다.
+<br>
 
-> $\lambda_j$ 에 대한 값으로 뽑아내자! 
-> 
-> ![](picture/5-6.png)
-> 
-> - Gibbs sampling을 위한 조건 마련을 위해, "i <= |H|" 을 1) $H_{-j}$ 와 2) $H_j$ 로 나눠준다. 
->   
->   > $\sum_H \prod_{i<= |H|} q_i(H_i|E,\lambda_i)$ 
->   > 
->   > = $\sum_{H_j}$ <mark>$q_j(H_j|E,\lambda_j) [\sum_{H_{-j}}\prod_{i <= |H|, i \neq j} q_i(H_i|E,\lambda_i)]$</mark>
-> 
-> - 계산을 편하게 하기 위해 $ln \tilde P(H,E|\theta)$ 을 설정한다.  
->   
->   > ![](picture/5-7.png)
->   > 
->   > C : $\lambda_j$ 가 속해있지 않은 나머지 값 들. derivative를 계산할 때 사라진다. 
-> 
-> - 마지막 식에서 rate-like trick을 통해서 Differentiation 없이 Sampling으로 계산할 수 있다.
->   
->   > ![](picture/5-8.png)
-> 
-> - i <= |H| 을 $H_j$, $H_{-j}$ 로 나눠서 고려했기에  <mark>Gibbs sampling </mark>이 가능하다.
->   
->   → Meanfield 가정 하에 Closed form을 형성한다.
+- $L(\lambda, \theta)$ 에 Meanfield Assumption을 가정하자 
+  
+  > ![](picture/5-5.png)
+  > 
+  > ![](picture/5-10.png)
+  > 
+  > $\theta$는 M-step에서 일어나며, 따로 조작하여 최적화할 것이 없다.  
+  > 
+  > 따라서 <u>$\lambda$ 를 최적화함으로써 모델을 발전시킬 것</u>이다.
+
+- $\lambda_j$ 에 대한 값으로 뽑아내자! 
+  
+  > ![](picture/5-6.png)
+  > 
+  > Gibbs sampling을 위한 조건 마련을 위해, "i <= |H|" 을 1) $H_{-j}$ 와 2) $H_j$ 로 나눠준다. 
+  > 
+  > > $\sum_H \prod_{i<= |H|} q_i(H_i|E,\lambda_i)$ 
+  > > 
+  > > = $\sum_{H_j}$ <mark>$q_j(H_j|E,\lambda_j) [\sum_{H_{-j}}\prod_{i <= |H|, i \neq j} q_i(H_i|E,\lambda_i)]$</mark>
+  > 
+  > $C = -\sum_{H_{-j}} q_i(H_i|E, \lambda_i)\prod_{j<=|H|, i =!j} q_i(H_i|E,\lambda_i) (\sum_{k=!j, k<=|H|} ln q_k(H_k|E, \lambda_k))$
+  > 
+  > - $\lambda_j$ 가 속해있지 않은 나머지 값으로, derivative를 계산할 때 사라진다. 
+  
+  > 계산을 편하게 하기 위해 $ln \tilde P(H,E|\theta)$ 을 설정한다.  
+  > 
+  > > ![](picture/5-7.png)
+  > 
+  > 마지막 식에서 rate-like trick을 통해서 Differentiation 없이 Sampling으로 $L_{\lambda_j}$ 를 계산할 수 있다.
+  > 
+  > > ![](picture/5-8.png)
+
+- i <= |H| 을 $H_j$, $H_{-j}$ 로 나눠서 고려했기에  <mark>Gibbs sampling </mark>이 가능하다.
+  
+  > 
+
+> → Meanfield 가정 하에 Closed form을 형성한다.
 
 <br>
+
+ -------
 
 ##### Simple Example Model
 
@@ -224,7 +264,7 @@
 >   
 >   > $\sum_{i=1}^n X_i \sim Gam(\sum_i^n k_i, \lambda)$
 >   > 
->   > 즉, independent 한 각 hidden variable의 합은 gamma 분포를 따라서 
+>   > independent하며 Exponential 분포를 따르는 각 hidden variable의 합은 gamma 분포를 따른다. 
 
 > Mean field Assumption 아래에서, 
 > 
@@ -348,7 +388,7 @@
   > 
   > $q(\theta, z) = q(\theta, z | \gamma, \phi)$. - 2번째 줄 
   > 
-  > - <mark>Why? $\lambda$와 H가 독립이라는 건가? 성립안하지 않나?</mark>
+  > - <mark>Q. Why? $\lambda$와 H가 독립이라는 건가? 성립안하지 않나?</mark>
   > 
   > - 오타인가..? $q(\theta, z) $ 가 아니라 $q(\theta, z|\gamma, \phi)$ 로 내려와야 함 
   > 
@@ -360,15 +400,17 @@
     
     이젠 ELBO를 maximize 해서 MLE를 구하자!
     
-    > Q. Free-form optimization이 뭐지..? E-M Step을 말하는 것 같기도 하고 
+    > <mark>Q. Free-form optimization이 뭐지..?</mark> E-M Step을 말하는 것 같기도 하고 
 
-###### Derivation of $E_q(logP(\theta|\alpha))$ 구하기
+<br>
+
+##### Derivation of $E_q(logP(\theta|\alpha))$ 구하기
 
 ![](picture/5-23.png)
 
-- 여기서 우린 $logP(\theta| \alpha), logP(z|\theta), logP(w|z,\beta)$ 의 기댓값을 각각 구해야 한다.
-  
-  - 물론 $H(q) $까지!
+- $logP(\theta| \alpha), logP(z|\theta), logP(w|z,\beta)$ 의 기댓값과 H(q)를 각각 구해야 한다.
+
+<br>
 
 - $E_q(logP(\theta|\alpha))$ 구하기 
   
@@ -376,13 +418,15 @@
   
   > $x_i : \theta_{d,i}$
   
-  ![](picture/5-24.png)
-  
-  > ![](picture/5-26.png)
-  > 
-  > - mean-field assumption을 통해서 $q(\theta,z|\gamma, \phi) = q(\theta|r)q(z|\phi) $ 로 바꿈. 
-  > 
-  > - 또한 $q(z|\phi)$ 는 $log(\theta_{d,i})$ 와 관련성이 없어서 상수 취급해줄 수 있음.  
+  - 각 분포를 대입해준다.
+    
+    > ![](picture/5-24.png)
+    > 
+    > ![](picture/5-26.png)
+    > 
+    > - mean-field assumption을 통해서 $q(\theta,z|\gamma, \phi) = q(\theta|r)q(z|\phi) $ 로 바꿈.
+    > 
+    > - 또한 $q(z|\phi)$ 는 $log(\theta_{d,i})$ 와 관련성이 없어서 상수 취급해줄 수 있음.  
   
   - 이제 $E_q(logP(\theta|\alpha))$ 에 대해서 미분을 통해 최댓값을 찾을 것임 
     
@@ -400,9 +444,13 @@
     > 
     > > $\Gamma(z) = \int_0^\infin t^{z-1} e^{-t} dt$
   
-  ![](picture/5-29.png)
-  
-  > $E_q(log \theta_{d,i})$ 을 계산한 것을 처음 식에 대입
+  - 값들 정리해주기
+    
+    > ![](picture/5-29.png)
+    > 
+    > $E_q(log \theta_{d,i})$ 을 계산한 것을 처음 식에 대입
+
+<br>
 
 - $E_q(logP(\theta|\alpha))$ 구하기! 
   
@@ -434,7 +482,7 @@
   
   - 각각에 대한 미분 과정은 Youtube의 교수님 강의 참고하기! 
   
-  - 4개의 변수 중 $\alpha$ 만큼은 미분의 값을 0으로 만들수가 없다. 따라서 Netwon-Rhapson method를 통해 해결한다. 
+  - <u>4개의 변수 중 $\alpha$ 만큼은 미분의 값을 0으로 만들수가 없다. 따라서 Netwon-Rhapson method를 통해 해결한다. </u>
     
     ![](picture/5-38.png)
     
@@ -446,19 +494,23 @@
     
     - 즉, $\gamma, \phi$는 끝까지 계산하지 않아도 된다. 
 
+<br>
+
 - 만약 우리가 계산을 정확히, tight 하게 하고 싶다면 "Held-out log likelihood"를 계산하면 된다. 
 
-- $\beta$ 업데이트 해주기 
+<br>
+
+- **$\beta$ 업데이트 해주기**
   
   - 각 파라미터를 update 할 때 $\beta_{i,v}$ 가 $\sum^M_{d=1} \sum^N_{n=1}$ 으로 인해 계산양을 엄청 많이 사용한다.
     
     - d에 대해서 Batch를 뽑아 Sampling으로 Stochastic infernce를 구해준다.
     
     - 이건 근사이나 Gradient estimate bias가 없기 때문에 더 좋다.
-    
-    - 반면 모든 경우를 고려할 때 local optima에 빠지면 헤어나오지 못해 성능이 낮다.
-    
-    → 성능도 좋아지고, 속도도 빠른 이 방식을 사용 안할리가 없다!
+      
+      - 반면 모든 경우를 고려할 때 local optima에 빠지면 헤어나오지 못해 성능이 낮다.
+      
+      - <mark>→ 성능도 좋아지고, 속도도 빠른 이 방식을 사용 안할리가 없다!</mark>
   
   - 단, Stochastic 하게 뽑는 것이기 때문에 분산이 증가할 수 있다. 
     
@@ -474,7 +526,9 @@
 
 - 2002 ~ 2010 까지는 GIbs sampler가 많이 사용되었음 
   
-  - Gap이 존재하지 않아 Exact 함 
+  - Gap이 존재하지 않아 Exact 함. 
+    
+    - (Sampling으로 인한 오차는 어쩔 수 없어서 무시하는 듯) 
   
   - Gibs가 VI 보다 모델을 향상시키기 쉬웠기 때문에 발전되는 속도가 빨랐다. 
   

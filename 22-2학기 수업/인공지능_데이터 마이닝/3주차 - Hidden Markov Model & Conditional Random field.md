@@ -138,8 +138,6 @@
   > > 
   > > P(A,B,C,D) = P(A,C) P(D|A,C) P(B|A,C,D)
   
-  
-  
   > **By Markov Blanket,**
   > 
   > - C($z_{t-1}$)이 관측될 때 A와 D는 condi Indep :  $P(D|A,C) = P(D|C))$
@@ -153,7 +151,7 @@
   > >                $=\sum_C P(A,C)P(D|C)P(B|D)$
   > > 
   > >                $= P(B|D) \sum_CP(A,C)P(D|C)$ 
-  > 
+  
   > Since P(D) = $b_{z_t, x_t}$  & P(D|C)= $P(z_t|z_{t-1}) =a_{z_{t-1}, z_{t}}$ 
   > 
   > > let P(A,C) = $\alpha^k_{t-1}$
@@ -161,18 +159,16 @@
   > > Since B is condi indep with A,C. P(A,B,D) = $\alpha_t^k$
   > > 
   > > <mark>P(A,B,D) = $\alpha_t^k = b_{z_t =k, x_t} \sum_i \alpha_{t-1}^i a_{i,k}$ </mark>
-  > 
+  
   > a,b, Observed Data X가 주어졌을 때 P($z_t^k$|X)는 아래와 같다. 
   > 
-  > > P($z_t^k|X$) = P($z^k_t, X$) / P(X)
-  > > 
-  > >                 = $\alpha_t^k /P(X)$   
+  > P($z_t^k|X$) = P($z^k_t, X$) / P(X)
   > 
-  > > 또한 <mark>$\alpha_t^k$ 를 구할 때, $\alpha^i_{t-1}$ 만 알고 있다면 Lineal 한 계산양을 필요로 </mark>한다.
-  > > 
-  > > Q. P(X)는 어떻게 구하나? 
-
-
+  >                 = $\alpha_t^k /P(X)$   
+  
+  > 또한 <mark>$\alpha_t^k$ 를 구할 때, $\alpha^i_{t-1}$ 만 알고 있다면 Lineal 한 계산양을 필요로 </mark>한다.
+  > 
+  > Q. P(X)는 어떻게 구하나? 
 
 <br>
 
@@ -320,6 +316,8 @@
   
   - 한편으론 우린 인과관계(Direct-direction) 보다 <u>각 사건 간의 관련성 또는 독립성에 더 관심이 많다</u>. 
 
+<br>
+
 - **Markov random field** - in Undirected graphical model 
   
   - 정의 : Undirected graphical model G 에서 각각의 노드 $x_i$ 의 확률 분포
@@ -386,7 +384,7 @@
   
   - Deep learning의 특성과 CRF의 특성은 겹치는 면이 있어 상호보완적으로 사용되었다. **Transfomer가 등장하기 전까지..**
     
-    > Q. Transfomer가 어떤 역할을 하길래? 
+    > <mark>Q. Transfomer가 어떤 역할을 하길래?</mark> 
     
     - 모델 구조 : CRF 가정은 DL의 Logistic activation function dml Neuron과 유사
     
