@@ -38,7 +38,7 @@
   
   - 함수에 Log를 씌움으로써 항상 Concave/Convex하게 만들어 줄 수 있다.
     
-    > Q. Log를 씌어도 Concave/Convex 하지 않을 땐 어떻게 하나? 
+    > <mark>Q. Log를 씌어도 Concave/Convex 하지 않을 땐 어떻게 하나? </mark>
     > 
     > ex)- $e^{(x-1)(x-2)(x-3)}$ log를 씌어도 1~3 구간에서 성립하지 않는다. 
   
@@ -104,7 +104,7 @@
   > > 
   > > $Q(i)$ : Variational distribution 
   > 
-  > > $L$
+  > > $Lower bound$ 는 Q를 어떠한 형태로 정의하는가, joint probablilty를 어떻게 풀어내는가, log 항을 어떻게 나누는가에 따라 다양한 형태를 띈다. 
   > 
   > <mark>Q에 대해 어떤 가정을 하느냐에 따라 2차 Vatriational Gap이 발생한다. </mark>
   > 
@@ -162,11 +162,7 @@
     > 
     > $L(\theta, q)$ : log p inference - KL term(q(z), P(Z|X, $\theta$)
     > 
-    > <mark>Q. 이 $L(\theta, q)$ 는 어디에서 온 건가?</mark> 먼저 Loss 인가, Lower bound 인가?
-    > 
-    > - 앞에서는 $KL(Q(Z|X)|| P(Z))$ 를 구했는데, 왜 여기선 $KL(Q(Z), P(Z|X, \theta))$ 로 사용하는 건지? 
-    > 
-    > - 둘의 값이 같은 것도 아닌데, 왜 바꿔준 거지? 
+    > $L(\theta, q)$  은 Lower bound 이자 Loss 함수로 사용될 수 있다. Lower bound을 최대화하도록 loss를 정의할 수 있다. 또한 앞서 서술했듯 $L(\theta, q)$ 는 다양한 형태를 띌 수 있다. 
     > 
     > $lnP(X) >= \sum_z q(z|x) ln(\frac{p(x,z)}{q(z|x)})$
     > 
