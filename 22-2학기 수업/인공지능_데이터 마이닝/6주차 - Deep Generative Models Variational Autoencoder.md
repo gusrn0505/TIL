@@ -26,9 +26,9 @@
 
 ##### Amortized Analysis and Inference
 
-- 기존의 variational inference에서는 데이터셋이 주어지지 않았을 때 만들어진 수식들이있다. 
+- 기존의 variational inference에서는 데이터셋이 없어도 만들었던 수식들이있다. 
   
-  - 데이터 셋이 없어도 모델의 구조, genetic process만 명시되면 구할 수 있다.
+  - 즉, 데이터 셋이 없어도 모델의 구조, genetic process만 명시되면 구할 수 있다.
     
     > 구체적으로 무엇이 구조고 Genetic process는 뭘 의미하지? 
     > 
@@ -46,27 +46,29 @@
   
   > Amortized Analysis : 데이터 셋이 존재했을 때의 Complexity를 분석하는 방법
   > 
-  > ex)- 데이터 셋이 다음과 같은 분포일 때Binary search tree 를 만들면 Complexity가 어떻게 되는가? 해쉬 구조를 만들면 어떻게 되는가? 
+  > ex)- 데이터 셋이 다음과 같은 분포일 때 Binary search tree 를 만들면 Complexity가 어떻게 되는가? 해쉬 구조를 만들면 어떻게 되는가? 
 
 <br>
 
 - **Amortized inference는 데이터셋이 존재했을 때의 inference를 의미한다.** 
   
-  - Amortized inference는 경험적으로 모델을 학습하는 방식의 추론을 의미한다.
+  - <mark>Amortized inference는 경험적으로 모델을 학습하는 방식의 추론을 의미</mark>한다.
     
-    - 새로운 데이터가 들어왔을 때 파라미터를 전부 새롭게 바꿔야 하는지, 또는 새로운 경우만 고려하면 되는지로 나눠 볼 수 있다.  
+    - 새로운 데이터가 들어왔을 때, 1)파라미터를 전부 새롭게 바꿔야 하는지, 또는 2)새로운 경우만 고려하면 되는지로 나눠 볼 수 있다.  
     
     - 데이터 셋 없이 Analytically parameter inference를 한 VI는 Amortized inference가 아니다.
     
     - 반면 Black box inference는 경험적으로 데이터셋이 있는 상황에서만 가능하니 Amortized inference에 속한다. 
       
-      - Black box는 Amortized inference로 계산 방법 중에서 MCMC로 국한하여 계산하려고 했던 것 
+      > Black box는 Amortized inference로 계산 방법 중에서 MCMC로 국한하여 계산하려고 했던 것 
   
   - <u>MCMC보다 좋은 Inference 방법이 개발되었다. </u>
     
     - Variational inference의 결과물로써 $\phi_i$ 에 대한 update 수식을 얻을 수 있다. 
       
       > P(H|E, $\lambda$) 에 대한 variational distribution $q_E(H; \phi)$ 에 대해, 
+      > 
+      > > $\phi$ : Q 분포의 파라미터 
       > 
       > Mean-field assumption을 통해서 $q_E^{MF}(H; \phi) = \prod_iq(H_i; \phi_i)$ 로 표현할 수 있다. 
       > 
@@ -218,7 +220,7 @@
 
 <br>
 
-##### Variational Auto(?) Deep Embedding(VADE)
+##### Variational Deep Embedding(VaDE)
 
 ![](./picture/6-16.png)
 
@@ -226,7 +228,27 @@
 > 
 > h ↔ z
 
-- q distribution을 구했으니, 이를 ELBO 형태로 표현하자. 
+- 앞서 GMM은 데이터를 기반으로 학습을 통해 Cluster를 생성할 수 있고, Multivariate Gausian Model을 통해서 Generation이 가능하다. 하지만 Latent를 생성하는 부분이 없다. 
+
+- 반면 VAE는 데이터로부터 특징(Latent)를 추출할 수 있다. 따라서 GMM과 VAE을 합칠 경우 GMM 모델의 단점(Latent Variable)을 추출할 방법이 없다는 것을 보완할 수 있다. 
+  
+  -> **데이터 X에서 Multivariate Gaussian을 Prior로 가지는 Cluster을 생성하고, 각 Cluster에서 Latent z를 생성하자! [VaDE]**
+
+
+
+- 또한 VaDE의 연구적 가치는 '데이터 X에서 C를 구조적으로 추출하기란 불가능하다' 를 수리적으로 해결함 
+  
+  - VaDE Graphical Model에 따르면, x ↔ z 만 연결되어 있고, x → c의 연결은 없으므로, VaDE의 ELBO는 풀 수 없음
+    
+    ![](./picture/7-3.png)
+    
+    > X -> C 방향의 연결이 없음. 
+  
+  ![](./picture/7-2.png)
+  
+  > 즉, 이전에는 구할 수 없었던 q(C|X) 를 구하게 만듬.  
+
+##### <br>
 
 ##### Key Idea on Probabilistic Modeling
 
@@ -234,9 +256,19 @@
 
 > by mean field assumption, $q_\phi(h,c|x) = q_\phi(h|e) q_\phi(c|e)$
 > 
-> c는 Discrete 한 값으로 따로 고려해줘야 함. 
+> c는 Cluster 결과로, Discrete 하여 따로 고려해줘야 함. 
+
+- VAE는 Prior로 Univariate Gaussian 을 Latent variable의 Prior로 가정하나, VaDE에서는 Multivariate Gaussian을 Prior로 가정한다. 
+
+- 그 외에 디코더를 통해 입력 신호를 재건하는 과정은 VAE와 VaDE가 동일하다. 
+
+
 
 ----
+
+
+
+
 
 #### Variants of Variational Autoencoder with Elaborated losses
 
@@ -248,7 +280,7 @@
   
   - Kernel trick 까지 적용될 때 많은 의미를 가짐 
     
-    > Kernel trick : Kernel trick은 Vector의 Basis를 확장하는 것을 모델링 하지 않고 Inner product를 계산하는 것. 원 정보를 담고 있는 Vector의 Basis를 Scalability 하게 등 다양하게 확장시킬 수 있는데, 이때 Kernel trick을 사용하면 계산양을 늘리지 않고도 원하는 목표를 이룰 수 있다는 것
+    > Kernel trick : Kernel trick은 Vector의 Basis를 확장하는 것을 모델링 하지 않고 Inner product를 계산하는 것. 원 정보를 담고 있는 Vector의 Basis를 Scalability 하게 등 다양하게 확장시킬 수 있는데, 이때 Kernel trick을 사용하면 계산양을 늘리지 않고도 원하는 목표를 이룰 수 있다
   
   - SVM의 Loss는 Margin-based Loss로 Likelihood loss로 다르다. 
     
@@ -264,11 +296,9 @@
     > 
     > 검은색 : Z 로몬 loss? 차이가 커져도 항상 1의 Penalty를 부여함. 
     > 
-    > 값이 1에서 차이가 나는 것은 SVM 모델에서 (we +b)y = 1 로 둬서 이지 않을까? 
+    > 1의 값에서 차이가 나는 것은  (we +b)y = 1 식으로 인한 것으로 판단됨
 
 - 다음 시간 질문 : SVM Margin-based 사람들에게 ELBO를 적용할 때에는 어떻게 사용할까? 
-
-
 
 --------
 
@@ -316,10 +346,6 @@
     > 
     > 또는 $\sigma$ 의 행렬 $\sum$ 의 off diagonal을 0으로 만드는 것과 동치 
 
-
-
-
-
 -----
 
 ##### Evidence Lower Bound with Neural Net.
@@ -329,8 +355,6 @@ Q. 앞의 $\beta$- Variational Autoencoder에서 꼭 likelihood와 prior을 conf
 - off diagonal이 0인(?) 상황에서 많이 보이는 거라면 weight를 자연스럽게 떨어뜨리면 되겠다.
   
   > ㅠㅠ.. 주어가 목적어가 빠져서 이해하기가 어려워 
-
-
 
 - 단, VAE 에서 Expectation을 계산하는 과정에서 불-편한 식이 있었다. 
   
@@ -364,8 +388,6 @@ Q. 앞의 $\beta$- Variational Autoencoder에서 꼭 likelihood와 prior을 conf
   > 
   > <mark>-> VAE를 좀 더 Tight 하게 적용할 수 있다.</mark>
 
-
-
 - Tightness의 조건을 알게 되었으니까, 이를 적용할 수 있는지 확인하자
   
   - Gradient Descent가 가능하면 바로 Neural Net에 적용할 수 있다. 
@@ -392,8 +414,6 @@ Q. 앞의 $\beta$- Variational Autoencoder에서 꼭 likelihood와 prior을 conf
   > 
   > 전체 Expectation에 대해 gradient는 개별 Gradient의 가중치를 부여한 것의 expectation과 같아진다. 
 
- 
-
 ------
 
 ##### Derivation of Implicit Distribution from ELBO - Prior ELBO
@@ -418,8 +438,6 @@ Q. 앞의 $\beta$- Variational Autoencoder에서 꼭 likelihood와 prior을 conf
   
   - 반면 Prior ELBO에선 더이상 Gaussian 분포를 가정하지 못해서 Closed form이 안될 수 있다. 
 
-
-
 - Prior ELBO의 $D_{KL} term$을 계산할 방법이 필요하다. 
   
   > ![](./picture/6-26.png)
@@ -439,8 +457,6 @@ Q. 앞의 $\beta$- Variational Autoencoder에서 꼭 likelihood와 prior을 conf
   > - <u>현재는 Sampling은 되나, Density ratio는 계산할 수 없는 상황이다. </u>
   > 
   > - 따라서 Density ratio를 계산할 추가적인 방안을 찾아야 한다.  
-
-
 
 - Expected Density Ratio 값 계산하기 
   
@@ -500,15 +516,11 @@ Q. 앞의 $\beta$- Variational Autoencoder에서 꼭 likelihood와 prior을 conf
     > 
     > <mark>-> NN 모델에서 학습하는 과정에서 $T^*$을 통해서 Prior 또한 업데이트</mark> 시켜줄 수 있다.
     
-    
-    
     > Decoder의 $\theta$, Incoder의 $\phi$ , discriminator의 $\psi$ 모두 학습 가능 
     > 
     > $\theta, \phi$는 학습 모델의 Back propagation 간 같이 학습됨. 
     > 
     > $\psi$ 는 Discriminator 학습 간 업데이트 된다.  
-
-
 
 - 이 방법은 Prior의 Optimality를 보장해준다. 
 
@@ -519,10 +531,6 @@ Q. 앞의 $\beta$- Variational Autoencoder에서 꼭 likelihood와 prior을 conf
   - 2). H에 대한 차원을 모른다. 즉, optimal prior에 대한 보장을 할 수 없다. 
     
     > Q. Why? 언제 Optimal prior에 대해 보장, 또는 보장을 못하나? 
-
-
-
-
 
 -------
 
@@ -552,8 +560,6 @@ Q. 앞의 $\beta$- Variational Autoencoder에서 꼭 likelihood와 prior을 conf
   > 
   > log ratio Trick을 쓰고 싶으나 Density esimation이 불가능 할 경우, Discriminator을 통해 계산할 수 있음을 앞에서 보였다. 
 
-
-
 ---
 
 ##### Variational inference and Implicit Models
@@ -569,8 +575,6 @@ Q. 앞의 $\beta$- Variational Autoencoder에서 꼭 likelihood와 prior을 conf
   - 가능성이 조금이라도 있으면 사용할 수 없다. 
   
   - $q_\phi$ 는 우리가 통제할 수 있는 것이 아니라서 support 영역이 0을 포함할 수 있다. 
-
-
 
 --- 
 

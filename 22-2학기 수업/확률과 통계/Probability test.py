@@ -1,4 +1,9 @@
+import numpy as np
+import pandas as pd
+import statsmodels.stats.weighstats as sms
+data = pd.read_csv("data/taxi.txt", sep = '\t', index_col=0)
 
-from scipy.stats import chi2
-result = chi2.cdf(0.12, 8)
-print(result)
+dat = data/1000
+print(dat.describe())
+dat_A = dat['BrandA']
+dat_B = dat['BrandB']
