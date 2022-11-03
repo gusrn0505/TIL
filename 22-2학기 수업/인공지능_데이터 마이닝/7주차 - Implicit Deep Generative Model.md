@@ -374,15 +374,15 @@
     
     > ![](./picture/7-27.png)
   
-  - Distance는 일종의 함수이며, 함수는 벡터의 일종이다.
+  - Distance는 벡터라면 구할 수 있다 함수는 벡터의 일종이다.
     
     > $R^\infin$ : Countably many. Sequential Array 
     > 
     > $R^R$ : Uncountably many. Dense. <u>실수 공간의 함수</u> 
     
-    - 즉, 함수도 벡터의 일종이기에 Vector의 특성을 활용할 수 있다. 
-    
-    - 또한 함수가 아닌 Divergence는 Vecotr의 특성을 활용할 수 없다. 
+    - 즉, 함수도 벡터이기에 Distance를 구할 수 있다. 
+  
+  - 분포 사이에 Divergence가 아닌 Distance를 재보자! 
 
 <br>
 
@@ -419,7 +419,265 @@
       > 세번째 줄 : Fenchel conjugate 정의 $f^*(a) = sup[<a,x> - f(x)] $ 
       > 
       > 네번째 줄 : Fenchel's inequality 와 위의 식 함께 고려. 부등호 식이 반대임.  
+    
+    - <mark>$f^*(a) + f(x) = <a,x> $ when $a = f'(x)$</mark>
+
+<br> 
+
+##### f- divergence
+
+- 기존의 KL-Divergence를 f- Divergence로 변경하자! 
+  
+  > KL-Term : $KL(P||Q) = \int_x P(x) ln(\frac{P(x)}{Q(x)})dx $
+  > 
+  > $D_f(P||Q) = \int_x q(x) f(\frac{p(x)}{q(x)} dx)$
+  > 
+  > > 분자, 분포에 있는 것이 다르니 주의!
+  > > 
+  > > f : generator function, convex. f(1) = 0
+
+- f에 대해서 Fenchel Conjugate $f^*(t), t \in T$ 을 정의할 수 있다. 
+  
+  >  $f(u) = sum_{t\in T} \{tu - f^*(t) \}$
+  
+  > ![](./picture/7-32.png)
+  > 
+  > 두번째 줄 : Jensen's inequality. Sup이 개별적으로 적용된 것의 합보단, 전체 합의 Sup이 더 작음. 
+  > 
+  > - 첫째줄의 t와 둘째줄의 $\tau$ 은 Sup의 대상이 달라짐에 따라 값이 달라짐.
+  > 
+  > - t를 x의 값에 따라 변화하는 함수 $\tau(x)$ 로 표현함. 
+  
+  - 이때 t는 Variational inference $\lambda$ 와 동일하게 Complexity을 줄이는 역할을 함. 
+  
+  - 우리가 접근가능(계산가능)한 영역은 마지막 줄의 Sup 정도가 되겠다. 
+    
+    > Q. Expectation 이니까 Sampling으로 근사시켜주는 건가? 
+    > 
+    > - Nope. Analytic 하게 최적값을 찾아냄 
+    > 
+    > p(x) : Real Image의 분포 
+    > 
+    > q(x) : Generated image의 분포                                                                                                                                                     
+
+<br>
+
+- 이제 우리가 고려해야할 것은 2개다. 
+  
+  - 1). 언제 Lower bound가 Tight 해지는가. (부등호가 등호가 되는가)
+    
+    - 개별 Sup의 합이 전체 합의 Sup과 같아질 때
+    
+    - 즉, Sup을 없애줄 수 있을 때 Tight 해진다.
+  
+  - 2). 어떻게 Tight 한 곳으로 접근할 수 있나(Sup을 언제 제거해줘도 되나)
+    
+    > $f(u) = sup_{t\in T} \{tu - f^*(t) \}$
+    > 
+    > <=> $f(x) = sup_{a\in T} \{ax - f^*(a) \}$  [u=x, t = a]
+    
+    > <u>우린 이미 이 sup이 $a=f'(x)$ 일때 없앨 수 있음을 보였다. </u>
+    > 
+    > 따라서 $\tau(x) = f'(\frac{p(x)}{q(x)})$ 일 때 최적값이다. 
+    > 
+    > - 왜 f' 안에 $\frac{p(x)}{q(x)}$ 인지는 아래에 설명 
+
+<br>
+
+- KL divergence를 Fenchel conjugate 형태로 바꿔보자! 
+  
+  > let u = $\frac{p(x)}{q(x)}$, f(u) = u log u
+  > 
+  > KL-term : $\int p(x) log \frac{p(x)}{q(x)} dx = \int q(x) \frac{p(x)}{q(x)} log\frac{p(x)}{q(x)} dx$
+  > 
+  >                                                   $= \int q(x)u log(u)dx $
+  > 
+  >                                                   $= \int q(x) f(u) dx= \int q(x)f(\frac{p(x)}{q(x)})$ [f-diver]
+  > 
+  > 앞서 증명했듯 최적 지점은 $\tau(x)  = f'(\frac{p(x)}{q(x)}) = 1 + log \frac{p(x)}{q(x)}$이다. 
 
 
+
+<br>
+
+- Gan도 Fenchel conjugate 형태로 바꿔보자!! 
+  
+  > ![](./picture/7-33.jpg)
+  > 
+  > 여기서 $\frac{p(x)}{q(x)}$ 을 u라고 해보자. 
+  > 
+  > > $V(D,G) = \int q(x) [u logu - (u+1)log(u+1)] dx$ 
+  > > 
+  > > $f(\frac{p(x)}{q(x)}) = f(u) = u logu - (u+1)log(u+1)$
+  > 
+  > $V(D,G) = \int q(x) f(\frac{p(x)}{q(x)})dx$ 형태로 표현가능하다.
+  
+  > 또한 Optimal한 경우는 $\tau(x) = f'(\frac{p(x)}{q(x)}) = f'(u)$ 이므로, 
+  > 
+  > $\tau(x) = f'(u) = log \frac{u}{u+1} = log \frac{p(x)}{p(x)+q(x)}$ 일 때 성립한다. 
+  
+  
+  
+  > $\tau(x)$ 의 형태를 볼 때 Discriminator 형태를 띄고 있다. 즉, $\tau(x)$가 Discriminator의 역할을 하고 있다고 볼 수 있다. 
+  > 
+  > - x가 P에서 오는지 q에서 오는지 구분해준다. 
+  
+  > 또한 Tight해질려면 $\tau(x)$를 학습시켜야 한다.
+  > 
+  > 우리가 Neural Network에서 Gradient Signal을 통해 학습하는 것을 고려할 때,  Sup 조건이 우리가 Tight 할 수 있는 기준을 찾도록 만들어 준다. 
+  > 
+  > 반대로 말해 Sup이 없었다면 tight하게 만드는 Gradient Signal이 나오도록 요구하지 않았을 것이다. 
+  
+  
+
+
+
+<br>
+
+- 즉, F-divergence의 값을 직접 못 찾으니 Lower Bound를 Tight 하게 만드는 조건을 충족시킴으로써 찾는다. 
+  
+  - 마지막으로 값을 계산하기 위해 p(x), $f^*(x)$, q(x), $\tau(x)$ 에 대한 값을 찾기만 하면 된다. 
+    
+    > p(x) : 데이터셋 분포. 그냥 계산하면 됨 
+    > 
+    > $f^*(x)$ : F-divergence를 정의하면서 이미 구체화됨 
+    > 
+    > q(x) : Generator 결과의 분포! 근사를 통해 구해야 함 
+    > 
+    > $\tau(x)$ : 최적의 값이 그때 마다 다르다! 보통 p(x), q(x)의 값 모두 필요하기 때문에 q(x)을 구한 뒤 계산 가능 
+
+- Lower bound를 $F(\theta, w) = E_{x\sim P}[T_w(x)] - E_{x \sim Q_\theta}[f^*(T_w(x))]$로 표현가능하며, 목적에 따라 조정해줄 수 있다. 
+  
+  - Divergence를 줄이기 위해 $\theta$를 통해서 $F(\theta, w)$을 줄인다. 
+    
+    > $\theta$ 는 Q 분포에 들어가는 벡터를 의미한다.
+  
+  - Tight 하게 만들기 위해 $w$을 통해 optimal $\tau$ 를 찾아 $F(\theta, w)$을 최대화한다. 
+    
+    > w는 $\tau(x)$에 들어가는 x를 의미하는 듯. 
+
+<mark>=> 이젠 GAN에서 F-divergence Form만 찾으면 다 Tight 조건을 찾을 수 있다. </mark>
+
+
+
+
+
+###### f- divergence의 단점
+
+- $\frac{p(x)}{q(x)}$ 에서 q(x)가 0인 경우 문제가 생긴다. 
+  
+  - 이전에는 q(x)가 임의의 분포로 Long-tail을 가진다고 가정하면 됐다.(ex-Gaussian)
+  
+  - 하지만 여기서의 q(x)는 Generator가 생성한 샘플의 분포로 우리 통제하에 없다.
+  
+  - 즉, 우리는 어떻게 q(x)가 0의 값을 안 가진다(Mode Collapse)는 것을 어떻게 알 수 있을까? 
+    
+    - 특히 지금은 q(x)을 알아내자가 목표기 때문에 그냥 못 넘어간다.
+  
+  - 위의 문제를 해결하지 않고는 f-divergence를 사용하지 못한다. 
+
+<mark>-> Divergence 말고 다른 걸 쓰자</mark>
+
+
+
+----
+
+#### Integral Probability Metrics(IPM) 도입
+
+- 서로 다른 분포 $\mu$ 와 v의 서포트 영역의 차이를 Sup 한 값으로 distance를 정의한다.
+  
+  > ![](./picture/7-34.png)
+  
+  - $\mathcal{G} $을 어떻게 세팅하느냐에 따라 IPM이 달라진다.
+  
+  - 지금까지 위의 식을 활용 못한 이유는 영역이 너무 넓어 적분을 계산하기 어려움.
+
+- $\mathcal{G}$ 는 크게 3가지 종류가 있다. 
+  
+  - 1). Total variation distance 
+    
+    > ![](./picture/7-35.png)
+    > 
+    > $\sum$ 의 모든 경우 고려 불가. 즉, 계산 불가 
+  
+  - 2). Wasserstein metric 
+    
+    > ![](./picture/7-36.png)
+    > 
+    > 적분 영역이 너무 넓어서 계산할 수 없음.
+  
+  - 3). Maximum Mean Discrepancy(MMD)
+    
+    > ![](./picture/7-37.png)
+    > 
+    > $\psi$ 는 임의의 함수. $\psi = I$ 일 때에는 Mean 구하는 것과 동일
+    > 
+    > 적분 영역이 좁아졌고, $\psi$ 는 내 통제에 있으니 그나마 계산 가능하다.
+    
+    - $\mathcal{G}$ 가 RKHS의 Unit ball 이다. 
+
+
+
+---- 
+
+#### GAN 과 MMD를 합쳐보자
+
+- 기존의 f-divergence에서 f 함수를 MMD 형태로 부여하자 
+  
+  > ![](./picture/7-38.png)
+  > 
+  > ![](./picture/7-39.png)
+  > 
+  > > $\psi(x) =x$ 일때, 이건 mean과 같아진다. 
+  > > 
+  > > $\psi(x) = (x, x^2)$ 일때, mean과 variance와 매칭된다.  
+  > > 
+  > > - 이때 정규 분포의 Sufficient statistic 조건을 충족한다. 
+  
+  - $\psi(x)$ 가 다양한 경우를 보장해주기 위해 Infinitly 하게 가면 좋겠다! Kernel trick을 도입하자! 
+    
+    > $\mu_o = \int k(x, .) p(dx) \in H$
+    > 
+    > k(x,.) : Kernel function for 커널 트릭 
+    > 
+    > H : Kernel Herbets space
+    > 
+    > 이때 p나 q에 대해서 직접적인 접근이 불가능할 수 있다. 따라서 $E[f(x)] = <f,\mu_p>_H$ 로 구한다. 
+
+- 커널 two-sample test에 따라서 아래 식이 성립한다. 
+  
+  > ![](./picture/7-40.png)
+  > 
+  > 각 Expectation은 Monte Carlo Expectation을 통해서 Sampling 근사를 한다.
+  
+  - Kernel Trick이 Inner product가 되는 상황에서만 쓸 수 있으니 이에 맞춰서 정의한다. 
+  
+  - 이젠 더 이상 $\psi$ 를 정의할 필요가 없다. 물론 k를 정해야 하긴 하지만 우리 자유다. 
+
+<br>
+
+- 이제 MMD를 최소화해보자 
+  
+  > ![](./picture/7-41.png)
+  > 
+  > 이때 $k(x_n, x_n')$ 데이터 셋에서 유래하여 상수값이다. 즉, 고려안해도 된다. 
+  > 
+  > $y_m, y_m'$ 의 값은 Generator을 통해 많은 값으로 고려해줘야 한다.  
+  > 
+  > > $y_m = G_\theta(z_m)$
+
+
+
+- <mark>하지만 계산량이 너무 많고, 굳이 MLP를 사용할 필요가 없어 사용하지  않는다. </mark>
+  
+  > $\sum_{n=1}^N$ : 모든 샘플 
+  > 
+  > $\sum_{m=1}^M$ : 여러번 반복 
+  > 
+  > 또한 $z_m, x_n$ 의 Joint한 경우를 고려해야 한다.
+  > 
+  > 거리를 또 각 계산해야 한다.  
+  > 
+  > -> 계산양이 너무 많다. 
 
 
