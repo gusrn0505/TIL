@@ -59,9 +59,9 @@
   > 
   > - 구체화할 수 없다! 하지만 Sampling이 가능하다! (How?)
   > 
-  > - Gan 모델에서 복원한 값(ex- Image)들을 얻을 수 있지만, 이 이미지들이 어디로부터 나왔는지(x)는 알 수가 없다. 즉, 접근 권한이 Sampling 결과에만 있는 것! 
+  > - Gan 모델에서 복원한 값(ex- Image)들을 얻을 수 있지만, 이 이미지들이 어디로부터 나왔는지(x)는 알 수가 없다. 즉, Sampling 결과에만 접근 가능!! 
   > 
-  > - pdf를 알고 있을 때와 반대의 상황. sampling은 pdf을 알고 있는 것의 종속되는 게 아니다..! 
+  > - pdf를 알고 있을 때와 반대의 상황. sampling은 pdf을 알고 있는 것의 종속 관계가 아니다..! 
   
   > $G(z; \theta_g)$ : Generator 
   > 
@@ -85,7 +85,7 @@
 
 - **Objective Function** 
   
-  - 생성한 것인가 아닌가하는 Binary case 이므로 Bernoulli trial로 여겨진다. 또한 Cross entropy 로 목적 함수를 정한다.
+  - 데이터의 출처는 데이터 셋 또는 생성, 즉 Binary case 이므로 Bernoulli trial로 여겨진다. 또한 Cross entropy 로 목적 함수를 정한다.
     
     > ![](./picture/7-5.png)
     > 
@@ -115,9 +115,9 @@
 
 > $z \sim p_z(z) -> x= G(z) -> x \sim P_g(x)$ 
 
-> $D(x) = \frac{P_{data}(x)}{P_{data}(x) + P_g(x)}$ 
+> Discriminator이 이미 Optimal이라고 가정하자. 
 > 
-> - 이 식이 어떻게 나왔지? 
+> 그때 $D(x) = \frac{P_{data}(x)}{P_{data}(x) + P_g(x)}$ 을 성립한다. 
 
 - 두 개의 Expectation을 Jensen-Shannon-Divergence로 표현한다.
   
@@ -171,7 +171,7 @@
 
 - 즉, Jensus's Divergence는 X와 Z 사이의 Mutual information과 동일하다. 
   
-  - Jensus's Divergence의 값이 0 이라면, X와 Z 사이에 상호 정보는 없는 것과 동일한 의미를 가진다. [예측함에 있어서 Z는 어떠한 영향도 미칠 수 없다]
+  - Jensus's Divergence의 값이 0 이라면, X와 Z 사이에 상호 정보는 없는 것과 동일한 의미를 가진다. **[예측함에 있어서 Z는 어떠한 영향도 미칠 수 없다]**
   
   - Jensus's Divergence 값에 따라 Z가 X의 값을 유추함에 있어서 얼마나 많은 정보를 제공하는지 계산할 수 있다. 
 
@@ -193,7 +193,7 @@
     
     - 앞서 Implicit Likelihood인 <mark>$P_g(x)$ 가 $P_{data}(x)$을 최대한 유추할 정보를 주도록 최적화한다.</mark>
 
--> 구체화할 수 없었던 $P_g(x)$을 최적화할 수 있게 되었다.
+<mark>-> Explicit distribution인 $P_g(x)$을 최적화할 수 있게 되었다.</mark>
 
 ---
 
@@ -270,6 +270,14 @@
 - Parameter을 update할 때, Generator에는 여러 Unrolled 상황을 고려하며 Discriminator에는 통상적으로 학습한다.
   
   > Q. Why? 왜 Generator에만 여러 경우를 고려하나? 
+  > 
+  > Unrolled GAN의 목적과 가정을 생각해보자 
+  > 
+  > 우리는 Mode Collapse를 일으키는 Generator을 학습시키고자 한다. 
+  > 
+  > 이것에 집중하기 위해서 Discriminator은 이미 Optimal 하다고 가정하고 있다. 
+  > 
+  > 즉, 현 목적과 가정을 기반으로 했을 때 Discrinator에는 기존대로 적용해도 어려움이 없다. 
   
   > Generator을 편미분 했을 때, 
   > 
@@ -312,6 +320,8 @@
   > $NN_G(z,c;w_G) =x $
   > 
   > $NN_D(x,c;w_D) = p$ 
+
+<br>
 
 ##### Info GAN
 
@@ -496,8 +506,6 @@
   > 
   > 앞서 증명했듯 최적 지점은 $\tau(x)  = f'(\frac{p(x)}{q(x)}) = 1 + log \frac{p(x)}{q(x)}$이다. 
 
-
-
 <br>
 
 - Gan도 Fenchel conjugate 형태로 바꿔보자!! 
@@ -516,21 +524,15 @@
   > 
   > $\tau(x) = f'(u) = log \frac{u}{u+1} = log \frac{p(x)}{p(x)+q(x)}$ 일 때 성립한다. 
   
-  
-  
   > $\tau(x)$ 의 형태를 볼 때 Discriminator 형태를 띄고 있다. 즉, $\tau(x)$가 Discriminator의 역할을 하고 있다고 볼 수 있다. 
   > 
   > - x가 P에서 오는지 q에서 오는지 구분해준다. 
-  
+  > 
   > 또한 Tight해질려면 $\tau(x)$를 학습시켜야 한다.
   > 
   > 우리가 Neural Network에서 Gradient Signal을 통해 학습하는 것을 고려할 때,  Sup 조건이 우리가 Tight 할 수 있는 기준을 찾도록 만들어 준다. 
   > 
   > 반대로 말해 Sup이 없었다면 tight하게 만드는 Gradient Signal이 나오도록 요구하지 않았을 것이다. 
-  
-  
-
-
 
 <br>
 
@@ -558,10 +560,6 @@
 
 <mark>=> 이젠 GAN에서 F-divergence Form만 찾으면 다 Tight 조건을 찾을 수 있다. </mark>
 
-
-
-
-
 ###### f- divergence의 단점
 
 - $\frac{p(x)}{q(x)}$ 에서 q(x)가 0인 경우 문제가 생긴다. 
@@ -577,8 +575,6 @@
   - 위의 문제를 해결하지 않고는 f-divergence를 사용하지 못한다. 
 
 <mark>-> Divergence 말고 다른 걸 쓰자</mark>
-
-
 
 ----
 
@@ -615,8 +611,6 @@
     > 적분 영역이 좁아졌고, $\psi$ 는 내 통제에 있으니 그나마 계산 가능하다.
     
     - $\mathcal{G}$ 가 RKHS의 Unit ball 이다. 
-
-
 
 ---- 
 
@@ -666,8 +660,6 @@
   > 
   > > $y_m = G_\theta(z_m)$
 
-
-
 - <mark>하지만 계산량이 너무 많고, 굳이 MLP를 사용할 필요가 없어 사용하지  않는다. </mark>
   
   > $\sum_{n=1}^N$ : 모든 샘플 
@@ -679,5 +671,9 @@
   > 거리를 또 각 계산해야 한다.  
   > 
   > -> 계산양이 너무 많다. 
+
+
+
+
 
 
