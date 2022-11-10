@@ -16,12 +16,12 @@
   
   > Conjugate 관계 예시 ) Drichlet ↔ Multinomial distribution 
   > 
-  > Tractable Likelihood는 Explicit density를 의미하나? 
+  > Tractable Likelihood는 Explicit density를 의미하나? ㅇㅇ 그런듯 
   
   - VAE에서 Variational distribution에 대한 Inference Network를 형성하여 Conjugate 관계를 더 이상 필요로 하지 않는다. 
   - 하지만 여전히 Explicit likelihood function을 필요로 한다.
 
-- Implicit Likelihood Model을 고려할 수 있으면 Explicit model에 비해 1) 표현력이 좋아질 수 있으며, 2) P 분포가 implicit 한 경우에도 적용할 수 있다. 
+- Implicit Likelihood Model을 고려할 수 있으면 <u>Explicit model에 비해 1) 표현력이 좋아질 수 있으며, 2) P 분포가 implicit 한 경우에도 적용</u>할 수 있다. 
   
   <mark>-> Learning in Implicit Model 을 연구하자! </mark>
 
@@ -73,6 +73,8 @@
   > 
   > - x가 Generator로 부터 왔을 확률 값을 계산
 
+<br>
+
 ###### Formalization of GAN - Parameter inference
 
 - Training 예시에 대해 옳은 Label(진짜 이미지인지, 생성한 이미지인지)을 부여하는 확률 값을 Maximize 하는 것 
@@ -115,7 +117,7 @@
 
 > $z \sim p_z(z) -> x= G(z) -> x \sim P_g(x)$ 
 
-> Discriminator이 이미 Optimal이라고 가정하자. 
+> Discriminator이 이미 Optimal이라고 가정한다. 
 > 
 > 그때 $D(x) = \frac{P_{data}(x)}{P_{data}(x) + P_g(x)}$ 을 성립한다. 
 
@@ -171,9 +173,9 @@
 
 - 즉, Jensus's Divergence는 X와 Z 사이의 Mutual information과 동일하다. 
   
-  - Jensus's Divergence의 값이 0 이라면, X와 Z 사이에 상호 정보는 없는 것과 동일한 의미를 가진다. **[예측함에 있어서 Z는 어떠한 영향도 미칠 수 없다]**
+  - Jensus's Divergence의 값이 0 이라면, X와 Z 사이에 상호 정보는 없는 것과 동일한 의미를 가진다. [예측함에 있어서 Z는 어떠한 영향도 미칠 수 없다]
   
-  - Jensus's Divergence 값에 따라 Z가 X의 값을 유추함에 있어서 얼마나 많은 정보를 제공하는지 계산할 수 있다. 
+  - <u>Jensus's Divergence 값에 따라 Z가 X의 값을 유추함에 있어서 얼마나 많은 정보를 제공하는지 계산할 수 있다. </u>
 
 <br>
 
@@ -193,7 +195,7 @@
     
     - 앞서 Implicit Likelihood인 <mark>$P_g(x)$ 가 $P_{data}(x)$을 최대한 유추할 정보를 주도록 최적화한다.</mark>
 
-<mark>-> Explicit distribution인 $P_g(x)$을 최적화할 수 있게 되었다.</mark>
+<mark>-> Implicit distribution인 $P_g(x)$을 최적화할 수 있게 되었다.</mark>
 
 ---
 
@@ -333,7 +335,7 @@
   > 
   > Latent variable을 C를 추가했을 때의 Mutual Information을 같이 고려하여 Generator을 최적화한다. 
 
-- 이때 c는 직접 구할 수 없어 근사를 필요로 하는 Latent Variable이다. 
+- 이때 c는 Latent Variable로, 직접 구할 수 없어 근사를 필요로 한다. 
   
   - Mutual Infomation 식을 통해서 Lower bound를 찾아 Tight 하게 만들어주자 
   
@@ -456,7 +458,9 @@
   > 
   > - 첫째줄의 t와 둘째줄의 $\tau$ 은 Sup의 대상이 달라짐에 따라 값이 달라짐.
   > 
-  > - t를 x의 값에 따라 변화하는 함수 $\tau(x)$ 로 표현함. 
+  > - t를 x의 값에 따라 변화하는 함수 $\tau(x)$ 로 표현함. t의 값은 x의 값에 따라 달라지기 때문에 모든 x의 경우에 대해 대응하기 위해 $\tau(x)$ 도입 필요. 
+  > 
+  > - 짜잔. <mark>$\tau(x)$ 는 GAN 에서의 Discriminator의 위치를 차지하고 있음</mark>
   
   - 이때 t는 Variational inference $\lambda$ 와 동일하게 Complexity을 줄이는 역할을 함. 
   
@@ -524,13 +528,13 @@
   > 
   > $\tau(x) = f'(u) = log \frac{u}{u+1} = log \frac{p(x)}{p(x)+q(x)}$ 일 때 성립한다. 
   
-  > $\tau(x)$ 의 형태를 볼 때 Discriminator 형태를 띄고 있다. 즉, $\tau(x)$가 Discriminator의 역할을 하고 있다고 볼 수 있다. 
+  > $\tau(x)$ 의 형태를 볼 때 Discriminator 형태를 띄고 있다. <mark>즉, $\tau(x)$가 Discriminator의 역할을 하고 있다고 볼 수 있다. </mark>
   > 
   > - x가 P에서 오는지 q에서 오는지 구분해준다. 
   > 
   > 또한 Tight해질려면 $\tau(x)$를 학습시켜야 한다.
   > 
-  > 우리가 Neural Network에서 Gradient Signal을 통해 학습하는 것을 고려할 때,  Sup 조건이 우리가 Tight 할 수 있는 기준을 찾도록 만들어 준다. 
+  > 우리가 Neural Network에서 Gradient Signal을 통해 학습하는 것을 고려할 때,  <u>Sup 조건이 우리가 Tight 할 수 있는 기준을 찾도록 만들어 준다.</u> 
   > 
   > 반대로 말해 Sup이 없었다면 tight하게 만드는 Gradient Signal이 나오도록 요구하지 않았을 것이다. 
 
@@ -560,6 +564,8 @@
 
 <mark>=> 이젠 GAN에서 F-divergence Form만 찾으면 다 Tight 조건을 찾을 수 있다. </mark>
 
+###### <br>
+
 ###### f- divergence의 단점
 
 - $\frac{p(x)}{q(x)}$ 에서 q(x)가 0인 경우 문제가 생긴다. 
@@ -568,7 +574,7 @@
   
   - 하지만 여기서의 q(x)는 Generator가 생성한 샘플의 분포로 우리 통제하에 없다.
   
-  - 즉, 우리는 어떻게 q(x)가 0의 값을 안 가진다(Mode Collapse)는 것을 어떻게 알 수 있을까? 
+  - 즉, 우리는 <u>어떻게 q(x)가 0의 값을 안 가진다는 것을 어떻게 알 수 있을까?</u> 
     
     - 특히 지금은 q(x)을 알아내자가 목표기 때문에 그냥 못 넘어간다.
   
@@ -622,11 +628,15 @@
   > 
   > ![](./picture/7-39.png)
   > 
-  > > $\psi(x) =x$ 일때, 이건 mean과 같아진다. 
+  > > Q. $\tau(x)$ 를 $\psi(x)$ 로 대체하는 것으로 보면 되겠다만.. 그런데 그렇게 해도 되나..? 아하 두 함수 모두 데이터가 p,q 에서 왔는가를 판단하려는 거니까. 
   > > 
-  > > $\psi(x) = (x, x^2)$ 일때, mean과 variance와 매칭된다.  
-  > > 
-  > > - 이때 정규 분포의 Sufficient statistic 조건을 충족한다. 
+  > > Divergence 함수를 Distance 함수로 바꾸는 것이라 생각하면 말 되네. 
+  > 
+  > $\psi(x) =x$ 일때, 이건 mean과 같아진다. 
+  > 
+  > $\psi(x) = (x, x^2)$ 일때, mean과 variance와 매칭된다.  
+  > 
+  > - 이때 정규 분포의 Sufficient statistic 조건을 충족한다. 
   
   - $\psi(x)$ 가 다양한 경우를 보장해주기 위해 Infinitly 하게 가면 좋겠다! Kernel trick을 도입하자! 
     
@@ -662,6 +672,8 @@
 
 - <mark>하지만 계산량이 너무 많고, 굳이 MLP를 사용할 필요가 없어 사용하지  않는다. </mark>
   
+  > Q. MLP? 위의 방법은 NN을 사용하지 않는 다는 의미일까나? 
+  
   > $\sum_{n=1}^N$ : 모든 샘플 
   > 
   > $\sum_{m=1}^M$ : 여러번 반복 
@@ -671,6 +683,191 @@
   > 거리를 또 각 계산해야 한다.  
   > 
   > -> 계산양이 너무 많다. 
+
+- Kernel로는 주로 RBF를 주로 사용함 
+
+-----
+
+###### IPM 추가 Develop!
+
+- Divergence 및 Distance Metric에 대해서 $p_{data}, p_g$ 분포에 따라 Gradient descent가 가능한지 점검하자. 
+
+- 극단적인 경우를 확인하기 위해 $p_{data}, p_g$ 를 아래와 같이 정의하자. 
+  
+  > $Z \sim U[0,1]$ : the uniform distribution on the unit interval 
+  > 
+  > $P_0$ : (0,Z) $\in R^2$ 의 분포. 
+  > 
+  > $g_\theta(z) = (\theta, z), \theta \in R$. $\theta$는 Generator functino의 Parameter 
+  > 
+  > ![](./picture/7-42.png)
+  > 
+  > $p_{data}$ 는 0의 값에서만 1의 값을 가지고, 나머지 상황에선 0을 가진다.
+  > 
+  > $p_g = g_{\theta}$는 $\theta$ 에서만 1의 값을 가지고, 나머지 상황에선 0을 가진다. 
+  > 
+  > -> $\theta$ 가 0일 때 최적이나, 나머지 값들에 대해선 1의 Divergence/Distance를 가진다. 
+  
+  - 이때 Gradient Descent가 가능하도록 Continuous 조건을 만족하는 것은 Wasserstein metric 밖에 없다. 
+    
+    > ![](./picture/7-43.png)
+    
+    > ![](./picture/7-44.png)
+    
+    > ![](./picture/7-47.png)
+    > 
+    > Wasserstein metric : 유일하게 $\theta =0$ 을 제외하고 모든 값에 대해서 Conti. $\theta=0$ 이라는 것은 이미 수렴한 것이니까 상관없음
+    > 
+    > JS Divergence :  Not Conti.  하지만 값이 log2 로 bound 되어 있어 Gradient descent는 가능하지만 점차 오차가 생김. 또한 수렴 방향이 나오지 않아서 수렴이 어려웠음. 
+    > 
+    > -> 작은 크기로 오차가 쌓이니 문제를 찾아내기 힘들었다.  
+    
+    -> 다른 Distance, Divergence는 NN에서 오차를 계속 만들어 낸다. 따라서 Wasserstein metric을 사용해야 한다! **[IPM의 정당성과 Wasserstein의 필요성]**
+
+------
+
+##### Wassertein Distance with GAN
+
+- 문제점 : Wassertein Distance를 GAN에 대입하고자 하나 분포에 있어 차이가 있다. 
+  
+  > ![](./picture/7-48.png)
+  > 
+  > $E_{(x,y)\sim \gamma}$ 는 GAN의 $E_{x \sim p_{data}(x)}, E_{z \sim p_z(z)}$ 와는 다르다. 
+  > 
+  > $\gamma$ 는 joint distribution인데, $p_{data}(x), p_z(z)$ 는 Marginalize distribution이다. 
+  > 
+  > Joint distribution은 계산양이 많아 그대로 활용할 수 없으며, GAN에 적용하기 위해 $p_{data}, p_z$ 각각에 Marginalized 해야 한다. 
+  > 
+  > 이때 $p_{data}, p_z$ 에 Marginalized 함과 동시에 Wassertein Distance를 최소로 만드는 Translation을 탐색하자. **[분포의 Mass transport 필요].** 
+
+
+
+<br>
+
+###### Kantorovich-Rubinstein Duality
+
+- Linear programming 에서 최적화에 있어 쌍대성이 존재한다. 
+  
+  > ![](./picture/7-49.png)
+  > 
+  > c : Translation 한 이후의 거리. 즉, $c^Tx$ 는 Translation 후 변화한 거리(정도)를 의미하며, 이를 최소화하는 것은 Wassertein distance 을 최소화하는 것이다. 
+  > 
+  > Duality에 의해 $c^Tx$ 를 최소화하는 것은 $b^Ty$ 를 최대화하는 것과 동일하다. 
+  > 
+  > 이때 A가 Wassertein distance가 최소값이 나오도록 Mass transportation 시켜주는 Matrix 라고 하자. 우리는 Duality를 활용하여 A의 조건을 알아보자(?) 
+
+
+
+<br>
+
+- $p_r $(데이터 셋 분포)를 최적의 $p_g$(generalize distribution)으로 옮기는 A를 찾자. 
+  
+  > ![](./picture/7-50.png)
+  > 
+  > 각각 $p_r$ 과, $p_g$ 는 Joint distribution $\gamma$ 가 나왔을 때 각각 Marginalize 한 결과 
+  > 
+  > 즉, 서로의 결과값이 정해진 상태에서, 어떻게 중간과정인 Projection을 했을 때 변환 전 후의 차이(||x-y||)가 최소화 되도록 하는 Projection Matrix를 찾자.  
+  > 
+  > - 즉, 최대한 변화 없이, 최소한의 변화만을 요구하는 값을 찾는다. 
+
+<br>
+
+- Projection을 모델링하자 
+  
+  > ![](./picture/7-51.png)
+  > 
+  > Decision variable x : $\gamma$ 의 모든 경우 (5 x 5)를 고려해야 함.  
+  > 
+  > - 우리가 찾아야 하는 값 
+  > 
+  > Translation matrix A : Ax =b. Translation을 한 다음에도 marginal distribution이 유지되도록 해야한다. [Hard constraint]
+  > 
+  > - 각  Marginalization 식을 풀어 쓴 것 
+  >   
+  >   > $\gamma_{11}+ \gamma_{12}+ \gamma_{13}+ \gamma_{14}+\gamma_{15} = P_r(x_1)$
+  > 
+  > output b : $\gamma$ 를 Projection 한 결과. $p_r, p_g$ 각 5개씩 총 10개. 
+  > 
+  > $c^T$ : Objective function coefficient : earth movement 간 거리. ||x-y||
+  > 
+  > -> x를 제외하고 A,b,c 모두 주어짐. 
+
+<br>
+
+- Duality를 활용하여 최적화 해야 하는 변수의 개수를 $n^2$ 에서 $2n$ 으로 줄인다. 
+  
+  > ![](./picture/7-52.png)
+  > 
+  > X의 개수가 25개($n^2$)인 것에 비해 Y는 10개(2n) 으로 줄었다. 
+  > 
+  >  y는 매 지점(x,y)들마다  Projection 될 Measure(f(x), g(y)) 의 Projection 
+  > 
+  > > f(x)의 x는 $p_r(=p_{data})$ 을, g(y)의 y는 $p_g$를 따름. 
+  > > 
+  > > -> 각 f(x), g(y)는 GAN 에서의 discriminator 역할을 하는 함수가 될 수 있다. 
+  > 
+  > <u>y를 최적화하면 우리가 목표로 하는 x 값을 구할 수 있다. </u>
+
+<br>
+
+- Dual 이 최적화 될 때 f(x) 가 Lipshitz constraint 특성을 지닌다. 
+  - Dual : Maximize $b^Ty$, subject to $A^Ty<=c$ 이기 때문에, 각각 계산하면 아래와 같이 나온다. 
+  
+  > $f(x_i) + g(y_j)<= D_{ij}$   (행렬 계산을 하면 나옴)
+  > 
+  > 이때 $D_{ii} =0$ 이기에, $f(x_i) + g(y_i) <= 0$ 이 된다. 
+  
+  > $b^Ty $가 Maximize 로 Optimal 되는 것은  $A^Ty =c$  일때로, 
+  > 
+  > $f(x_i) = -g(y_i)$ 을 성립할 때로, 모든 경우에 대입하면 아래 식이 나온다. 
+  > 
+  > $f(x_i) + g(y_j) <= D_{i,j}$  => <mark>$ f(x_i) - f(y_i) <= D_{i,j}(=|x_i - y_j|)$  </mark>
+  > 
+  > -> 즉, f의 차이가 일정 상수 보다 이하인<mark> Lipschitz constraint 특성을 지님</mark>
+  > 
+  > > $d_Y(f(x_1), f(x_2)) <= Kd_X(x_1, x_2)$ [Lipschitz constraint]
+  
+  - Neural Network에서는 Lipschitz constraint가 당연히 성립해야 함. 그래야 Gradient가 발산하지 않을 수 있음. 
+
+<br> 
+
+- 위의 내용을 종합하여 Kantorovich-Rubinstein Theorem이 성립한다. 
+  
+  > ![](./picture/7-54.png)
+  > 
+  > <u>Joint distribution의 Expectation을 Sup 형태로 끌어내어 기존 GAN 형식과 유사하게 생성한다!</u> **이것이 Kantorovich-Rubinstein Theorem의 의의!**
+  > 
+  > Lipschitz Constraint 특성을 띌 때, $f(x_i) - f(y_i) <= D_{i,j} = |x-y|$ 을 성립한다. 즉, $|x-y| $의 최소값은 f(x) - f(y) 의 최대값과 동일해진다. 
+  > 
+  > 물론 이때 서로 다른 분포에서 위치한다는 점을 같이 고려해야 한다. 
+
+- 이후 GAN 식에 대입함으로써 Wassertein GAN을 마무리한다. 
+  
+  > ![](./picture/7-55.png)
+  
+  - 이때 GAN과 Wassertein GAN에서 Discriminator가 바뀌었다. 
+    
+    - GAN에선 x가 Dataset에 속할 경우를 D(x), 아닐 경우를 1-D(x)로 여겼다. 
+    
+    - 하지만 Wassertein GAN 에선 모두 f 함수로 고려한다. 
+    
+    -> 즉, 더 이 식에선 f는 꼭 데이터셋 만 추려낸다는 것이 아니다. Generated 된 데이터로 상관없이 Generator을 발전시키는 데 도움이 되면 된다. 이젠 Critic 의 역할을 맡을 수 있게 되었다. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
