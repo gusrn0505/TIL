@@ -16,7 +16,7 @@
 
 - 각 Domain과의 Correlation 없이 Mean function을 예측해보자 
   
-  > Domain과 Correlation이 없다는 것은, 사전지식 없이 주어진 데이터 만으로 파악하겠다는 건가? 
+  > Domain과 Correlation이 없다는 것은, 사전지식 없이 주어진 데이터 만으로 파악하겠다는 건가? 그런 듯. 
   
   > Moving Average with time window 
   > 
@@ -46,22 +46,15 @@
 
 해결해야 하는 문제 
 
-1. XOR 문제 해결하기 : Kernel Trick을 통한 Feature Expansion
-- XOR 문제의 경우 Linear 방식을 통해서 Discrimant space / Line을 형성할 수 없다.
-
-- 이를 해결하기 위해서는 1) Feature expantion, 2) Nonlinear function을 도입해야 한다.
+- XOR 문제 해결하기 : Kernel Trick을 통한 Feature Expansion
   
-  > ![](file://C:\Users\PC\Desktop\TIL\22-2학기 수업\인공지능_데이터 마이닝\picture\8-3.png)
+  - XOR 문제의 경우 Linear 방식을 통해서 Discrimant space / Line을 형성할 수 없다.
   
-  => 이때, Kernel Trick을 쓰면 고차원으로의 계산없이 Feature expantion을 한 효과를 얻을 수 있다. 따라서 Kernel Trick을 쓸 수 있도록 내적의 형태로 표현해보자.
-
-<br> 
-
-1. 미분 가능성 확보하기 : RBF Kernel 도입하기
-
-2. Bayesian 조건부 확률을 통해서 $P(t_{n+1}, T_n)$ 을 구할 수 있는 값의 형태로 바꾸기 
-   
-   - Multivariate Normal distribution의 조건부 확률을 하나의 Normal 분포로 바꾸기
+  - 이를 해결하고자 1) Feature expantion, 2) Nonlinear function을 도입해야 한다.
+    
+    > ![](file://C:\Users\PC\Desktop\TIL\22-2학기 수업\인공지능_데이터 마이닝\picture\8-3.png)
+    
+    => 이때, <u>Kernel Trick을 쓰면 고차원으로의 계산없이 Feature expantion을 한 효과를 얻을 수 있다</u>. 따라서 Kernel Trick을 쓸 수 있도록 내적의 형태로 표현해보자.
 
 <br>
 
@@ -291,19 +284,13 @@
   
   > ex)- Gaussian Process 
 
-
-
 <br> 
 
-- Process를 알면 Classifier, Regression, Cluster 모두다 가능하다. 
+- Process를 알면 Regression, Classifier Cluster 모두다 가능하다. 
   
   - Cluster는 Latent variable을 EM으로 학습하고, 이를 활용하면 된다. 
   
   - 하지만 GP의 Latent variable 생성은 너무 맥락이 길어서 여기선 생략 
-
-
-
-
 
 -----
 
@@ -353,8 +340,6 @@
   
   => 기존의 선형 층을 다수 쌓아야 가능했던 Funtion Approximator을 단층의 GP은 Stacking 없이도 전부 표현할 수 있게 되었다.
 
-
-
 -----
 
 ##### Kernel 방식의 장단점과 NN와의 연계
@@ -368,8 +353,8 @@
   - 위의 Kernel 에서도 $k = K_{(N+1)1} , ...., K_{(N+1)N}$ 는 데이터가 늘어남에 따라 계속 증가한다. 
   
   - <mark>즉, Kernel은 데이터의 Complexity를 일정이상 반영하기 어렵다. </mark>
-  
-  => 반면 DNN은 파라미터의 개수가 많아 계산양은 많은 대신, 데이터의 Complexity를 반영해줄 수 있다.
+    
+    => 반면 DNN은 파라미터의 개수가 많아 계산양은 많은 대신, 데이터의 Complexity를 반영해줄 수 있다.
 
 <br>
 
@@ -388,8 +373,6 @@
   - NN은 항상 적정 Depth에 대한 고민이 있었으나, 마지막 층에 GP을 적용해줌으로써 지금껏 고려하지 못한 Feature들을 포괄할 수 있다.
   
   - Kernel은 반면 고려할 수 있는 경우가 너무 적었다. 따라서 NN에서 Kernel을 중첩시키는 방향, DEEP Kernel 방향으로 접근한다.
-
-
 
 -----
 
@@ -434,8 +417,6 @@
   > 즉, hyperparameter는 m(argin) 뿐이다. m을 조절하여 탐험과 활용 사이의 균형을 잡는다. 
   > 
   > 두번째 -> 3번째 줄은 t분포의 느낌. 
-
-
 
 <br>
 
