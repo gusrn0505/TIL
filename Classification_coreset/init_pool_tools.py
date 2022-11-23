@@ -18,10 +18,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
 
-# local stuff
-from dsets.mnist import MNIST
-from mymodels.mnist_net import Net
-from train_test import train, test
 
 def obtain_init_pool(args):
     '''
@@ -31,38 +27,25 @@ def obtain_init_pool(args):
     '''
     init_pool_size = args.init_size
 
-    train_file = os.path.join(args.dataset_root, 'train.csv')
-    init_file = os.path.join(args.dataset_root, 'init_pool.csv')
+    original_file = os.path.join(args.dataset_root, 'original.csv')
+
     labeled_file = os.path.join(args.dataset_root, 'labeled.csv')
     unlabeled_file = os.path.join(args.dataset_root, 'unlabeled.csv')
 
     # trainfile(주소 + 파일명)의 정보를 불러와라. 
-    train_rows = np.genfromtxt(train_file, delimiter=',', dtype=str)
+    original_rows = np.genfromtxt(original_file, delimiter=',', dtype=str)
 
-    np.random.shuffle(train_rows)
+    np.random.shuffle(original_rows)
 
     # 여기서의 Labeled data / Unlabeled 데이터는 개수만 나눠준다. 
-    # 그럼 여기서 데이터가 Label을 가지고 있어야 하는지 유무는 어떻게 체크할 수 있지? 
-    # 모델에서 Label 데이터를 어떻게 받아들이는지 확인해야겠네. 
-    labeled_rows = train_rows[:init_pool_size]
-    unlabeled_rows = train_rows[init_pool_size:]
-    print(labeled_rows.shape)
-    print(unlabeled_rows.shape)
-
-
-    # 이게 양식이 잘못 됐다고? 
-    # 숫자값을 string으로 인식할 줄 알고 이렇게 한 건가? 
-    # 일단 $s,$s 을 $f, $f로 변경해보겠음 
-    # 뜨아.. $s, $s 가 아니라 $s 하나만 넣는 거였다. 
-
+    # 현재 init pool size =0 임. 추후 sampling에 따라서 추가할 예정
+    # 현재 unlabeled_row에도 label이 추가되어 있는 상황. 나중에 정보를 읽을 때 sample['label'] 이 형태로 label을 불러올 예정. 
+    labeled_rows = original_rows[:init_pool_size]
+    unlabeled_rows = original_rows[init_pool_size:]
+ 
     # labeled_file(주소 + 파일명)에 Llabeled_rows ndarray 정보를 저장해라 
-    np.savetxt(labeled_file, labeled_rows,'%s',delimiter=',')
-    np.savetxt(init_file, labeled_rows,'%s',delimiter=',')
-    np.savetxt(unlabeled_file, unlabeled_rows,'%s',delimiter=',')
-
-
-#    np.savetxt(labeled_file, labeled_rows,'%s,%s',delimiter=',')
-#    np.savetxt(init_file, labeled_rows,'%s,%s',delimiter=',')
-#    np.savetxt(unlabeled_file, unlabeled_rows,'%s,%s',delimiter=',')
+    # dataset_root 위치에다가, labeled.csv / unlabeled.csv 로 저장해라. 
+    np.savetxt(labeled_file, labeled_rows,'%s',delimiter=',', encoding='utf-8')
+    np.savetxt(unlabeled_file, unlabeled_rows,'%s',delimiter=',', encoding='utf-8')
 
     return labeled_file, unlabeled_file

@@ -26,8 +26,8 @@ from torch.optim.lr_scheduler import StepLR
 # local stuff
 # 폴더에 있는 경우 A.B 형태로 기술 
 from dsets.mnist import MNIST
-from mymodels.mnist_net import AutoEncoder
-from train_test import train, test
+from mymodels.mnist_net import AutoEncoder, Net
+from train_test import train, test, ae_train
 from init_pool_tools import obtain_init_pool
 from coreset import Coreset_Greedy
 
@@ -45,11 +45,11 @@ def argparser():
                         help='random seed (default: 1)')
 
 # batch size 수정 필요 
-    parser.add_argument('--al-batch-size', default=500, type=int,
+    parser.add_argument('--al-batch-size', default=100, type=int,
                         help='number of samples to add in each iteration')
 
-# init size 수정 필요  
-    parser.add_argument('--init-size', default=1000, type=int,
+# init size 수정 필요. Batch size와 동일하게 
+    parser.add_argument('--init-size', default=0, type=int,
                         help='init pool size')
 
     # Dataset의 위치는 data\mnist_easy 에 있는 걸 default 로 여김 
@@ -57,8 +57,10 @@ def argparser():
     # arg.dataset_root 를 하면 따로 값을 설정하지 않는 한 default 값이 나온다. 
     parser.add_argument('--dataset-root', default='data/mnist_easy', type=str,
                         help='root directory of the dataset')
+
     parser.add_argument('--dataset-name', default='mnist', type=str,
                         help='dataset name')
+
     parser.add_argument('--output-dir', default='output', type=str,
                         help='dataset name')
 
@@ -68,15 +70,22 @@ def argparser():
 
 
 # Sampling method는 coreset 하나다! 
-    parser.add_argument('--sampling-method', default='random', type=str,
+    parser.add_argument('--sampling-method', default='coreset', type=str,
                         help='one of random, coreset')
 
-    parser.add_argument('--max-eps', type=int, default=10, metavar='N',
+    parser.add_argument('--max-eps', type=int, default=1, metavar='N',
                         help='max episodes of active learning')
-    # bald method 가 의미하는 건 뭘까? Sampling 방식 중에 Bald method 라는 게 있음. 
+
 
     parser.add_argument('--dropout-iterations', type=int, default=5, metavar='N',
                         help='dropout iterations for bald method')
+
+    # 
+    parser.add_argument('--hidden-dim1', type=int, default=64, metavar='N',
+                        help='first hidden dimension of AE')
+
+    parser.add_argument('--hidden-dim2', type=int, default=32, metavar='N',
+                        help='second hidden dimension of AE')
 
     # batch-size 인자 추가하기. type = int, default =32, 인자의 이름은 "N", -h로 인자에 대해 찾으면 아래 메시지가 나옴
     parser.add_argument('--batch-size', type=int, default=32, metavar='N',
@@ -129,7 +138,9 @@ def remove_rows(unlabel_dataset, sampling_dataset):
 # 모델 학습 간 loader에 있는 정보들을 모델에 입력할 수 있도록 구분시켜 준 후, 
 # GPU에서 model.get_features 시행. 이후에 CPU 메모리로 돌려서 featrue 반환
 
+# loader는 iterative 한 객체. 
 # Model을 Net에서 Autoencoder로 바꿀 것.
+# 그냥 distance를 구한 경우, 아닌 경우 구분해볼 것. 
 def get_features(model, loader):
     features = []
 
@@ -144,65 +155,20 @@ def get_features(model, loader):
             # sample의 feature들을 각각 변수(data, target 등)으로 분리하기  
             # data는 nd.array 형식임. 
             data = sample['image']
-            target = sample['label']
             img_name = sample['img_name'][0]
 
             # data.to(device) : GPU에 data의 복사본이 반환됨
-            data, target = data.to(device), target.to(device)
+            data= data.to(device)
 
 # model.get_features => model.get_codes 
             output = model.get_codes(data)
             ## pdb.set_trace()
 
-            count += 1
-            # if count > 10000:
-            #     break
-
-            # .cpu() : GPU 메모리에 올려져 있는 tensor을 cpu 메모리로 복사하는 method
-            # .numpy() : tensor을 numpy로 반환하여 반환. Cpu에 있는 tensor에 대해서만 사용 가능
             features.append(output.cpu().numpy())
             ## features.append((img_name, output.cpu().numpy()))
     return features
 
 """
-# uncertainty 등 우선순위를 비교할 수 있는 기준을 계산하는 것 
-def get_probs(model, loader, stochastic=False):
-    probs = []
-    if stochastic:
-        # 모델을 Train mode로 변경. Stochasitic 이면 다르게 해야할 이유가 있나? 
-        model.train()
-    else:
-        model.eval()
-
-    count = 0
-    with torch.no_grad():
-        for sample in loader:
-            # data : ndarray 형식
-            data = sample['image'] 
-            target = sample['label']
-            img_name = sample['img_name'][0]
-
-            data, target = data.to(device), target.to(device)
-
-            # Stochastic일 경우 model의 stocastic_pred 함수를 실행 
-            if stochastic:
-                output = model.stochastic_pred(data)
-            
-            # model 에 그냥 data를 입력하는 것과, 위의 stochastic 일 때 랑 어떤 차이가 있나? 
-            output = model(data)
-
-            # convert log softmax into softmax outputs
-            prob = output.cpu().numpy()
-            # output의 [0]의 값이 의미하는 게 뭘까? 
-            prob = np.exp(prob[0])
-
-            probs.append(prob)
-
-            count += 1 # 엥 count가 역할을 하는 게 없네. 
-
-    return np.array(probs)
-
-
 # torch.utils.data.Dataset : 샘플과 정답(label)을 저장한다. 
 class MNIST(Dataset):
 
@@ -248,13 +214,14 @@ def active_sample(args, unlabeled_rows, sample_size, method='coreset', model=Non
         sample_rows = unlabeled_rows[:sample_size]
         return sample_rows
     
-    if method == 'coreset':
+    if method == 'ae_coreset':
         #create unlabeled loader
         data_transforms = transforms.Compose([
                                transforms.ToTensor(),
                                transforms.Normalize((0.1307,), (0.3081,))
                            ])
 
+        # subset을 train으로 하는게 맞을까? 
         unlab_dset = MNIST(args.dataset_root, subset='train',csv_file='unlabeled.csv',transform=data_transforms)
         unlab_loader = DataLoader(unlab_dset, batch_size=1, shuffle=False, **kwargs)
 
@@ -268,6 +235,7 @@ def active_sample(args, unlabeled_rows, sample_size, method='coreset', model=Non
         unlabeled_features = get_features(model, unlab_loader)# (img_name, features)
 
         all_features = labeled_features + unlabeled_features
+        # label data의 index가 어디까지인지 표기. 
         labeled_indices = np.arange(0,len(labeled_features))
 
         # Coreset_Greedy 함수 수정 필요! 결과값을 다르게 뽑아야 함!
@@ -283,7 +251,34 @@ def active_sample(args, unlabeled_rows, sample_size, method='coreset', model=Non
         sample_rows = unlabeled_rows[new_batch]
 
         return sample_rows
-    
+
+
+    if method == 'coreset':
+        # data_transforms 활용 x 
+
+        unlab_dset = MNIST(args.dataset_root, subset='train',csv_file='unlabeled.csv')
+        unlab_loader = DataLoader(unlab_dset, batch_size=1, shuffle=False, **kwargs)
+
+        #labeled dataloader
+        lab_dset = MNIST(args.dataset_root, subset='train',csv_file='labeled.csv')
+        lab_loader = DataLoader(lab_dset, batch_size=1, shuffle=False, **kwargs)
+
+        all_data = lab_loader + unlab_loader
+        labeled_indices = np.arange(0,len(lab_loader))
+
+        # Coreset_Greedy 함수 수정 필요! 결과값을 다르게 뽑아야 함!
+        coreset = Coreset_Greedy(all_data)
+
+        # unlabeled 데이터에서 sample_size 만큼 center point 뽑기 
+        new_batch, max_distance = coreset.sample(labeled_indices, sample_size)
+        
+        # unlabeled rows start after labeled rows in all_features
+        # so offset the indices
+        new_batch = [i - len(labeled_features) for i in new_batch]
+        
+        sample_rows = unlabeled_rows[new_batch]
+
+        return sample_rows
 
 
 # dest_dir 위치에 결과 기록하기. 입력할 결과들을 입력값으로 넣음 
@@ -296,7 +291,7 @@ def log(dest_dir, episode_id, sample_method, sample_time, accuracy, labeled_rows
         log_rows = [['Episode Id','Sample Method','Sampling Time (s)','Labeled Pool','Accuracy']]
     # 파일이 존재할 때에는 데이터를 처리해서 불러온다. 
     else:
-        log_rows = np.genfromtxt(log_file, delimiter=',', dtype=str).tolist()
+        log_rows = np.genfromtxt(log_file, delimiter=',', dtype=str, encoding='utf-8').tolist()
 
     # episod_id, sample_mthod, sample_time 등의 값을 추가한다. 
     log_rows.append([episode_id,sample_method, sample_time, len(labeled_rows), accuracy])
@@ -318,83 +313,8 @@ def log_picked_samples(dest_dir, samples, ep_id=0):
             # 그 다음으로 sample들의 feature들을 한 객체로 뭉쳐 추가해주기. 
             writer.writerow(s.tolist())
 
-# original 데이터를 구분해주기 위해서 함수 추가 
-def permutation_train_test_split(X, test_size=0.2, shuffle=True, random_state = 1004) : 
-    test_num = int(X.shape[0] * test_size)
-    train_num = X.shape[0] - test_num 
-
-    if shuffle : 
-        np.random.seed(random_state)
-        shuffled = np.random.permutation(X.shape[0])
-        X = X[shuffled, :]
-        X_train = X[:train_num]
-        X_test = X[train_num :]
-
-    else : 
-        X_train = X[:train_num]
-        X_test = X[train_num :]
-
-    return X_train, X_train
-
-"""
-# args 로 Dataset을 구분하여 저장한 다음, 그때 그때 필요한 값을 뽑아 쓰는 건 좋은 것 같다. 
-# 이 함수를 통해서 필요로 하는 데이터 셋들을 구분하는 거구나. 
-# train.csv 에 걍 더 지금 가지고 있는 csv을 넣으면 되는 건가? 
-def obtain_init_pool(args):
-    '''
-    Go to the dataset root. Get train.csv
-    shuffle train.csv and get the first "init_size" samples.
-    create three new csv files -> init_pool.csv, labeled.csv and unlabeled.csv
-    '''
-    init_pool_size = args.init_size
-
-    train_file = os.path.join(args.dataset_root, 'train.csv')
-    init_file = os.path.join(args.dataset_root, 'init_pool.csv')
-    labeled_file = os.path.join(args.dataset_root, 'labeled.csv')
-    unlabeled_file = os.path.join(args.dataset_root, 'unlabeled.csv')
-
-    train_rows = np.genfromtxt(train_file, delimiter=',', dtype=str)
-
-    np.random.shuffle(train_rows)
-
-    labeled_rows = train_rows[:init_pool_size]
-    unlabeled_rows = train_rows[init_pool_size:]
-
-    np.savetxt(labeled_file, labeled_rows,'%s,%s',delimiter=',')
-    np.savetxt(init_file, labeled_rows,'%s,%s',delimiter=',')
-    np.savetxt(unlabeled_file, unlabeled_rows,'%s,%s',delimiter=',')
-
-    return labeled_file, unlabeled_file
-"""
-
-"""
-# 모델을 학습할 때 필요한 과정들을 압축시켜 놓은 함수 
-def train(args, model, device, train_loader, optimizer, epoch):
-    model.train()
-    for batch_idx, sample in enumerate(train_loader):
-        data = sample['image']
-        target = sample['label']
-
-        data, target = data.to(device), target.to(device)
-        # pdb.set_trace()
-        optimizer.zero_grad()
-        output = model(data)
-        loss = F.nll_loss(output, target)
-        loss.backward()
-        optimizer.step()
-        if batch_idx % args.log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.item()))
-    return model
 
 
-    # 여기에 원 데이터를 넣으면 train.csv, test.csv 로 나눠줄 수 있도록 해주자. 
-    from sklearn.model_selection import train_test_split
-
-
-
-"""
 if __name__ == "__main__":
     args = argparser().parse_args()
     pprint.pprint(args)
@@ -412,66 +332,83 @@ if __name__ == "__main__":
     # Obtaining init pool - 추가 : Original.csv가 있다면 이를 Train과 Test로 구분해줌. 
     # 현재 코드에서 Train set 에는 Label이 달려 있어야 하나? ㅇㅇ 하나의 파일에서 Label과 데이터를 구분하고 있음. 
     original_file = os.path.join(args.dataset_root, 'original.csv')
-    original_rows = np.genfromtxt(original_file, delimiter=',', dtype=str)
-    train_original, test_original = permutation_train_test_split(original_rows, test_size=0.2, shuffle = True)
+    original_rows = np.genfromtxt(original_file, delimiter=',', dtype=str, encoding='utf-8')
 
-    origin_train_file = os.path.join(args.dataset_root, 'train.csv')
-    origin_test_file = os.path.join(args.dataset_root, 'test.csv')
-    
-    np.savetxt(origin_train_file, train_original,'%s',delimiter=',')
-    np.savetxt(origin_test_file, test_original,'%s',delimiter=',')
 
-    # 여기서 csv 파일을 먼저 받는데? 
+    # 여기서 csv 파일을 먼저 받는데? labeled / unlabeled 이 데이터들은 train/test dataset들과 무슨 역할을 하는가? 
     labeled_csv, unlabeled_csv = obtain_init_pool(args)
     print("Initial labeled pool created.")
 
-    # initial setup
-    # data transform을 어떻게 한다는 걸까. csv 파일을 넣으면 어떻게 되지? 
+# 여기까지 실행이 되었음. 
+
+    unlabeled_rows = np.genfromtxt(unlabeled_csv, delimiter=',', dtype=str, encoding='utf-8')
+
     data_transforms = transforms.Compose([
                            transforms.ToTensor(),
                            transforms.Normalize((0.1307,), (0.3081,))
                        ])
 
+    # neural network 학습하는 과정. 이걸 AE에 맞게 바꿔줘야 함. 
     # 데이터를 위치 등을 정리 및 sample = {'image': image, 'label': label, 'img_name': img_name_small} 형태로 수정해줌
+    # dataset_test 는 추후 pseudo labeling에 대한 예측으로 변경할 필요가 있음. 
+    ae_dataset_train = MNIST(args.dataset_root, subset='original', csv_file='original.csv', transform=data_transforms)
+    ae_train_loader = DataLoader(ae_dataset_train, batch_size=args.batch_size, shuffle=False, **kwargs)
+
+
+
+    model2 = AutoEncoder(28*28, args.hidden_dim1, args.hidden_dim2).to(device)
+    optimizer2 = optim.Adam(model2.parameters(), lr=args.lr) # setup the optimizer
+    # 학습률을 각 Step 마다 조절해주는 함수 
+    model2 = ae_train(args, model2, device, ae_train_loader, optimizer2, args.epochs)
+
+
+    # set the sample size
+    sample_size = args.al_batch_size
+    if len(unlabeled_rows) < sample_size:
+        sample_size = len(unlabeled_rows)
+
+    if args.sampling_method == "ae_coreset" : 
+        sample_rows = active_sample(args, unlabeled_rows, sample_size, method=args.sampling_method, model=model2)
+
+    if args.sampling_method == "coreset" : 
+        sample_rows = active_sample(args, unlabeled_rows, sample_size, method=args.sampling_method, model=None)
+
+    labeled_rows = sample_rows
+    np.savetxt(labeled_csv, labeled_rows,'%s,%s',delimiter=',', encoding='utf-8')
+
+    # update the unlabeled pool
+    unlabeled_rows = remove_rows(unlabeled_rows, sample_rows)
+    np.savetxt(unlabeled_csv, unlabeled_rows, '%s,%s', delimiter=',', encoding='utf-8')
+
+    print("Unlabeled pool size: ",len(unlabeled_rows))
+    print("Labeled pool size: ",len(labeled_rows))
+
     dataset_train = MNIST(args.dataset_root, subset='train',csv_file='labeled.csv',transform=data_transforms)
-    dataset_test = MNIST(args.dataset_root, subset='test', csv_file='test.csv', transform=data_transforms)
-    dataset_trial = MNIST(args.dataset_root, subset = 'trial',csv_file = 'init_pool.csv', transform=data_transforms)
-    print("len :", len(dataset_trial))
-    print("indexing :", dataset_trial[0],dataset_trial[1] )
-
-    # img_name = os.path.join(self.root_dir, self.subset, self.dataframe.iloc[idx,0])
-
-    # initial training
-
-    trial_loader = DataLoader(dataset_trial, batch_size =2, shuffle=True, **kwargs)
-    # 왜 Dataloader의 정보를 못 불러오는 걸까? 다른 예시에서는 잘 불러오는데? MNIST의 자료 정보가 이상한거라면 Dataloader 자체는 잘 실행이 되는게 이상하고
-    trial = iter(trial_loader)
-    # 이것도 안 되네. 왜 이번엔 print에서 터질까. 
-    print(next(trial)) 
-
-
-
     train_loader = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True, **kwargs)
+    dataset_test = MNIST(args.dataset_root, subset='test',csv_file='unlabeled.csv',transform=data_transforms)
     test_loader = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False, **kwargs)
+
+    # 최초 labeled_rows 도 sampling 된 값으로 설정 
 
 
 #    model = Net().to(device) # initialize the model.
 # Net 모델을 Autoencoder로 변경해줌. 변경해줌에 따라서 아래 코드를 변경해줘야할 수 있음. 
-    model = AutoEncoder().to(device)
-
-    optimizer = optim.Adam(model.parameters(), lr=args.lr) # setup the optimizer
+    model1 = Net().to(device)
+    optimizer1 = optim.Adam(model1.parameters(), lr=args.lr) # setup the optimizer
     # 학습률을 각 Step 마다 조절해주는 함수 
-    scheduler = StepLR(optimizer, step_size = 1, gamma=args.gamma)
-
+    scheduler1 = StepLR(optimizer1, step_size = 1, gamma=args.gamma)
 
     for epoch in range(1, args.epochs + 1):
         # train_test.py 의 train 함수를 통해 손 쉽게 모델 학습 진행 
-        model = train(args, model, device, train_loader, optimizer, epoch)
+        model1 = train(args, model1, device, train_loader, optimizer1, epoch)
         
-        scheduler.step()
+        scheduler1.step()
 
         # train_test.py 의 test 함수를 통해 손 쉽게 모델 학습 진행 
-    accuracy = test(args, model, device, test_loader)
+    # 추후 pseudo labeling dataset에 대해서 바꿔줄 필요가 있음. 
+    accuracy = test(args, model1, device, test_loader)
+
+
 
     # save model
     dest_dir = os.path.join(args.output_dir, args.dataset_name)
@@ -489,7 +426,7 @@ if __name__ == "__main__":
     save_path = os.path.join(dest_dir_name,'init.pth')
 
     
-    torch.save(model.state_dict(), save_path)
+    torch.save(model1.state_dict(), save_path)
     print("initial pool model saved in: ",save_path)
 
 
@@ -507,11 +444,13 @@ if __name__ == "__main__":
     # pdb.set_trace()
     # 기록 남기기
     log(dest_dir_name, 0, args.sampling_method, 0, accuracy, [0]*args.init_size)
-    log_picked_samples(dest_dir_name, np.genfromtxt(labeled_csv, delimiter=',', dtype=str))
+    log_picked_samples(dest_dir_name, np.genfromtxt(labeled_csv, delimiter=',', dtype=str, encoding='utf-8'))
 
+
+    print("First test clear")
 
     # start the active learning loop.
-    episode_id = 1
+    episode_id = 2
     while True:
 
         if episode_id > args.max_eps:
@@ -519,8 +458,8 @@ if __name__ == "__main__":
 
 
         # read the unlabeled file
-        unlabeled_rows = np.genfromtxt(unlabeled_csv, delimiter=',', dtype=str)
-        labeled_rows = np.genfromtxt(labeled_csv, delimiter=',', dtype=str)
+        unlabeled_rows = np.genfromtxt(unlabeled_csv, delimiter=',', dtype=str, encoding='utf-8')
+        labeled_rows = np.genfromtxt(labeled_csv, delimiter=',', dtype=str, encoding='utf-8')
 
         print("Episode #",episode_id)
 
@@ -537,7 +476,12 @@ if __name__ == "__main__":
 
         # sample
         sample_start = time.time()
-        sample_rows = active_sample(args, unlabeled_rows, sample_size, method=args.sampling_method, model=model)
+        # ae 기반 sample. ae_unlabeled_rows data 형성 필요 
+        if args.sampling_method == "ae_coreset" : 
+            sample_rows = active_sample(args, unlabeled_rows, sample_size, method=args.sampling_method, model=model2)
+
+        if args.smapling_method == "coreset" : 
+            sample_rows = active_sample(args, unlabeled_rows, sample_size, method=args.sampling_method, model=None)
         sample_end = time.time()
 
         # log picked samples
@@ -549,12 +493,12 @@ if __name__ == "__main__":
 
         # update the labeled pool
         labeled_rows = np.concatenate((labeled_rows,sample_rows),axis=0)
-        np.savetxt(labeled_csv, labeled_rows,'%s,%s',delimiter=',')
+        np.savetxt(labeled_csv, labeled_rows,'%s,%s',delimiter=',', encoding='utf-8')
 
 
         # update the unlabeled pool
         unlabeled_rows = remove_rows(unlabeled_rows, sample_rows)
-        np.savetxt(unlabeled_csv, unlabeled_rows, '%s,%s', delimiter=',')
+        np.savetxt(unlabeled_csv, unlabeled_rows, '%s,%s', delimiter=',', encoding='utf-8')
 
         print("Unlabeled pool size: ",len(unlabeled_rows))
         print("Labeled pool size: ",len(labeled_rows))
@@ -566,12 +510,12 @@ if __name__ == "__main__":
   
 
         model = Net().to(device) # initialize the model.
-        optimizer = optim.Adam(model.parameters(), lr=args.lr) # setup the optimizer
+        optimizer = optim.Adam(model1.parameters(), lr=args.lr) # setup the optimizer
         # scheduler = StepLR(optimizer, step_size = 1, gamma=args.gamma)
 
         for epoch in range(1, args.epochs + 1):
-            model = train(args, model, device, train_loader, optimizer, epoch)
-        accuracy = test(args, model, device, test_loader)
+            model1 = train(args, model1, device, train_loader, optimizer, epoch)
+        accuracy = test(args, model1, device, test_loader)
             # scheduler.step()
 
         # save model
