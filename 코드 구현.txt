@@ -2,6 +2,30 @@
 1. Distance matrix 제작 방법 
 2. auto encoder 적용 필요 
 
+문제점 발견 
+- 차원이 높을수록, 접하는 subgraph의 개수가 많아진다 => 조건을 만족시키기 어렵다. 
+- 현재로선 접하는 subgraph의 수를 적정양으로 줄여내는 것이 필요하다. 이를 줄이기 위해선 반지름을 줄이거나, 차원을 줄여야 한다.  
+
+- 반지름을 줄이는 것은 Sample size가 더욱 커져야 하기 때문에 취지와 맞지 않다. 
+- 따라서 정보양을 유지하면서 차원 축소를 해내는 것이 필요하다. 
+unsupervised dim-reduction에는 PCA, AE등이 있다. 
+
+단, 차원 축소가 loss되는 정도가 있다. 이것과 balance를 잘 맞춰야할듯
+reconstriction error을 줄이는 것이 중요하다. 
+=> 관련 방법들을 찾아봅시닷. 
+
+
+적정한 차원 축소 방안을 찾을 수 있나? 
+2차원 이여야 최대 6개로 줄일 수 있었다만, 
+3차원이면 주변에 최대 몇개까지 있을지는... 모르겠쿤.. 너무 복잡해진다. 
+n 차원이면 계산양이 미쳐날뛰기 시작한다.
+
+1개 차원이 추가될 때마다 접하는 subgraph의 개수가 최대 6배씩 늘어난다. 
+
+=> 그냥 coreset을 적용할 순 없다. 
+
+
+
 기존의 코드가 NN에 맞춰져 있기 때문에 코드를 대거 수정할 필요가 있다. 
 
 <구현할 것>
@@ -57,7 +81,7 @@ def labeling (input : sampling data vector, output : label)
 
 
 def make_subgraph (input : la_distance, sampling index, delta, output : W) 
-* subgraph 만들 때, label data는 Sampling index를 기반으로 중복되지 않도록 고려해줄 것. 
+* subgraph 만들 때, label data는 Sampling index를 기반ori으로 중복되지 않도록 고려해줄 것. 
 * 밀도 체크는 그때 그때 합시당. list_Gi의 개수만 세면 되니까. 
 - la_distance 에서 distance가 delta 보다 작거나 같으면 1의 값 부여. 아닌 경우 0의 값 부여. 이후에 Wij에서 i = index(sampling index)이며, j = sampling index 일 때 0이 값으로 부여. (label data는 subgraph에 속했다고 표시 x. 중복을 피하기 위해) 
 - x에 대해서 column은 어느 subgraph에 속하는지 확인가능 

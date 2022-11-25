@@ -19,13 +19,12 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
 
 
-def train(args, model, device, train_loader, optimizer, epoch):
+def train(args, model, device, labeled_dataset, labeled_dataset_label, optimizer, epoch):
     model.train()
     
     # for 절 자체에 오류가 나는 걸까, 아님 아래의 내용들에서 문제가 생기는 걸까. 
-    for batch_idx, sample in enumerate(train_loader):
-        data = sample['image']
-        target = sample['label']
+    for i, data in enumerate(labeled_dataset):
+        target = labeled_dataset_label[i]
 
         data, target = data.to(device), target.to(device)
         # pdb.set_trace()
@@ -34,14 +33,14 @@ def train(args, model, device, train_loader, optimizer, epoch):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
-        if batch_idx % args.log_interval == 0:
+        if i % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.item()))
+                epoch, i, len(labeled_dataset),
+                100. * i / len(labeled_dataset), loss.item()))
     return model
 
-
-def test(args, model, device, test_loader):
+"""
+def test(args, model, device, test_dataset, test_dataset_label, optimizer1, epoch) : 
     model.eval()
     test_loss = 0
     correct = 0
@@ -63,27 +62,4 @@ def test(args, model, device, test_loader):
         100. * correct / len(test_loader.dataset)))
 
     return 100. * correct/len(test_loader.dataset)
-
-
-# 아래 수정 필요 
-def ae_train(args, model, device, train_loader, optimizer, num_epochs):
-
-    # num_epoch를 epoch로 바꿔야 한다는 것 
-    for epoch in range(num_epochs):
-
-        epoch_loss = 0.
-        for batch_X, _ in train_loader:
-            batch_X = batch_X.to(device)
-            optimizer.zero_grad()
-
-      # Forward Pass
-            model.train()
-            outputs = model(batch_X)
-            train_loss = Loss(outputs, batch_X)
-            epoch_loss += train_loss.data
-
-      # Backward and optimize
-            train_loss.backward()
-            optimizer.step()
-
-    return model
+"""

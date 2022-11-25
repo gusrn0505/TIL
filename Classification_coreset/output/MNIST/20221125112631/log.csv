@@ -1,0 +1,2 @@
+Episode Id,Sample Method,Labeled Pool,Num of classification,Ratio,Accuracy
+0,ae_coreset,1000,7716,0.01,0.9612493519958528

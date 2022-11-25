@@ -21,54 +21,52 @@ from torch.optim.lr_scheduler import StepLR
 
 from sklearn.metrics import pairwise_distances
 
-# 수정 필요. 
+
 class Coreset_Greedy:
-    def __init__(self, all_pts):
+    def __init__(self, all_pts, num_labeldata):
         self.all_pts = np.array(all_pts)
         self.dset_size = len(all_pts)
+        self.num_label = num_labeldata
         self.min_distances = None
-        self.already_selected = []
-
         # reshape
-        feature_len = self.all_pts[0].shape[1]
+        feature_len = self.all_pts[0].shape[0]
         self.all_pts = self.all_pts.reshape(-1,feature_len)
 
         # self.first_time = True
 
-    def update_dist(self, centers, only_new=True, reset_dist=False):
+    def update_dist(self, centers, reset_dist=False):
         if reset_dist:
             self.min_distances = None
-        if only_new:
-            centers = [p for p in centers if p not in self.already_selected]
-        
-        if centers is not None:
-            x = self.all_pts[centers] # pick only centers
+
+        if len(centers) != 0:
+            x = [self.all_pts[i] for i in centers]
             dist = pairwise_distances(self.all_pts, x, metric='euclidean')
 
-            if self.min_distances is None:
-                self.min_distances = np.min(dist, axis=1).reshape(-1,1)
-            else:
-                self.min_distances = np.minimum(self.min_distances, dist)
+            self.min_distances = np.min(dist, axis=1).reshape(-1,1)  # 이게 문제. 
     
-    def sample(self, already_selected, sample_size):
+    def sample(self, labeled_index_list, sample_size):
 
-        # initially updating the distances
-        self.update_dist(already_selected, only_new=False, reset_dist=True)
-        self.already_selected = already_selected
+        # already_selected : 이전에 이미 labeling 된 것. 
+        self.already_selected = labeled_index_list
+        self.update_dist(labeled_index_list, reset_dist=True)
 
         # epdb.set_trace()
 
         new_batch = []
         # pdb.set_trace()
         for _ in range(sample_size):
-            if self.already_selected == []:
-                ind = np.random.choice(np.arange(self.dset_size))
+            if len(self.already_selected) == 0 and len(new_batch)==0 :
+                # ind 가 unlabeled data에 있도록 설정 
+                ind = np.random.choice(np.arange(self.dset_size - self.num_label)) + self.num_label
             else:
                 ind = np.argmax(self.min_distances)
-            
-            assert ind not in already_selected
-            self.update_dist([ind],only_new=True, reset_dist=False)
+                 
+            # assert ind not in already_selected
+            l1 = list(self.already_selected.copy())
             new_batch.append(ind)
+            l2 = l1 + new_batch
+            self.update_dist(l2, reset_dist=False)
+            
         
         max_distance = max(self.min_distances)
         print("Max distance from cluster : %0.2f" % max_distance)

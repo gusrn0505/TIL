@@ -7,9 +7,6 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 
-
-## AutoEncoder / ConvAutoEncoder 추가 
-
 class AutoEncoder(nn.Module):
   def __init__(self, input_dim, hidden_dim1, hidden_dim2):
     super(AutoEncoder, self).__init__()

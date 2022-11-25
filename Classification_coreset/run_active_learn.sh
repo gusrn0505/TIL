@@ -2,8 +2,9 @@ EPOCHS=50
 LR=0.001
 GAMMA=0.1
 INIT_SIZE=0
-AL_BSIZE=100
+AL_BSIZE=1000
 SAMPLE_METHOD=ae_coreset
+DIM_REDUCTION=AE
 HIDDEN_DIM1=64
 HIDDEN_DIM2=32
 DROOT=data/mnist_easy
@@ -15,6 +16,7 @@ CUDA_VISIBLE_DEVICES=0 python active_learn.py \
                       --gamma $GAMMA --init-size $INIT_SIZE \
                       --al-batch-size $AL_BSIZE \
                       --sampling-method $SAMPLE_METHOD \
+                      --dim-reduction $DIM_REDUCTION \
                       --hidden-dim1 $HIDDEN_DIM1 \
                       --hidden-dim2 $HIDDEN_DIM2 \
                       --dataset-name $DNAME \
