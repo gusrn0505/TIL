@@ -18,8 +18,6 @@
   
   > 수많은 형태의 자료들이 Graph로 이뤄져 있다. 
 
-
-
 - **Graph의 종류들** : Raw data를 Network로 표현할 때 데이터를 잃지 않아야 한다.
   
   - Undirected / Directed 
@@ -48,8 +46,6 @@
       > 
       > - ex)- 4는 C 노드를 통해 5와 연결되어 있다.   
 
-
-
 - Traditional Graph Representation 
   
   - Adjacency matrix를 활용
@@ -66,15 +62,11 @@
   
   <mark>→ 보다 Graph를 잘 Representation을 하기 위해 Deep learning을 도입하자!</mark> 
 
-
-
 - Challenges 
   
   - DNN은 정형화된 구조에 적용가능했다. 
   
   - Graph는 너무 복잡했다. (임의의 구조, 서로 다른 타입의 node와 edge, 큰 Dataset)
-
-
 
 ----
 
@@ -95,8 +87,6 @@
 - Community detection : Identify densily linked clusters of nodes 
 
 - Network similarity : How similar are two (sub) networks 
-
-
 
 ###### Typical Tasks
 
@@ -124,8 +114,6 @@
   > 
   > 부분으로 쪼개면 그 의미를 잃음 
 
-
-
 ---- 
 
 #### Traditional Methods
@@ -133,8 +121,6 @@
 - 효과적인 특성(feature)을 쓰는 것이 성능을 올리는 핵심이다. 
 
 - Traditional Methods는 Hand-crafted features를 사용한다. 
-
-
 
 ###### Node-level features
 
@@ -148,7 +134,7 @@
   
   - Node centrality : 각 노드별 중요도를 고려한다. 
     
-    -  Eigenvector centrality : 각 노드별 할당된 eigenvalue를 기반으로 측정 
+    - Eigenvector centrality : 각 노드별 할당된 eigenvalue를 기반으로 측정 
       
       ![](./picture/6-9.png)
       
@@ -175,8 +161,6 @@
     - Graphlet degree vector(GDV) :  주어진 노드별로 Graphlet의 개수 vector 측정
       
       ![](./picture/6-14.png)
-
-
 
 - Edge-level Feature 
   
@@ -221,9 +205,3 @@
       ![](./picture/6-19.png)
       
       ![](./picture/6-20.png)
-
-
-
-
-
-
