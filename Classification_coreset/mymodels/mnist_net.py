@@ -7,61 +7,6 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 
-class AutoEncoder(nn.Module):
-  def __init__(self, input_dim, hidden_dim1, hidden_dim2):
-    super(AutoEncoder, self).__init__()
-    
-    self.encoder = nn.Sequential(
-      nn.Linear(input_dim, hidden_dim1),
-      nn.ReLU(),
-      nn.Linear(hidden_dim1, hidden_dim2),
-      nn.ReLU()
-    )
-    
-    self.decoder = nn.Sequential(
-      nn.Linear(hidden_dim2, hidden_dim1),
-      nn.ReLU(),
-      nn.Linear(hidden_dim1, input_dim),
-      nn.ReLU()
-    )
-  
-  def forward(self, x):
-    out = x.view(x.size(0), -1)
-    out = self.encoder(out)
-    out = self.decoder(out)
-    out = out.view(x.size())
-    return out
-  
-  def get_codes(self, x):
-    return self.encoder(x)
-
-
-class ConvAutoEncoder(nn.Module):
-  def __init__(self):
-    super(ConvAutoEncoder, self).__init__()
-    
-    self.encoder = nn.Sequential(
-      nn.Conv2d(1, 3, kernel_size = 5),
-      nn.ReLU(),
-      nn.Conv2d(3, 5, kernel_size = 5),
-      nn.ReLU()
-    )
-    
-    self.decoder = nn.Sequential(
-      nn.ConvTranspose2d(5, 3, kernel_size = 5),
-      nn.ReLU(),
-      nn.ConvTranspose2d(3, 1, kernel_size = 5),
-      nn.ReLU()
-    )
-    
-  def forward(self, x):
-    out = self.encoder(x)
-    out = self.decoder(out)
-    return out
-
-  def get_codes(self, x):
-    return self.encoder(x)
-
 
 class Net(nn.Module):
     def __init__(self):
@@ -107,15 +52,15 @@ class Net(nn.Module):
         return output
 
     def forward(self, x):
-        x = self.conv1(x)
+        x = self.conv1(x) # (1,32,3,1)
         x = F.relu(x)
-        x = self.conv2(x)
+        x = self.conv2(x)  # (32, 64, 3, 1)
         x = F.max_pool2d(x, 2)
         x = self.dropout1(x)
         x = torch.flatten(x, 1)
-        x = self.fc1(x)
+        x = self.fc1(x) #(9216, 128)
         x = F.relu(x)
         x = self.dropout2(x)
-        x = self.fc2(x)
+        x = self.fc2(x)  #(128,10)
         output = F.log_softmax(x, dim=1)
         return output

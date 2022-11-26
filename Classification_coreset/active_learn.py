@@ -33,7 +33,7 @@ from sklearn.metrics import pairwise_distances
 from dsets.mnist import MNIST
 from mymodels.mnist_net import Net
 from auto_encoder import AutoEncoder, ConvAutoEncoder, ae_train
-from train_test import train
+from train_test import train, test
 from init_pool_tools import obtain_init_pool
 from coreset import Coreset_Greedy
 
@@ -113,9 +113,8 @@ def argparser():
                         help='Learning rate step gamma (default: 0.7)')
 
 
-######### 아래 코드들은 이번 Coreset selection 간 사용하지 않을 값들 ##################
-#    parser.add_argument('--log-interval', type=int, default=10, metavar='N',
-#                        help='how many batches to wait before logging training status')
+    parser.add_argument('--log-interval', type=int, default=10, metavar='N',
+                        help='how many batches to wait before logging training status')
 
 
 
@@ -462,8 +461,6 @@ if __name__ == "__main__":
 
     print("Well work!")
 
-    #log(dest_dir_name, 0, args.sampling_method, 0, accuracy, [0]*args.init_size)
-    #log_picked_samples(dest_dir_name, np.genfromtxt(labeled_csv, delimiter=',', dtype=str, encoding='utf-8'))
 
     # save model
     dest_dir = os.path.join(args.output_dir, args.dataset_name)
@@ -479,7 +476,7 @@ if __name__ == "__main__":
 
     if not os.path.exists(dest_dir_name):
         os.mkdir(dest_dir_name)
-    save_path = os.path.join(dest_dir_name,'init.pth')
+
 
     episode_id = 0
 
@@ -490,9 +487,6 @@ if __name__ == "__main__":
 
         log(dest_dir_name, episode_id, args.sampling_method, labeled_dataset_label, num_classification, ratio, score)
 
-
-""" Neural Network을 동일하게 비교하는 건 잠정 중단. 추후 Dataloader 및 pd dataframe을 제 조작해서 방법을 찾아봅시다.
-    # conv2(x) 에서 오류가 생기네 
     neural = Net().to(device)
     optimizer1 = optim.Adam(neural.parameters(), lr=args.lr) # setup the optimizer
     # 학습률을 각 Step 마다 조절해주는 함수 
@@ -507,37 +501,12 @@ if __name__ == "__main__":
 
         # train_test.py 의 test 함수를 통해 손 쉽게 모델 학습 진행 
     # 추후 pseudo labeling dataset에 대해서 바꿔줄 필요가 있음. 
-    accuracy = test(args, neural, device, test_dataset, test_dataset_label, optimizer1, epoch)
-
-
-
-
-
-    # 추후 Classification 이 추가됨에 따라 여기에 결과 저장 필요 
-
-    # torch.save(neural.state_dict(), save_path)
-    # print("initial pool model saved in: ",save_path)
-
-
-
-    # copy labeled csv and unlabeled csv to dest_dir
-    # pdb.set_trace()
-
-    # save config
-    with open(dest_dir_name + '/config.json', 'w') as f:
-        import json
-        # 파이썬 객체를 JSON 파일로 저장하기. 
-        json.dump(vars(args),f)
-    # save logs
-
-    # pdb.set_trace()
-    # 기록 남기기
-    #log(dest_dir_name, 0, args.sampling_method, 0, accuracy, [0]*args.init_size)
-    #log_picked_samples(dest_dir_name, np.genfromtxt(labeled_csv, delimiter=',', dtype=str, encoding='utf-8'))
-
+    accuracy = test(args, neural, device, unlabeled_dataset, unlabeled_dataset_label, optimizer1, epoch)
+    log(dest_dir_name, episode_id, "CNN", labeled_dataset_label, len(unlabeled_dataset_label), 0, accuracy)
 
     print("First test clear")
 
+    """
     # start the active learning loop.
     episode_id = 2
     while True:
