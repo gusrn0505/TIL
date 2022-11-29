@@ -1,7 +1,5 @@
 #### 8주차 - Graph Neural Network
 
-
-
 ##### Outline
 
 - **Graph Neural Network(GNN)**
@@ -23,10 +21,6 @@
   - Deep Multiplex Graph Infomax(DMGI)
   
   - Heterogenous GNN(HetGNN)
-
-
-
-
 
 ---- 
 
@@ -54,8 +48,6 @@
     
     - Large-scale : 노드와 Egde가 수백만에서 수십 억개가 있을 수 있다. 
 
-
-
 <br>
 
 - CNN에서 Convolution filter을 통해서 각 local receptive field 의 특징을 학습한다. 
@@ -65,8 +57,6 @@
   > ![](picture/8-2.png)
   
   - 서로 이웃 노드로부터 정보를 전달하고 결합한다. [Message passing]
-
-
 
 ---- 
 
@@ -79,8 +69,6 @@
   - Local network Neighborhood에 기반하여 Node Embdding을 만든다. 
     
     > ![](picture/8-4.png)
-
-
 
 <br>
 
@@ -103,8 +91,6 @@
   > ![](picture/8-6.png)
   
   - 만약 A가 값이 많이 없는 Sparse matrix 일 경우 계산양이 대폭 줄어들 수 있다. 
-
-
 
 <br>
 
@@ -132,8 +118,6 @@
     > 
     > L : ex)- adjacency information일 경우, 0 or 1의 값을 가지기에 Cross entropy 형태를 띈다.  
 
-
-
 ----
 
 #### Graph Attention Network(GAT)
@@ -146,13 +130,9 @@
   
   - GCN에서는 이웃 노드들이 서로 비중이 똑같을 것이라고 가정한다. ($\alpha_{uv} = \frac{1}{|N(v)|}$)
 
-
-
 - Attention은 각 데이터의 Semantic 부분에 가중치를 부여한다. 
   
   - 따라서 Attention을 활용하여 각 노드에 적절한 가중치를 부여할 수 있다. 
-
-
 
 <br> 
 
@@ -168,13 +148,161 @@
   > 
   > - 그리고 각각의 계산 값들을 Concat 한다. 
 
-
-
 - 또한 Multi head attention을 적용하여 복수의 Attention score을 만들어 낸다. 
   
   > ![](picture/8-13.png)
   > 
   > 이후 각각의 Attention score을 Aggregate 하여 최종 Embedding을 만든다. 
+
+
+
+
+
+--------
+
+#### GraphSAGE
+
+- Idea : GCN / GAT을 일반화하자. 
+  
+  > ![](picture/8-14.png)
+  > 
+  > Aggregation 방법으로 일반화 
+  > 
+  > - Mean / Pool / LSTM 등 다양하게 들어갈 수 있음. 
+  > 
+  > - LSTM의 경우가 가장 성능이 좋음 
+  > 
+  > Bias 부분을 일반화함. 
+
+
+
+-----
+
+##### Inductive capability of GNN
+
+- Inductive learning : Training 당시에 없었던 노드에 대해서도 Embedding을 얻을 수 있다. 
+  
+  - 이는 Embedding matrix에 대한 학습은 Deepwalk/node2vec을 통해 이미 마쳤기에 , 새로운 Node가 들어온다해서 새롭게 학습할 필요가 없어 가능하다. 
+  
+  - 대신 Embedding 자체가 아닌, Embedding을 활용하는 Aggregator와 Transformer을 학습하자. 
+
+
+
+<br>
+
+#### Deep Graph Infomax(DGI)
+
+###### 배경지식
+
+- **Mutual Information(MI)**
+  
+  - 두 변수가 공유하는 정보의 양을 측정한다. 
+    
+    > ![](picture/8-15.png)
+    
+    > 만약 X와 Y가 Independent 하다면 MI =0 이 된다. 
+    
+    - 최근까지 MI에 대한 계산이 Neural Network 상에서 안되었다. 
+    
+    - 하지만 2018년 ICML에서 발표된 "Mutual information neural estimation(MINE)" 을 통해서 이제 가능해졌다. 
+
+
+
+- **Deep Infomax** 
+  
+  - Image data에 대한 Unsupervised representation learning
+  
+  -  Idea : local patch와 Global representation 간의 Mutual information을 극대화한다.  
+
+
+
+- **DGI Idea** 
+  
+  > ![](picture/8-17.png)
+  > 
+  > 아래 Loss 함수를 최적화하는 것이 MI을 Maximize 하는 것과 같음이 논문에 밝혀져 있음. 
+  > 
+  > 아래에 놓여있는 $\tilde X, \tilde A$ 들은 C(corrupt graph)을 통해서  만들어낸 Graph들이다. 위의 값에 +, 아래의 값에 - 를 적용하여 Loss 함수를 만들어낸다. 
+  > 
+  > - 아래 있는 값들은 Generate한 값으로 봐야하나? 
+  
+  - Deep Informax를 Graph domain에 적용한다.
+  
+  - Image에서의 Local patch representation은 Graph에서의 Node representation과 같다. 
+    
+    - 이로써 Node의 특징을 추가적으로 고려한다.
+  
+  - GCN encoder을 학습한다.
+    
+    > ![](picture/8-16.png)
+    > 
+    > $\epsilon$  :GCN encoder
+    > 
+    > X : Feature  / A : Adjacency 
+    > 
+    > $h_1$ : Embedding vec
+    
+    - Local node neighborhood에 대해 반복하여 Aggregation 함으로써 Node representation을 생성한다. 
+    
+    - $h_i$는 node i 주변의 Graph patch들을 요약한다.(representation 한다)
+
+
+
+-----------
+
+#### GNNS with Edge embeddings
+
+- 동기 : Edges 또한 정보를 가지고 있을 것이다. 
+  
+  > ex)- 저자와 논문간의 관계 
+  > 
+  > ![](picture/8-18.png)
+
+
+
+---------
+
+### GNN on heterogeneous network
+
+- Multi-layer(Multiplex) Network 
+
+- R-GCN : Relational GCN 
+  
+  - Idea : GCN을 확장하여 서로 다른 종류의 Relationship까지 고려하자 
+    
+    > ![](picture/8-19.png)
+    > 
+    > ![](picture/8-20.png)
+
+
+
+<br> 
+
+#### DMGI : Unsupervised attributed Multiplex Network Embedding
+
+- Idea : Infomax 원리를 Multiplex network에도 적용하자! [DGI를 Multiplex network로 표현해보자]
+  
+  > ![](picture/8-21.png)
+  > 
+  > Schoomate 등 다양한 관계들 (Multiplex)을 반영하면서 Infomax 하자! 
+  
+  > 이때 어느 관계가 더 중요한지 Attention 을 통해서 비중을 정한다. 
+  > 
+  > ![](picture/8-22.png)
+  
+  > 최종적으로 Corrupted Network와 Original Network에 대해 Consensus Regularization 함으로써 Embedding 한다. 
+  > 
+  > ![](picture/8-23.png)
+
+
+
+--------
+
+#### Heterogeneous Graph Neural Network(HETGNN)
+
+- Idea : Multi type / Multi node 를 함께 고려하자 
+  
+  > ![](picture/8-24.png)
 
 
 
