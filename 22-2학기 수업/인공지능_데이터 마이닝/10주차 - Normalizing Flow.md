@@ -116,8 +116,6 @@
     > 
     > 즉, $|detJ(x_t)|$ 을 통해서 Transition 이후의 넓이 변화를 표현한다. 
 
-
-
 <br>
 
 ---- 
@@ -150,8 +148,6 @@
     
     - 태생을 바꿔버리면 Bijective 조건을 깨게 된다. 
 
-
-
 <br>
 
 - 생각해볼 점 
@@ -174,8 +170,6 @@
       
       - => 이로써 Flow model의 태생은 바꾸지 못한다는 단점을 해소할 수 있다. 
 
-
-
 <br>
 
 - Flow 모델을 수식으로 정리해보자. 여기서도 MLE을 추구한다. 
@@ -188,15 +182,11 @@
     
     - 예외로는 GAN이 있다. 서로간의 차이 값을 구하고자 한다. 
 
-
-
 <br>
 
 **이제 성능을 점검해보자.**
 
 - 일단 미분이 쉬워야한다. 그래야 계산하기 쉬울 거니까 :) 
-
-
 
 ##### Elementwise Flows - 각 성분들이 Independent 하다.
 
@@ -214,11 +204,7 @@
   
   > ![](picture/10-11.png)
 
-
-
 => 하지만 각 변수간의 상관성을 고려하지 못해 성능이 나오지 않는다.. 
-
-
 
 <br>
 
@@ -304,8 +290,6 @@
     > 
     > 위의 그림은 Single Layer임. 이를 중첩하면 Multi layer가 됨. 
 
-
-
 <br> 
 
 ##### Generalized Coupling Flow
@@ -330,8 +314,6 @@
     > 
     > Monotonically increase 하며 Inverse 되는 것들
 
-
-
 <br>
 
 ##### Diverse Suggestions on variable split
@@ -339,8 +321,6 @@
 - 그 외에도 Split 기준을 어떻게 하는 냐에 따라서 여러 변형이 있다. 
   
   > ![](picture/10-23.png)
-
-
 
 <br>
 
@@ -371,8 +351,6 @@
       > ![](picture/10-27.png)
       > 
       > 즉, 이와 같은 형태의 Bayesian Network을 가져야 한다. 
-      
-      
 
 ##### Autoregressive Flow
 
@@ -395,8 +373,6 @@
   > ![](picture/10-30.png)
   
   - 반면 Inference process의 경우 주어진 $x_1, x_2$을 대입하면 되기에 병렬화 가능하다. 
-  
-  
 
 <br>
 
@@ -431,5 +407,3 @@
   - 현재 Inference process는 Bayesian Network가 아니기 때문에 MCMC가 될 수 없다. 
   
   - 하지만 일부 변형을 거친다면 MCMC가 될 수 있다. 
-
-
