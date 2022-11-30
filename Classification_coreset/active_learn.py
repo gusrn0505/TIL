@@ -124,8 +124,8 @@ def argparser():
 # Unlabel dataset에서 Coreset selection을 통해서 Sampling 한 값들 없애기
 def remove_rows(unlabel_dataset, sampling_dataset):
 
-    len_unlabel = len(unlabel_dataset)
-    len_sampling = len(sampling_dataset)
+    unlabel_dataset = np.array(unlabel_dataset).tolist()
+    sampling_dataset = np.array(sampling_dataset).tolist()
 
     result = [item for item in unlabel_dataset if item not in sampling_dataset]
 
@@ -155,7 +155,7 @@ def get_features(model, dataset, device):
 
 
 # uncertainty, margin, coreset 등 다양한 방식으로 sampling 하기 
-def active_sample(unlabeled_dataset, labeled_dataset, sample_size, method='coreset', model=None, device="cpu"):
+def active_sample(unlabeled_dataset, labeled_dataset, sample_size, method='ae_coreset', model=None, device="cpu"):
     if method == 'ae_coreset':
 
         labeled_features = get_features(model, labeled_dataset, device) # (img_name, features)
@@ -181,29 +181,10 @@ def active_sample(unlabeled_dataset, labeled_dataset, sample_size, method='cores
         return sample_rows, new_batch, max_distance
 
 
-    if method == 'coreset':
-        # data_transforms 활용 x 
-
-        all_data = labeled_dataset + unlabeled_dataset
-        labeled_indices = np.arange(0,len(labeled_dataset))
-
-        # Coreset_Greedy 함수 수정 필요! 결과값을 다르게 뽑아야 함!
-        coreset = Coreset_Greedy(all_data)
-
-        # unlabeled 데이터에서 sample_size 만큼 center point 뽑기 
-        new_batch, max_distance = coreset.sample(labeled_indices, sample_size)
-        
-        # unlabeled rows start after labeled rows in all_features
-        # so offset the indices
-        new_batch = [i - len(labeled_dataset) for i in new_batch]
-        new_batch.sort()
-        sample_rows = [unlabeled_dataset[i] for i in new_batch]
-        return sample_rows, new_batch, max_distance
-
-
-
+# 수정 필요. 한번 Unlabeled data가 일부 데이터를 뺸 이후에선 Original dataset 과의 Index가 맞지 않음 
 def make_subgraph(sampling_index, original_dataset, radii, model):
-
+# original_dataset을 Label data로 바꿀 순 없나? 
+    # x는 Sample point 
     x = [original_dataset[i] for i in sampling_index]
     dataset = original_dataset
 
@@ -385,7 +366,8 @@ if __name__ == "__main__":
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
 
-    original_data = datasets.MNIST(
+    # 데이터 셋 변경 시 수정 필요 ####################################
+    original_data = datasets.CIFAR10(
         root="data",
         train=True,
         download=True,
@@ -401,7 +383,7 @@ if __name__ == "__main__":
     for sample in original_data : 
         original_all.append(sample)
         feature = np.array(sample[0])
-        original_dataset.append(list(feature.reshape(len(feature[0])*len(feature[0][0]))))
+        original_dataset.append(list(feature.reshape(3*len(feature[0])*len(feature[0][0]))))
         original_label.append(sample[1])
     
 
@@ -410,7 +392,8 @@ if __name__ == "__main__":
     labeled_dataset = [] 
     labeled_dataset_label = []
 
-    PATH = './weights/'
+    # 데이터 셋 변경 시 수정 필요 #####################################
+    PATH = './weights/CIFAR10/'
     dim_reduction = None
     if args.dim_reduction == "AE" : 
         dim_reduction = torch.load(PATH + 'AE.pt')  
@@ -421,10 +404,6 @@ if __name__ == "__main__":
         dim_reduction.load_state_dict(torch.load(PATH + 'CAE_state_dict.pt'))  
 
     print("Successfully loaded AE & CAE")
-
-    # 한번만 Train을 시킬 방법이 없을까? 
-    #ae_train(AE, ae_training_data, ae_test_data, device, AE_loss, AE_optimizer, args.ae_epochs, kwargs)
-    #ae_train(CAE, ae_training_data, ae_test_data, device, AE_loss, AE_optimizer, args.ae_epochs, kwargs)
 
 
     # set the sample size
@@ -471,7 +450,7 @@ if __name__ == "__main__":
         os.mkdir(dest_dir)
 
     now = datetime.now()
-    dest_dir_name = str(now.year) + str(now.month) + str(now.day) + str(now.hour) + str(now.minute) + str(now.second)
+    dest_dir_name = str(now.year) + str(".")+ str(now.month) + str(".") + str(now.day)+ str(".") + str(now.hour) + str(now.minute)
     dest_dir_name = os.path.join(dest_dir, dest_dir_name)
 
     if not os.path.exists(dest_dir_name):

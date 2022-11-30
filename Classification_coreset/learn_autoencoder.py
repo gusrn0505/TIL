@@ -37,15 +37,15 @@ if __name__ == "__main__":
     # use_cuda가 true라면 kwargs를 다음과 같이 지정하기. 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
-
-    ae_training_data = datasets.MNIST(
+    # 데이터 변경시 수정 필요 
+    ae_training_data = datasets.CIFAR10(
         root="data",
         train=True,
         download=True,
         transform=ToTensor()
     )
-
-    ae_test_data = datasets.MNIST(
+    # 데이터 변경시 수정 필요 
+    ae_test_data = datasets.CIFAR10(
         root="data",
         train=False,
         download=True,
@@ -53,25 +53,21 @@ if __name__ == "__main__":
     )
 
 
-    # AE.CAE 학습 시키기. 
-    AE = AutoEncoder(28 * 28, args.hidden_dim1, args.hidden_dim2)
+    # 데이터 셋의 차원에 따라 수정해야 함 
+    AE = AutoEncoder(3* 32 * 32, args.hidden_dim1, args.hidden_dim2)
     AE_loss = nn.MSELoss()
 
-    CAE = ConvAutoEncoder()
-    CAE_loss = nn.MSELoss()
-
+    
     AE = AE.to(device)
-    CAE = CAE.to(device)
 
     AE_optimizer = optim.Adam(AE.parameters(), lr=args.lr)
-    CAE_optimizer = optim.Adam(CAE.parameters(), lr=args.lr)
 
-    PATH = './weights/'
-
+    #데이터 변경시 수정 필요. 
+    PATH = './weights/CIFAR10/'
+    if not os.path.exists(PATH): os.mkdir(PATH)
 
         # 한번만 Train을 시킬 방법이 없을까? 
     ae_train(AE, ae_training_data, ae_test_data, device, AE_loss, AE_optimizer, args.ae_epochs, kwargs)
-    ae_train(CAE, ae_training_data, ae_test_data, device, AE_loss, AE_optimizer, args.ae_epochs, kwargs)
 
     torch.save(AE, PATH + 'AE.pt')  # 전체 모델 저장
     
@@ -81,6 +77,17 @@ if __name__ == "__main__":
         'optimizer': AE_optimizer.state_dict()
     }, PATH + 'AE_all.tar') 
 
+
+    """
+    CAE = ConvAutoEncoder()
+    CAE_loss = nn.MSELoss()
+
+    CAE = CAE.to(device)
+    CAE_optimizer = optim.Adam(CAE.parameters(), lr=args.lr)
+    ae_train(CAE, ae_training_data, ae_test_data, device, AE_loss, AE_optimizer, args.ae_epochs, kwargs)
+
+
+
     torch.save(CAE, PATH + 'CAE.pt')  # 전체 모델 저장
     
     torch.save(CAE.state_dict(), PATH + 'CAE_state_dict.pt')  # 모델 객체의 state_dict 저장
@@ -88,6 +95,7 @@ if __name__ == "__main__":
         'model': CAE.state_dict(),
         'optimizer': CAE_optimizer.state_dict()
     }, PATH + 'CAE_all.tar') 
+    """
 
 
     print("Finish training AE, CAE")

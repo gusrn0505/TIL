@@ -42,7 +42,7 @@ class Coreset_Greedy:
             x = [self.all_pts[i] for i in centers]
             dist = pairwise_distances(self.all_pts, x, metric='euclidean')
 
-            self.min_distances = np.min(dist, axis=1).reshape(-1,1)  # 이게 문제. 
+            self.min_distances = np.min(dist, axis=1).reshape(-1,1)  # 이게 문제.
     
     def sample(self, labeled_index_list, sample_size):
 
