@@ -88,11 +88,6 @@ def argparser():
     parser.add_argument('--dim-reduction', type=str, default="AE", metavar='LR',
                         help='method of dimension reduction')
 
-    parser.add_argument('--hidden-dim1', type=int, default=64, metavar='N',
-                        help='first hidden dimension of AE')
-
-    parser.add_argument('--hidden-dim2', type=int, default=32, metavar='N',
-                        help='second hidden dimension of AE')
 
     # batch-size 인자 추가하기. type = int, default =32, 인자의 이름은 "N", -h로 인자에 대해 찾으면 아래 메시지가 나옴
     parser.add_argument('--batch-size', type=int, default=32, metavar='N',
@@ -116,23 +111,7 @@ def argparser():
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
 
-
-
     return parser
-
-
-# Unlabel dataset에서 Coreset selection을 통해서 Sampling 한 값들 없애기
-def remove_rows(unlabel_dataset, sampling_dataset):
-
-    unlabel_dataset = np.array(unlabel_dataset).tolist()
-    sampling_dataset = np.array(sampling_dataset).tolist()
-
-    result = [item for item in unlabel_dataset if item not in sampling_dataset]
-
-    # 혹시나 samp에 속한 data를 뽑거나, 중복으로 뽑은 경우 오류 발생. 아마 reconstruction 중에 중복 값이 생길 수 있음. 
-    # assert len(result) == len_unlabel - len_sampling
-    return np.array(result)
-
 
 def get_features(model, dataset, device):
     features = []
@@ -142,15 +121,15 @@ def get_features(model, dataset, device):
     model.eval()
     # torch.no_grad : autograd engine을 비활성화시켜 필요한 메모리를 줄여주고 연산속도를 증가시킴 
     
+    dataloader = DataLoader(dataset, batch_size = 64) # 여기서 Dataloader로 보내는 구나. 
+
     with torch.no_grad() : 
-        for sample in dataset:
-            sample = torch.tensor(sample, requires_grad=True).to(device)
-            # data는 nd.array 형식임. 
+        for sample in dataloader:
+            sample = sample.clone().detach().to(device)
         
             output = model.get_codes(sample)
-
-            features.append(output.cpu().numpy())
-            ## features.append((img_name, output.cpu().numpy()))
+            features = features + list(output.cpu().numpy()) 
+    
     return features
 
 
@@ -160,7 +139,6 @@ def active_sample(unlabeled_dataset, labeled_dataset, sample_size, method='ae_co
 
         labeled_features = get_features(model, labeled_dataset, device) # (img_name, features)
         unlabeled_features = get_features(model, unlabeled_dataset, device)# (img_name, features)
-
 
         all_features = labeled_features + unlabeled_features
         # label data의 index가 어디까지인지 표기. 
@@ -207,7 +185,7 @@ def make_subgraph(sampling_index, original_dataset, radii, model):
     return np.array(subgraph), density_subgraph
 
 
-# 추가 수정 필요! 뭔가 이상함!
+
 def adjacency_subgraph(labeled_dataset, labeled_dataset_label, radii, model) : 
     dataset = labeled_dataset
     num_subgraph = len(labeled_dataset_label)
@@ -220,8 +198,7 @@ def adjacency_subgraph(labeled_dataset, labeled_dataset_label, radii, model) :
     for i, row in enumerate(dist) : 
         adj_d = np.where(row < 2*radii[0])[0] 
         for j, distance in enumerate(row) : 
-            if distance >= 2*radii[0] : adj_dist[i,j] = int(0)   
-            # 뭔가 이상.. 여기선 문제없지만, 밖에서 다시 거리를 재면 성립안하는 경우가 있음. 
+            if distance >= 2*radii[0] : adj_dist[i,j] = int(0)    
             elif 2*radii[0] > distance and distance >= radii[0]  : 
                 adj_dist[i,j] = int(1)
             elif i==j : adj_dist[i,j] = int(0) # 자기자신은 제거
@@ -383,7 +360,7 @@ if __name__ == "__main__":
     for sample in original_data : 
         original_all.append(sample)
         feature = np.array(sample[0])
-        original_dataset.append(list(feature.reshape(3*len(feature[0])*len(feature[0][0]))))
+        original_dataset.append(feature)
         original_label.append(sample[1])
     
 
@@ -393,17 +370,12 @@ if __name__ == "__main__":
     labeled_dataset_label = []
 
     # 데이터 셋 변경 시 수정 필요 #####################################
-    PATH = './weights/CIFAR10/'
-    dim_reduction = None
-    if args.dim_reduction == "AE" : 
-        dim_reduction = torch.load(PATH + 'AE.pt')  
-        dim_reduction.load_state_dict(torch.load(PATH + 'AE_state_dict.pt'))  
+    PATH = './weights/MNIST/'
+    AE = None
+    AE = torch.load(PATH + 'AE.pt')  
+    AE.load_state_dict(torch.load(PATH + 'AE_state_dict.pt'))  
 
-    if args.dim_reduction == "CAE" : 
-        dim_reduction = torch.load(PATH + 'CAE.pt')
-        dim_reduction.load_state_dict(torch.load(PATH + 'CAE_state_dict.pt'))  
-
-    print("Successfully loaded AE & CAE")
+    print("Successfully loaded AE")
 
 
     # set the sample size
@@ -411,16 +383,9 @@ if __name__ == "__main__":
     if len(unlabeled_dataset) < sample_size:
         sample_size = len(unlabeled_dataset)
 
-    if args.sampling_method == "ae_coreset" : 
-        print(args.sampling_method)
-        sample_dataset, sample_index,radius  = active_sample(unlabeled_dataset, labeled_dataset, sample_size, method=args.sampling_method, model=dim_reduction, device=device)
+    sample_dataset, sample_index,radius  = active_sample(unlabeled_dataset, labeled_dataset, sample_size, method=args.sampling_method, model=AE, device=device)
 
-    if args.sampling_method == "cae_coreset" : 
-        sample_dataset, sample_index,radius  = active_sample(unlabeled_dataset, labeled_dataset, sample_size, method=args.sampling_method, model=dim_reduction, device=device)
 
-    if args.sampling_method == "coreset" : 
-        sample_dataset, sample_index, radius = active_sample(unlabeled_dataset, labeled_dataset, sample_size, method=args.sampling_method, model=None, device=device)
-    
     sample_data = [unlabeled_dataset[i] for i in sample_index]
     sample_label = [unlabeled_dataset_label[i] for i in sample_index]
 
@@ -428,15 +393,15 @@ if __name__ == "__main__":
     labeled_dataset = sample_data[:]
     labeled_dataset_label = sample_label[:]
 
-    unlabeled_dataset = remove_rows(unlabeled_dataset, sample_data)
     for i in sample_index[::-1] : 
+        del unlabeled_dataset[i]
         del unlabeled_dataset_label[i]
 
     print("Unlabeled pool size: ",len(unlabeled_dataset))
     print("Labeled pool size: ",len(labeled_dataset))
 
-    subgraph, density_subgraph = make_subgraph(sample_index, original_dataset, radius, dim_reduction)
-    dist_class, adj_dist, classified_subgraph_index, pseudo_class_label = adjacency_subgraph(labeled_dataset, labeled_dataset_label, radius, dim_reduction)
+    subgraph, density_subgraph = make_subgraph(sample_index, original_dataset, radius, AE)
+    dist_class, adj_dist, classified_subgraph_index, pseudo_class_label = adjacency_subgraph(labeled_dataset, labeled_dataset_label, radius, AE)
 
     print("Well work!")
 
@@ -493,49 +458,40 @@ if __name__ == "__main__":
         if episode_id > args.max_eps:
             break
 
-        # read the unlabeled file
-        # 위 아래로 붙일 수 있도록 조정할 필요가 있음. 
-        unlabeled_rows = np.genfromtxt(unlabeled_csv, delimiter=',', dtype=str, encoding='utf-8')
-        labeled_rows = np.genfromtxt(labeled_csv, delimiter=',', dtype=str, encoding='utf-8')
-
         print("Episode #",episode_id)
 
 
         # sanity checks
         # 더 이상 남은 unlabled row가 없을 때 끝내기 
-        if len(unlabeled_rows) == 0:
-            break
+        if len(unlabeled_dataset_label) == 0: break
 
         # set the sample size
         sample_size = args.al_batch_size
-        if len(unlabeled_rows) < sample_size:
-            sample_size = len(unlabeled_rows)
+        if len(unlabeled_dataset) < sample_size:
+            sample_size = len(unlabeled_dataset_label)
 
         # sample
         sample_start = time.time()
         # ae 기반 sample. ae_unlabeled_rows data 형성 필요 
         if args.sampling_method == "ae_coreset" : 
-            sample_rows = active_sample(args, unlabeled_rows, sample_size, method=args.sampling_method, model=model2)
+            sample_dataset, sample_index, radius = active_sample(unlabeled_dataset, labeled_dataset, sampling_size, method="ae_coreset", model=dim_reduction, device="cuda")
 
-        if args.smapling_method == "coreset" : 
-            sample_rows = active_sample(args, unlabeled_rows, sample_size, method=args.sampling_method, model=None)
+        sample_data = [unlabeled_dataset[i] for i in sample_index]
+        sample_label = [unlabeled_dataset_label[i] for i in sample_index]
+
         sample_end = time.time()
-
-        # log picked samples
-        log_picked_samples(dest_dir_name, sample_rows, episode_id)
-
 
 
         sample_time = sample_end - sample_start
 
         # update the labeled pool
-        labeled_rows = np.concatenate((labeled_rows,sample_rows),axis=0)
-        np.savetxt(labeled_csv, labeled_rows,'%s,%s',delimiter=',', encoding='utf-8')
+        labeled_dataset = np.concatenate((labeled_dataset,sample_data),axis=0)
+        labeled_dataset_label = np.concatenate((labeled_dataset_label, sample_label), axis =0)
 
+        for i in sample_index[::-1] : 
+            del unlabeled_dataset[i]
+            del unlabeled_dataset_label[i]
 
-        # update the unlabeled pool
-        unlabeled_rows = remove_rows(unlabeled_rows, sample_rows)
-        np.savetxt(unlabeled_csv, unlabeled_rows, '%s,%s', delimiter=',', encoding='utf-8')
 
         print("Unlabeled pool size: ",len(unlabeled_rows))
         print("Labeled pool size: ",len(labeled_rows))

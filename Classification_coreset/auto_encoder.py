@@ -49,31 +49,79 @@ class AutoEncoder(nn.Module):
   def get_codes(self, x):
     return self.encoder(x)
 
+
 class ConvAutoEncoder(nn.Module):
-  def __init__(self):
+  def __init__(self, input_size, cnn_kernel, cnn_stride, cnn_padding):
     super(ConvAutoEncoder, self).__init__()
     
-    self.encoder = nn.Sequential(
-      nn.Conv2d(1, 3, kernel_size = 5),
+    # Encoder
+    self.cnn_layer1 = nn.Sequential(
+      
+      nn.Conv2d(1, 16, kernel_size = cnn_kernel, stride=cnn_stride, padding=2),
+      #nn.Conv2d(3, 16, kernel_size = cnn_kernel, stride=cnn_stride, padding=cnn_padding),
       nn.ReLU(),
-      nn.Conv2d(3, 5, kernel_size = 5),
+      nn.BatchNorm2d(16), 
+      nn.Conv2d(16, 32, kernel_size = cnn_kernel, stride=cnn_stride, padding=cnn_padding),
+      nn.ReLU(), 
+      nn.BatchNorm2d(32), 
+      nn.Conv2d(32, 64, kernel_size = cnn_kernel, stride=cnn_stride, padding=cnn_padding),
+      nn.ReLU(), 
+      nn.BatchNorm2d(64),
+      nn.MaxPool2d(2,2)
+      )
+
+
+    self.fc_encoder = nn.Sequential(
+      nn.Linear(256, 64),
+      nn.ReLU(),
+      nn.Linear(64, 8),
+      nn.ReLU(),
+      nn.Linear(8, 2),
       nn.ReLU()
     )
-    
-    self.decoder = nn.Sequential(
-      nn.ConvTranspose2d(5, 3, kernel_size = 5),
+
+    self.fc_decoder = nn.Sequential(
+      nn.Linear(2, 8),
       nn.ReLU(),
-      nn.ConvTranspose2d(3, 1, kernel_size = 5),
+      nn.Linear(8, 64),
+      nn.ReLU(),
+      nn.Linear(64, 256),
       nn.ReLU()
     )
+
+    # Decoder 
+    # ConvTranspose2d : output H/W = Kernel size + stride(input size -1) - 2 padding
+    # (N, 3, cnn2_size, cnn2_size) => (N, 3, cnn1_size, cnn1_size)
+    self.tran_cnn_layer1 = nn.Sequential(
+      nn.ConvTranspose2d(64, 64, kernel_size = cnn_kernel, stride =cnn_stride, padding =cnn_padding),
+      nn.ReLU(),
+      nn.BatchNorm2d(64), 
+      nn.ConvTranspose2d(64, 32, kernel_size = cnn_kernel, stride =cnn_stride, padding =cnn_padding),
+      nn.ReLU(),
+      nn.BatchNorm2d(32),
+      nn.ConvTranspose2d(32, 16, kernel_size = cnn_kernel, stride =cnn_stride, padding =cnn_padding),
+      nn.ReLU(),
+      nn.BatchNorm2d(16),
+      nn.ConvTranspose2d(16, 1, kernel_size = cnn_kernel, stride =cnn_stride, padding =2),
+      #nn.ConvTranspose2d(16, 3, kernel_size = cnn_kernel, stride =cnn_stride, padding =cnn_padding),
+      nn.ReLU()
+    )
+
     
   def forward(self, x):
-    out = self.encoder(x)
-    out = self.decoder(out)
+    out = self.cnn_layer1(x)
+    out = torch.flatten(out, 1) # batchsize - 64, 32 * cnn2^2  
+    out = self.fc_encoder(out) # 64, 32 * cnn2^2 -> 64, 2
+    out = self.fc_decoder(out) # 64, 2 => 64, 32 * cnn2^2 2048
+    out = out.view(len(x), 64, 2, 2)  # (batch_size, , H, W)
+    out = self.tran_cnn_layer1(out)
     return out
 
   def get_codes(self, x):
-    return self.encoder(x)
+    out = self.cnn_layer1(x) 
+    out = torch.flatten(out, 1)
+    out = self.fc_encoder(out)
+    return out 
 
 
 def ae_train(model, training_data, test_data, device, Loss, optimizer, num_epochs, kwargs):
@@ -82,6 +130,8 @@ def ae_train(model, training_data, test_data, device, Loss, optimizer, num_epoch
 
     best_test_loss = 99999999
     early_stop, early_stop_max = 0., 3.
+
+    
     train_dataloader = DataLoader(training_data, batch_size=64, shuffle=False, **kwargs)
     test_dataloader = DataLoader(test_data, batch_size=64, shuffle=False, **kwargs)
 
@@ -103,7 +153,7 @@ def ae_train(model, training_data, test_data, device, Loss, optimizer, num_epoch
             train_loss.backward()
             optimizer.step()
 
-        train_loss_arr.append(epoch_loss / len(train_dataloader.dataset))
+        train_loss_arr.append(epoch_loss / train_dataloader.batch_size)
 
         if epoch % 10 == 0:
             model.eval()
