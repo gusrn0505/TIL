@@ -32,6 +32,7 @@ from sklearn.metrics import pairwise_distances
 # 폴더에 있는 경우 A.B 형태로 기술 
 from dsets.mnist import MNIST
 from mymodels.mnist_net import Net
+from network_architectures import MNIST_BN_32_64_256, RGB_48_96_192_gp, RGB_128_256_down_gp
 from auto_encoder import AutoEncoder, ConvAutoEncoder, ae_train
 from train_test import train, test
 from init_pool_tools import obtain_init_pool
@@ -85,7 +86,7 @@ def argparser():
     parser.add_argument('--dropout-iterations', type=int, default=5, metavar='N',
                         help='dropout iterations for bald method')
 
-    parser.add_argument('--dim-reduction', type=str, default="AE", metavar='LR',
+    parser.add_argument('--dim-reduction', type=str, default="CAE", metavar='LR',
                         help='method of dimension reduction')
 
 
@@ -344,7 +345,7 @@ if __name__ == "__main__":
 
 
     # 데이터 셋 변경 시 수정 필요 ####################################
-    original_data = datasets.CIFAR10(
+    original_data = datasets.MNIST(
         root="data",
         train=True,
         download=True,
@@ -372,8 +373,9 @@ if __name__ == "__main__":
     # 데이터 셋 변경 시 수정 필요 #####################################
     PATH = './weights/MNIST/'
     AE = None
-    AE = torch.load(PATH + 'AE.pt')  
-    AE.load_state_dict(torch.load(PATH + 'AE_state_dict.pt'))  
+    AE = torch.load(PATH + 'CAE.pt')  
+    AE.load_state_dict(torch.load(PATH + 'CAE_state_dict.pt'))  
+
 
     print("Successfully loaded AE")
 
@@ -431,7 +433,11 @@ if __name__ == "__main__":
 
         log(dest_dir_name, episode_id, args.sampling_method, labeled_dataset_label, num_classification, ratio, score)
 
-    neural = Net().to(device)
+    #neural = Net().to(device)
+    neural = MNIST_BN_32_64_256().to(device)
+    #neural = RGB_48_96_192_gp().to(device)
+    #neural = RGB_128_256_down_gp.to(device)
+
     optimizer1 = optim.Adam(neural.parameters(), lr=args.lr) # setup the optimizer
     # 학습률을 각 Step 마다 조절해주는 함수 
     scheduler1 = StepLR(optimizer1, step_size = 1, gamma=args.gamma)

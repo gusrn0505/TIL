@@ -21,6 +21,7 @@ from torch.optim.lr_scheduler import StepLR
 
 
 from auto_encoder import AutoEncoder, ConvAutoEncoder, ae_train
+from network_architectures import MNIST_BN_32_64_256
 from active_learn import argparser
 
 if __name__ == "__main__":
@@ -55,10 +56,8 @@ if __name__ == "__main__":
 
 
     # 데이터 셋의 차원에 따라 수정해야 함 
-    AE = ConvAutoEncoder(28, 2, 2, 0)
+    AE = MNIST_BN_32_64_256(10, 2)
     AE_loss = nn.MSELoss()
-
-    
     AE = AE.to(device)
 
     #AE_optimizer = optim.Adam(AE.parameters(), lr=args.lr)
