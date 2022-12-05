@@ -1,3 +1,1 @@
-./run_active_learn.sh
-./run_active_learn.sh
-./run_active_learn.sh
+python learn_autoencoder.py

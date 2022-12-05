@@ -29,8 +29,7 @@ class Coreset_Greedy:
         self.num_label = num_labeldata
         self.min_distances = None
         # reshape
-        feature_len = self.all_pts[0].shape[0]
-        self.all_pts = self.all_pts.reshape(-1,feature_len)
+        #self.all_pts = self.all_pts.reshape(-1,2)
 
         # self.first_time = True
 

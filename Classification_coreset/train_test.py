@@ -31,7 +31,8 @@ def train(args, model, device, labeled_dataset, labeled_dataset_label, optimizer
     data_loader = DataLoader(all_data, batch_size=32)
 
     for i, (data, target) in enumerate(data_loader):
-        data = data.view(len(target), 1, 28,28)
+        # 이미지 해상도에 따라서 수정해줘야 함
+        data = data.view(len(target), 3, 32,32)
         data, target = data.to(device), target.to(device)
         # pdb.set_trace()
         optimizer.zero_grad()
@@ -60,7 +61,8 @@ def test(args, model, device, test_dataset, test_dataset_label, optimizer1, epoc
     # dataloader에 index가 가능한가? 
     with torch.no_grad():
         for data, target in data_loader:
-            data = data.view(len(target), 1, 28,28)
+            # 이미지 해상도에 따라서 수정해줘야 함
+            data = data.view(len(target), 3, 32,32)
             data, target = data.to(device), target.to(device)
 
             output = model(data)

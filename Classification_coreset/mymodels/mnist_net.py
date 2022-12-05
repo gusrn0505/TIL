@@ -15,13 +15,14 @@ class Net(nn.Module):
         # (데이터 개수, 출력 채널 수, repre의 높이, repre의 폭) 의 형태로 결과 반환
         # 또는 (batch size, input 채널 수, 높이, 폭) => (배치 사이즈, output 채널 수, output 높이, output 폭) 으로 반환
         
+        # 데이터에 따라서 수정해줘야 함
         # 1개의 입력 채널(이미지)를 받아들이고, 사각 커널 사이즈가 3인 32개의 합성곱 특징들을 출력한다. 
-        self.conv1 = nn.Conv2d(1, 32, 3, 1)
+        self.conv1 = nn.Conv2d(3, 32, 3, 1)
         # 32개의 입력 계층을 받아들이고, 사각 커널 사이즈가 3인 합성곱 특징을 출력합니다. 
         self.conv2 = nn.Conv2d(32, 64, 3, 1)
         self.dropout1 = nn.Dropout2d(0.25)
         self.dropout2 = nn.Dropout2d(0.5)
-        self.fc1 = nn.Linear(9216, 128) # 9218 차원에서 128 차원으로 줄이기
+        self.fc1 = nn.Linear(12544, 128) # 9218 차원에서 128 차원으로 줄이기
         self.fc2 = nn.Linear(128, 10)
 
     # 기본적인 NN 모델에서 dim 128개로 만든 다음 학습. 
