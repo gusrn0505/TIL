@@ -2,13 +2,13 @@ EPOCHS=100
 LR=0.001
 GAMMA=0.1
 INIT_SIZE=0
-AL_BSIZE=250
+AL_BSIZE=5
 SAMPLE_METHOD=cae_coreset
 DROOT=data/MNIST
 DNAME=MNIST
 OUT_DIR=output/
 MAX_EPISODES=2
-LOG_INTERVAL=10
+LOG_INTERVAL=2
 CUDA_VISIBLE_DEVICES=0 python active_learn.py \
                       --epochs $EPOCHS --lr $LR \
                       --gamma $GAMMA --init-size $INIT_SIZE \

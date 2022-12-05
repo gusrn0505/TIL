@@ -34,7 +34,7 @@ from dsets.mnist import MNIST
 from mymodels.mnist_net import Net
 from network_architectures import MNIST_BN_32_64_256, RGB_48_96_192_gp, RGB_128_256_down_gp
 from auto_encoder import AutoEncoder, ConvAutoEncoder, ae_train
-from train_test import train, test
+from train_test import MNIST_train, CIFAR_train, MNIST_test, CIFAR_test
 from init_pool_tools import obtain_init_pool
 from coreset import Coreset_Greedy
 
@@ -135,48 +135,31 @@ def get_features(model, dataset, device):
 
 
 # uncertainty, margin, coreset 등 다양한 방식으로 sampling 하기 
-def active_sample(unlabeled_dataset, labeled_dataset, sample_size, method='ae_coreset', model=None, device="cpu"):
-    if method == 'ae_coreset':
+def active_sample(unlabeled_dataset, labeled_dataset, sample_size, model=None, device="cpu"):
+    labeled_features = get_features(model, labeled_dataset, device) # (img_name, features)
+    unlabeled_features = get_features(model, unlabeled_dataset, device)# (img_name, features)
 
-        labeled_features = get_features(model, labeled_dataset, device) # (img_name, features)
-        unlabeled_features = get_features(model, unlabeled_dataset, device)# (img_name, features)
-
-        all_features = labeled_features + unlabeled_features
+    all_features = labeled_features + unlabeled_features
         # label data의 index가 어디까지인지 표기. 
-        labeled_indices = np.arange(0,len(labeled_features))
+    labeled_indices = np.arange(0,len(labeled_features))
 
         #coreset = Coreset_Greedy(all_features)
-        coreset = Coreset_Greedy(all_features, len(labeled_features))
+    coreset = Coreset_Greedy(all_features, len(labeled_features))
 
         # unlabeled 데이터에서 sample_size 만큼 center point 뽑기, 당시 반지름 뽑기
-        new_batch, max_distance = coreset.sample(labeled_indices, sample_size)
+    new_batch, max_distance = coreset.sample(labeled_indices, sample_size)
         
         # unlabeled rows start after labeled rows in all_features
         # so offset the indices
-        new_batch = [i - len(labeled_features) for i in new_batch]
-        new_batch.sort()
+    new_batch = [i - len(labeled_features) for i in new_batch]
+    new_batch.sort()
 
-        sample_rows = [unlabeled_dataset[i] for i in new_batch]
-        return sample_rows, new_batch, max_distance
-
-
-# 수정 필요. 한번 Unlabeled data가 일부 데이터를 뺸 이후에선 Original dataset 과의 Index가 맞지 않음 
-def make_subgraph(sampling_index, original_dataset, radii, model):
-    # 저 Sampling index가 Original dataset의 index 면 아무 문제가 없겠다만.. 
-    # p 회차의 Sampling_point만 고려해줘야 함. Sample_label로 부여가능 
-
-    #make_subgraph(sampling_data, sampling_label, unlabeled_dataset, radii, model)
-    # x = sampling_data 
-    # dataset = unlabeled_data 가 되어야 하지 않나? p회차별로 subgraph를 그리는 대상이 달라지지 않나? 
-    # 아 아니다. original data로 해야 나중에 j가 index로 바로 부여될 수 있다. 
-    
-    # ㅇㅇㅇㅇ 이거 맞는 것 같은데. 그럼 Original_dataset이 아니라 unlabeled_dataset 이 들어와야겠네. 
-    # 그리고 어차피 Sampling point 들은 이미 빠져 있으니까 아래 추가 조건은 고려 안해도 되겠다. 
+    sample_rows = [unlabeled_dataset[i] for i in new_batch]
+    return sample_rows, new_batch, max_distance
 
 
-    # x는 Sample point 
-    x = [original_dataset[i] for i in sampling_index] # sampling point의 원본 데이터. original_index 말고 다른 값으로 변경 필요
-    # x = sampling_data
+def make_subgraph(sampling_label, original_dataset, radii, model):
+    x = [original_dataset[i[1]] for i in sampling_label] 
     dataset = original_dataset
 
     if model is not None : 
@@ -189,10 +172,7 @@ def make_subgraph(sampling_index, original_dataset, radii, model):
     density_subgraph = []
     for i, row in enumerate(dist) : 
         for j, distance in enumerate(row) : 
-            if distance > radii or j == sampling_index[i] : subgraph[i,j] =int(0) # 자기자신은 제거  
-            # 자기 자신을 제외한다를, distance =0 이면 제외 한다 조건을 바꿔도 되려나? 
-            # CAE가 잘못 project 한다면, 0,0 으로 수렴하기가 쉽다. 즉, 이런 오류에 robust 하게 조건을 잡아야 한다. 
-            # unlabeled data 랑만 거리를 비교한다면? 굳이 제거안해줘도 될 것 같은데? 
+            if distance > radii or j == sampling_label[i][1] : subgraph[i,j] =int(0) 
             else : subgraph[i,j] = int(1) 
         
         density_subgraph.append(sum(subgraph[i]))
@@ -202,19 +182,20 @@ def make_subgraph(sampling_index, original_dataset, radii, model):
 
 
 
-def adjacency_subgraph(labeled_dataset, labeled_dataset_label, radii, model) : 
-    dataset = labeled_dataset
-    num_subgraph = len(labeled_dataset_label)
-    if model is not None :
+
+def adjacency_subgraph(sample_data, sample_label, radii, model, M) :  
+    dataset = sample_data
+    num_subgraph = len(sample_label)
+    if model is not None : 
         dataset = get_features(model,dataset, device)
     
     dist = pairwise_distances(dataset, dataset, metric='euclidean')
     adj_dist = dist.copy()
     
     for i, row in enumerate(dist) : 
-        adj_d = np.where(row < 2*radii[0])[0] 
+        adj_d = np.where(row < 2*radii[0])[0] # 겹치는 것들의 index만 도출하기 
         for j, distance in enumerate(row) : 
-            if distance >= 2*radii[0] : adj_dist[i,j] = int(0)    
+            if distance >= 2*radii[0] : adj_dist[i,j] = int(0)   
             elif 2*radii[0] > distance and distance >= radii[0]  : 
                 adj_dist[i,j] = int(1)
             elif i==j : adj_dist[i,j] = int(0) # 자기자신은 제거
@@ -223,39 +204,39 @@ def adjacency_subgraph(labeled_dataset, labeled_dataset_label, radii, model) :
 
     classified_subgraph_index = []
 
+
     for i in range(num_subgraph) : 
         i_sub_class = "x"
-        adj_index = np.where(adj_dist[ :,i] ==1)
-        if len(adj_index[0])==0 : continue 
-        i_sub_class = labeled_dataset_label[i]
+        adj_index = np.where(adj_dist[ :,i] ==1)[0] 
+        if len(adj_index)==0 : continue 
+        i_sub_class = sample_label[i][0]
 
-        for j in adj_index[0] :  
-            if i_sub_class != labeled_dataset_label[j] : 
+        for j in adj_index :  
+            if i_sub_class != sample_label[j][0] : 
                 i_sub_class = "x"
                 continue
-        if i_sub_class != "x" : 
+        if i_sub_class != "x" and len(adj_index) >= M : 
             classified_subgraph_index.append(i)
     
-    classified_label = [labeled_dataset_label[i] for i in classified_subgraph_index]
+    classified_label = [sample_label[i] for i in classified_subgraph_index]
 
     return dist, adj_dist, classified_subgraph_index, classified_label
 
 
 
 def first_classification(classified_subgraph_index, pseudo_class_label, subgraph, density_subgraph, ratio) : 
-    dense_classified_subgraph_index = [density_subgraph[i] for i in classified_subgraph_index]
-    sorted_density = sorted(dense_classified_subgraph_index, reverse=True)
-    rank = int(ratio*len(sorted_density))
-
-    M = sorted_density[max(rank-1, 0)]
+    dense_classified_subgraph = [density_subgraph[i] for i in classified_subgraph_index]    
+    sort_by_density = sorted(dense_classified_subgraph, reverse=True)
+    rank = int(ratio*len(sort_by_density))
+    M = sort_by_density[max(rank-1, 0)] # 밀도 상위 M % 의 subgraph만을 사용. 
 
     classification = defaultdict(list)
     for i, index in enumerate(classified_subgraph_index) : 
         if density_subgraph[index] < M : continue
         x_index = list(np.where(subgraph[index] == 1)[0])
-        label = pseudo_class_label[i]
+        label = pseudo_class_label[i][0]
     
-        classification[label] = classification[label] + x_index
+        classification[label] += x_index
     return classification
 
 def check_performance(classification, original_label) : 
@@ -267,7 +248,7 @@ def check_performance(classification, original_label) :
         num_x = len(x_index)
         count = 0 
         for index in x_index :
-            if original_label[index] == i : count += 1 
+            if original_label[index][0] == i : count += 1 
         
         i_score = count/num_x
         all_score += count
@@ -314,33 +295,7 @@ def log_picked_samples(dest_dir, samples, ep_id=0):
 
 
 
-def check_class(subgraph, density_subgraph, M, labeled_dataset_label) : 
-    num_sample = np.shape(subgraph)[1]
 
-    classification =[-1]*num_sample 
-    classified_index = []
-
-    filtered_subgraph_index = []
-
-
-    # xk 가 속한 subgraph의 label이 모두 같을 확률 
-    for i in range(num_sample) : 
-        in_subgraph_index = np.where(subgraph[ :,i] ==1)
-        if len(in_subgraph_index[0])==0 : continue 
-        i_class = labeled_dataset_label[in_subgraph_index[0][0]]
-
-        for j in in_subgraph_index[1:] :  
-            if i_class != labeled_dataset_label[j] : 
-                i_class = -1
-                continue
-        if i_class != -1 : 
-            classification[i] = i_class
-            classified_index.append(i)
-    
-    score = len(classified_index)
-    pseudo_label = [classification[i] for i in classified_index]
-
-    return score, classified_index, pseudo_label
 
 
 
@@ -373,11 +328,11 @@ if __name__ == "__main__":
     original_dataset = []
     original_label = [] 
 
-    for sample in original_data : 
+    for i, sample in enumerate(original_data) : 
         original_all.append(sample)
         feature = np.array(sample[0])
         original_dataset.append(feature)
-        original_label.append(sample[1]) # 여기다가 index를 추가해버릴까?  (label, index) 이런 형태로! 
+        original_label.append([sample[1], i]) # 여기다가 index를 추가해버릴까?  (label, index) 이런 형태로! 
     
 
     unlabeled_dataset = original_dataset[:]
@@ -388,8 +343,8 @@ if __name__ == "__main__":
     # 데이터 셋 변경 시 수정 필요 #####################################
     PATH = './weights/MNIST/'
     AE = None
-    AE = torch.load(PATH + 'CAE.pt')  
-    AE.load_state_dict(torch.load(PATH + 'CAE_state_dict.pt'))  
+    CAE = torch.load(PATH + 'CAE.pt')  
+    CAE.load_state_dict(torch.load(PATH + 'CAE_state_dict.pt'))  
 
 
     print("Successfully loaded AE")
@@ -399,16 +354,21 @@ if __name__ == "__main__":
     sample_size = args.al_batch_size
     if len(unlabeled_dataset) < sample_size:
         sample_size = len(unlabeled_dataset)
-
-    sample_dataset, sample_index,radius  = active_sample(unlabeled_dataset, labeled_dataset, sample_size, method=args.sampling_method, model=AE, device=device)
+    
+    
+    sample_dataset, sample_index,radius  = active_sample(unlabeled_dataset, labeled_dataset, sample_size, model=CAE, device=device)
 
 
     sample_data = [unlabeled_dataset[i] for i in sample_index]
     sample_label = [unlabeled_dataset_label[i] for i in sample_index]
 
     # Sampling에 따른 Dataset 수정 
-    labeled_dataset = sample_data[:]
-    labeled_dataset_label = sample_label[:]
+    if len(labeled_dataset_label) == 0 :  
+        labeled_dataset = sample_data[:]
+        labeled_dataset_label = sample_label[:]
+    else : 
+        labeled_dataset = np.concatenate((labeled_dataset,sample_data),axis=0)
+        labeled_dataset_label = np.concatenate((labeled_dataset_label, sample_label), axis =0)
 
     for i in sample_index[::-1] : 
         del unlabeled_dataset[i]
@@ -417,8 +377,9 @@ if __name__ == "__main__":
     print("Unlabeled pool size: ",len(unlabeled_dataset))
     print("Labeled pool size: ",len(labeled_dataset))
 
-    subgraph, density_subgraph = make_subgraph(sample_index, original_dataset, radius, AE)
-    dist_class, adj_dist, classified_subgraph_index, pseudo_class_label = adjacency_subgraph(labeled_dataset, labeled_dataset_label, radius, AE)
+    subgraph, density_subgraph = make_subgraph(sample_label, original_dataset, radius, CAE)
+    # 마지막 숫자를 통해서 접하는 subgraph의 수 정할 수 있음. 
+    dist_class, adj_dist, classified_subgraph_index, pseudo_class_label = adjacency_subgraph(sample_dataset, sample_label, radius, CAE, 0)
 
     print("Well work!")
 
@@ -443,13 +404,14 @@ if __name__ == "__main__":
 
     ratio_term = list(np.arange(0.001, 1, 0.001))
     for ratio in ratio_term : 
+        if len(pseudo_class_label) == 0 : break 
         f_classification = first_classification(classified_subgraph_index, pseudo_class_label, subgraph, density_subgraph, ratio)
         num_classification, score, dic_score = check_performance(f_classification,original_label)
 
         log(dest_dir_name, episode_id, args.sampling_method, labeled_dataset_label, num_classification, ratio, score)
 
     #neural = Net().to(device)
-    neural = MNIST_BN_32_64_256().to(device)
+    neural = MNIST_BN_32_64_256(10).to(device)
     #neural = RGB_48_96_192_gp().to(device)
     #neural = RGB_128_256_down_gp.to(device)
 
@@ -460,13 +422,13 @@ if __name__ == "__main__":
     for epoch in range(1, args.epochs + 1):
         # train_test.py 의 train 함수를 통해 손 쉽게 모델 학습 진행 
         # train 수정 필요. 
-        neural = train(args, neural, device, labeled_dataset, labeled_dataset_label, optimizer1, epoch)
+        neural = MNIST_train(args, neural, device, labeled_dataset, labeled_dataset_label, optimizer1, epoch)
         
         scheduler1.step()
 
         # train_test.py 의 test 함수를 통해 손 쉽게 모델 학습 진행 
     # 추후 pseudo labeling dataset에 대해서 바꿔줄 필요가 있음. 
-    accuracy = test(args, neural, device, unlabeled_dataset, unlabeled_dataset_label, optimizer1, epoch)
+    accuracy = MNIST_test(args, neural, device, unlabeled_dataset, unlabeled_dataset_label, optimizer1, epoch)
     log(dest_dir_name, episode_id, "CNN", labeled_dataset_label, len(unlabeled_dataset_label), 0, accuracy)
 
     print("First test clear")
@@ -494,8 +456,7 @@ if __name__ == "__main__":
         # sample
         sample_start = time.time()
         # ae 기반 sample. ae_unlabeled_rows data 형성 필요 
-        if args.sampling_method == "ae_coreset" : 
-            sample_dataset, sample_index, radius = active_sample(unlabeled_dataset, labeled_dataset, sampling_size, method="ae_coreset", model=dim_reduction, device="cuda")
+        sample_dataset, sample_index, radius = active_sample(unlabeled_dataset, labeled_dataset, sampling_size, model=dim_reduction, device="cuda")
 
         sample_data = [unlabeled_dataset[i] for i in sample_index]
         sample_label = [unlabeled_dataset_label[i] for i in sample_index]
