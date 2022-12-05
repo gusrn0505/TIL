@@ -162,9 +162,10 @@ def active_sample(unlabeled_dataset, labeled_dataset, sample_size, method='ae_co
 
 # 수정 필요. 한번 Unlabeled data가 일부 데이터를 뺸 이후에선 Original dataset 과의 Index가 맞지 않음 
 def make_subgraph(sampling_index, original_dataset, radii, model):
-# original_dataset을 Label data로 바꿀 순 없나? 
+
     # x는 Sample point 
-    x = [original_dataset[i] for i in sampling_index]
+    x = [original_dataset[i] for i in sampling_index] # sampling point의 원본 데이터. original_index 말고 다른 값으로 변경 필요
+    # x = sampling_data
     dataset = original_dataset
 
     if model is not None : 
@@ -178,6 +179,9 @@ def make_subgraph(sampling_index, original_dataset, radii, model):
     for i, row in enumerate(dist) : 
         for j, distance in enumerate(row) : 
             if distance > radii or j == sampling_index[i] : subgraph[i,j] =int(0) # 자기자신은 제거  
+            # 자기 자신을 제외한다를, distance =0 이면 제외 한다 조건을 바꿔도 되려나? 
+            # CAE가 잘못 project 한다면, 0,0 으로 수렴하기가 쉽다. 즉, 이런 오류에 robust 하게 조건을 잡아야 한다. 
+            # unlabeled data 랑만 거리를 비교한다면? 굳이 제거안해줘도 될 것 같은데? 
             else : subgraph[i,j] = int(1) 
         
         density_subgraph.append(sum(subgraph[i]))
