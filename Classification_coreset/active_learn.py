@@ -162,6 +162,17 @@ def active_sample(unlabeled_dataset, labeled_dataset, sample_size, method='ae_co
 
 # 수정 필요. 한번 Unlabeled data가 일부 데이터를 뺸 이후에선 Original dataset 과의 Index가 맞지 않음 
 def make_subgraph(sampling_index, original_dataset, radii, model):
+    # 저 Sampling index가 Original dataset의 index 면 아무 문제가 없겠다만.. 
+    # p 회차의 Sampling_point만 고려해줘야 함. Sample_label로 부여가능 
+
+    #make_subgraph(sampling_data, sampling_label, unlabeled_dataset, radii, model)
+    # x = sampling_data 
+    # dataset = unlabeled_data 가 되어야 하지 않나? p회차별로 subgraph를 그리는 대상이 달라지지 않나? 
+    # 아 아니다. original data로 해야 나중에 j가 index로 바로 부여될 수 있다. 
+    
+    # ㅇㅇㅇㅇ 이거 맞는 것 같은데. 그럼 Original_dataset이 아니라 unlabeled_dataset 이 들어와야겠네. 
+    # 그리고 어차피 Sampling point 들은 이미 빠져 있으니까 아래 추가 조건은 고려 안해도 되겠다. 
+
 
     # x는 Sample point 
     x = [original_dataset[i] for i in sampling_index] # sampling point의 원본 데이터. original_index 말고 다른 값으로 변경 필요
@@ -366,7 +377,7 @@ if __name__ == "__main__":
         original_all.append(sample)
         feature = np.array(sample[0])
         original_dataset.append(feature)
-        original_label.append(sample[1])
+        original_label.append(sample[1]) # 여기다가 index를 추가해버릴까?  (label, index) 이런 형태로! 
     
 
     unlabeled_dataset = original_dataset[:]
@@ -395,7 +406,7 @@ if __name__ == "__main__":
     sample_data = [unlabeled_dataset[i] for i in sample_index]
     sample_label = [unlabeled_dataset_label[i] for i in sample_index]
 
-    # Sampling에 따른 Datset 수정 
+    # Sampling에 따른 Dataset 수정 
     labeled_dataset = sample_data[:]
     labeled_dataset_label = sample_label[:]
 
