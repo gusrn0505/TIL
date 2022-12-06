@@ -193,7 +193,6 @@ def adjacency_subgraph(sample_data, sample_label, radii, model, M) :
     adj_dist = dist.copy()
     
     for i, row in enumerate(dist) : 
-        adj_d = np.where(row < 2*radii[0])[0] # 겹치는 것들의 index만 도출하기 
         for j, distance in enumerate(row) : 
             if distance >= 2*radii[0] : adj_dist[i,j] = int(0)   
             elif 2*radii[0] > distance and distance >= radii[0]  : 

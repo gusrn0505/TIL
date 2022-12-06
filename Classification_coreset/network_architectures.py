@@ -68,7 +68,8 @@ class MNIST_BN_32_64_256 (nn.Module):
         x = self.drop1(x)
         x = F.relu(self.fc3(x)) #(1024 -> 256) 
         x = self.fc4(x) # 256 -> n_classes
-        return x
+        output = F.log_softmax(x, dim=1)
+        return output
 
 
 @architecture('rgb-48-96-192-gp', (3, 32, 32))
@@ -121,7 +122,8 @@ class RGB_48_96_192_gp (nn.Module):
 
         x = F.relu(self.fc4(x)) # (192, 192)
         x = self.fc5(x) # 192 -> n_classes
-        return x
+        output = F.log_softmax(x, dim=1)
+        return output
 
 
 @architecture('rgb-128-256-down-gp', (3, 32, 32))
@@ -175,7 +177,8 @@ class RGB_128_256_down_gp(nn.Module):
         x = x.view(-1, 128)
 
         x = self.fc4(x)
-        return x
+        output = F.log_softmax(x, dim=1)
+        return output
 
 
 
