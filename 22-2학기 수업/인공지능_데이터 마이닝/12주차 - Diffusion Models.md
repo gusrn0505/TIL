@@ -19,8 +19,6 @@
   > - 이후에 Noise를 점차 빼면서 둘의 간격을 유사하도록 조정한다. 
   
   - Mode Collapse는 density가 겹치는 점이 없어 생기는 현상이다. Long tail인 Noise를 더해준 결과 이젠 예방할 수 있다. 
-  
-  
 
 -----
 
@@ -35,8 +33,6 @@
   > MCMC : Burn-in 이후 Stationary 된 distribution이 Data distribution으로 가도록 한다. Markov Chain을 parament inference로 사용한 것. 
 
 - Reverse diffusion을 쭉 거치면 Prior data distribution $P_0$가 될 것이다. 
-
-
 
 <br>
 
@@ -59,8 +55,6 @@
   - Variational inference -> ELBO -> ELBO optimization이 필요하게 될 것. 
   
   - 이 조각을 다 맞추면 Diffustion이 된다. 
-
-
 
 <br> 
 
@@ -90,8 +84,6 @@
     
     - => <u>모델 posterior가 Model prior distribution, Variational distribution이 같아진다.</u> (?)
 
-
-
 <br>
 
 - 각 단계마다 동일한 구조를 가진다(self-similar). 따라서 한 스텝이 잘 작동하면 문제없다.
@@ -110,8 +102,6 @@
   
   - 이때 Transition 해봐야 distribution은 Normal일 것이라 기대한다. 더 나아가 Closed form solution이 존재할 것이라 기대한다. 
 
-
-
 <br>
 
 - 이제 SDE를 품으로써 임의의 시점의 p distribution ($p(x_{t-1}|x_0)$)을 근사하자 
@@ -119,9 +109,5 @@
   > ![](picture/12-6.png)
   > 
   > 위의 $q(x_t|x_{t-1})$ 을 t-1 번 진행한 것. 
-
-
-
-
 
 
