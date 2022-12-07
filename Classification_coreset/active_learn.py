@@ -114,7 +114,7 @@ def argparser():
 
     return parser
 
-def get_features(model, dataset, device):
+def get_features(model, dataset, device="cuda"):
     features = []
 
     # 모델 evaluation 과정에서 사용하지 않아야 하는 layer들을 알아서 off 시키는 함수 
@@ -135,7 +135,7 @@ def get_features(model, dataset, device):
 
 
 # uncertainty, margin, coreset 등 다양한 방식으로 sampling 하기 
-def active_sample(unlabeled_dataset, labeled_dataset, sample_size, model=None, device="cpu"):
+def active_sample(unlabeled_dataset, labeled_dataset, sample_size, model=None, device="cuda"):
     labeled_features = get_features(model, labeled_dataset, device) # (img_name, features)
     unlabeled_features = get_features(model, unlabeled_dataset, device)# (img_name, features)
 
@@ -163,8 +163,8 @@ def make_subgraph(sampling_label, original_dataset, radii, model):
     dataset = original_dataset
 
     if model is not None : 
-        x = get_features(model, x, device)
-        dataset = get_features(model, dataset, device)
+        x = get_features(model, x, device="cuda")
+        dataset = get_features(model, dataset, device="cuda")
 
     dist = pairwise_distances(x,dataset, metric='euclidean')
 
@@ -187,7 +187,7 @@ def adjacency_subgraph(sample_data, sample_label, radii, model, M) :
     dataset = sample_data
     num_subgraph = len(sample_label)
     if model is not None : 
-        dataset = get_features(model,dataset, device)
+        dataset = get_features(model,dataset, device="cuda")
     
     dist = pairwise_distances(dataset, dataset, metric='euclidean')
     adj_dist = dist.copy()
@@ -236,6 +236,11 @@ def first_classification(classified_subgraph_index, pseudo_class_label, subgraph
         label = pseudo_class_label[i][0]
     
         classification[label] += x_index
+    
+    # 중복 제거 및 정렬 
+    for i in classification.keys() : 
+        classification[i] = sorted(list(set(classification[i])))
+
     return classification
 
 def check_performance(classification, original_label) : 
@@ -258,7 +263,17 @@ def check_performance(classification, original_label) :
     
     return all_count, all_score, score
 
+def update_count_subgraph(count_subgraph, unlabeled_dataset_label, subgraph) : 
+    unlabeled_index = [i[1] for i in unlabeled_dataset_label]
+    for i in unlabeled_index : 
+        count = [0]*10
+        i_subgraph = np.where(subgraph[:, i]==1)[0]
+        for j in i_subgraph : 
+            count[labeled_dataset_label[j][0]] += 1
 
+        count_subgraph[i].append([count, radius[0]]) 
+    
+    return count_subgraph
 
 # dest_dir 위치에 결과 기록하기. 입력할 결과들을 입력값으로 넣음 
 def log(dest_dir, episode_id, sample_method,  label_dataset_label, num_classification, ratio, accuracy):
@@ -339,6 +354,11 @@ if __name__ == "__main__":
     labeled_dataset = [] 
     labeled_dataset_label = []
 
+    c_labeled_dataset = [] 
+    c_labeled_dataset_label = []
+
+    count_subgraph = defaultdict(list)
+
     # 데이터 셋 변경 시 수정 필요 #####################################
     PATH = './weights/MNIST/'
     AE = None
@@ -408,6 +428,43 @@ if __name__ == "__main__":
         num_classification, score, dic_score = check_performance(f_classification,original_label)
 
         log(dest_dir_name, episode_id, args.sampling_method, labeled_dataset_label, num_classification, ratio, score)
+
+
+    # SC1 방법 이후 데이터셋 구분하기 
+    erase_dataset_ori_index = []
+    pre_index = [j[1] for j in c_labeled_dataset_label]
+
+    for i in f_classification.keys(): 
+        index = f_classification[i]
+    
+        index = list(set(index) - set(pre_index))
+
+        new_labeled_dataset = [original_dataset[j] for j in index]
+        new_labeled_dataset_label = [ [i,j] for j in index ]
+        new_erase_original_index = [new_labeled_dataset_label[j][1] for j in range(len(new_labeled_dataset_label))]
+
+        if len(c_labeled_dataset_label) == 0 : 
+            c_labeled_dataset = new_labeled_dataset
+            c_labeled_dataset_label = new_labeled_dataset_label
+        
+        else : 
+            c_labeled_dataset = np.concatenate((c_labeled_dataset, new_labeled_dataset), axis=0)
+            c_labeled_dataset_label = np.concatenate((c_labeled_dataset_label, new_labeled_dataset_label), axis =0)
+    
+        erase_dataset_ori_index += new_erase_original_index
+
+    erase_unlabeled_index = [np.where(np.array(unlabeled_dataset_label).T[1] == i)[0][0]  for i in erase_dataset_ori_index]
+    erase_unlabeled_index.sort()
+
+
+    for i in erase_unlabeled_index[::-1] : 
+        del unlabeled_dataset[i]
+        del unlabeled_dataset_label[i]
+
+
+    update_count_subgraph(count_subgraph, unlabeled_dataset_label, subgraph)
+
+
 
     #neural = Net().to(device)
     neural = MNIST_BN_32_64_256(10).to(device)
