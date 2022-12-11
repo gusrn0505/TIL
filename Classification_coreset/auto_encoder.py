@@ -52,44 +52,6 @@ def get_net_and_shape_for_architecture(arch_name):
 
 
 
-class AutoEncoder(nn.Module):
-  def __init__(self, input_dim, hidden_dim1, hidden_dim2):
-    super(AutoEncoder, self).__init__()
-    
-    self.encoder = nn.Sequential(
-      nn.Linear(input_dim, hidden_dim1),
-      nn.ReLU(),
-      nn.Linear(hidden_dim1, hidden_dim2),
-      nn.ReLU(),
-      nn.Linear(hidden_dim2, 8),
-      nn.ReLU(),
-      nn.Linear(8, 2),
-      nn.ReLU()
-    )
-    
-    self.decoder = nn.Sequential(
-      nn.Linear(2, 8),
-      nn.ReLU(),
-      nn.Linear(8, hidden_dim2),
-      nn.ReLU(),
-      nn.Linear(hidden_dim2, hidden_dim1),
-      nn.ReLU(),
-      nn.Linear(hidden_dim1, input_dim),
-      nn.ReLU()
-    )
-  
-  def forward(self, x):
-    out = x.view(x.size(0), -1)
-    out = self.encoder(out)
-    out = self.decoder(out)
-    out = out.view(x.size())
-    return out
-  
-  def get_codes(self, x):
-    return self.encoder(x)
-
-
-
 @architecture('mnist-bn-32-64-256', (1, 28, 28))
 class MNIST_BN_32_64_256 (nn.Module):
     def __init__(self, n_classes, dim_reduction):
@@ -158,84 +120,109 @@ class MNIST_BN_32_64_256 (nn.Module):
         return x
 
 
+@architecture('rgb-48-96-192-gp', (3, 32, 32))
+class RGB_48_96_192_gp (nn.Module):
+    def __init__(self, n_classes, dim_reduction):
+        super(RGB_48_96_192_gp, self).__init__()
+
+        self.conv1_1 = nn.Conv2d(3, 48, (3, 3), padding=1)
+        self.conv1_1_bn = nn.BatchNorm2d(48)
+        self.conv1_2 = nn.Conv2d(48, 48, (3, 3), padding=1)
+        self.conv1_2_bn = nn.BatchNorm2d(48)
+        self.pool1 = nn.MaxPool2d((2, 2))
+
+        self.conv2_1 = nn.Conv2d(48, 96, (3, 3), padding=1)
+        self.conv2_1_bn = nn.BatchNorm2d(96)
+        self.conv2_2 = nn.Conv2d(96, 96, (3, 3), padding=1)
+        self.conv2_2_bn = nn.BatchNorm2d(96)
+        self.conv2_3 = nn.Conv2d(96, 96, (3, 3), padding=1)
+        self.conv2_3_bn = nn.BatchNorm2d(96)
+        self.pool2 = nn.MaxPool2d((2, 2))
+
+        self.conv3_1 = nn.Conv2d(96, 192, (3, 3), padding=1)
+        self.conv3_1_bn = nn.BatchNorm2d(192)
+        self.conv3_2 = nn.Conv2d(192, 192, (3, 3), padding=1)
+        self.conv3_2_bn = nn.BatchNorm2d(192)
+        self.conv3_3 = nn.Conv2d(192, 192, (3, 3), padding=1)
+        self.conv3_3_bn = nn.BatchNorm2d(192)
+        self.pool3 = nn.MaxPool2d((2, 2))
+
+        self.drop1 = nn.Dropout()
+
+        self.fc1 = nn.Linear(192, 192)
+        self.fc2 = nn.Linear(192, n_classes)
+        self.fc3 = nn.Linear(n_classes, dim_reduction)
+
+
+        self.fc_d1 = nn.Linear(dim_reduction, n_classes)
+        self.fc_d2 = nn.Linear(n_classes, 192)
+        self.fc_d3 = nn.Linear(192, 192)
 
 
 
+        self.convT1= nn.ConvTranspose2d(192, 192, (4,4)) # (192, 1, 1) -> (192, 4, 4)
+        self.convT1_bn = nn.BatchNorm2d(192)        
+        self.convT2  = nn.ConvTranspose2d(192, 96, (2,2), 2) # (192, 4, 4) -> (96, 8, 8)
+        self.convT2_bn = nn.BatchNorm2d(96)
+        self.convT3 = nn.ConvTranspose2d(96, 48, (2,2), 2) # (96,8,8) => (48, 16,16)
+        self.convT3_bn = nn.BatchNorm2d(48) 
+        self.convT4 = nn.ConvTranspose2d(48, 3, (2,2), 2) # (48,16,16) => (3, 32,32)
 
 
+    def forward(self, x):
+        x = F.relu(self.conv1_1_bn(self.conv1_1(x))) # (3,32,32) -> (48,32,32)
+        x = self.pool1(F.relu(self.conv1_2_bn(self.conv1_2(x)))) # (48,32,32) => (48,16,16)
 
-class ConvAutoEncoder(nn.Module):
-  def __init__(self, input_size, cnn_kernel, cnn_stride, cnn_padding):
-    super(ConvAutoEncoder, self).__init__()
-    
-    # Encoder
-    self.cnn_layer1 = nn.Sequential(
-      
-      nn.Conv2d(1, 16, kernel_size = cnn_kernel, stride=cnn_stride, padding=2),
-      #nn.Conv2d(3, 16, kernel_size = cnn_kernel, stride=cnn_stride, padding=cnn_padding),
-      nn.ReLU(),
-      nn.BatchNorm2d(16), 
-      nn.Conv2d(16, 32, kernel_size = cnn_kernel, stride=cnn_stride, padding=cnn_padding),
-      nn.ReLU(), 
-      nn.BatchNorm2d(32), 
-      nn.Conv2d(32, 64, kernel_size = cnn_kernel, stride=cnn_stride, padding=cnn_padding),
-      nn.ReLU(), 
-      nn.BatchNorm2d(64),
-      nn.MaxPool2d(2,2)
-      )
+        x = F.relu(self.conv2_1_bn(self.conv2_1(x))) #(48,16,16) => (96,16,16)
+        x = F.relu(self.conv2_2_bn(self.conv2_2(x))) # (96,16,16) => (96,16,16)
+        x = self.pool2(F.relu(self.conv2_3_bn(self.conv2_3(x)))) # (96,16,16) => (96,8,8)
+
+        x = F.relu(self.conv3_1_bn(self.conv3_1(x))) # (96,8,8) => (192, 8,8)
+        x = F.relu(self.conv3_2_bn(self.conv3_2(x))) # (192, 8,8) => (192, 8,8)
+        x = self.pool3(F.relu(self.conv3_3_bn(self.conv3_3(x)))) # (192, 8, 8) => (192, 4,4)
+
+        x = F.avg_pool2d(x, 4) # (192, 4, 4) => (192, 1, 1) # 이거 오토 encoder로 괜찮나? 일단 해보고 오류면 제외해보자. 
+        x = x.view(-1, 192)
+
+        x = self.drop1(x)
+        x = F.relu(self.fc1(x)) # (192, 192)
+        x = F.relu(self.fc2(x)) # 192 -> n_classes
+        x = self.fc3(x)
 
 
-    self.fc_encoder = nn.Sequential(
-      nn.Linear(256, 64),
-      nn.ReLU(),
-      nn.Linear(64, 8),
-      nn.ReLU(),
-      nn.Linear(8, 2),
-      nn.ReLU()
-    )
+        x = self.fc_d1(x)
+        x = F.relu(self.fc_d2(x))
+        x = self.drop1(x)
+        x = F.relu(self.fc_d3(x)) # 
 
-    self.fc_decoder = nn.Sequential(
-      nn.Linear(2, 8),
-      nn.ReLU(),
-      nn.Linear(8, 64),
-      nn.ReLU(),
-      nn.Linear(64, 256),
-      nn.ReLU()
-    )
+        x = x.view(-1, 192, 1, 1) # 192 -> (192, 1, 1)
+        x = F.relu(self.convT1_bn(self.convT1(x)))
+        x = F.relu(self.convT2_bn(self.convT2(x)))
+        x = F.relu(self.convT3_bn(self.convT3(x))) 
+        x = self.convT4(x)
+        return x
 
-    # Decoder 
-    # ConvTranspose2d : output H/W = Kernel size + stride(input size -1) - 2 padding
-    # (N, 3, cnn2_size, cnn2_size) => (N, 3, cnn1_size, cnn1_size)
-    self.tran_cnn_layer1 = nn.Sequential(
-      nn.ConvTranspose2d(64, 64, kernel_size = cnn_kernel, stride =cnn_stride, padding =cnn_padding),
-      nn.ReLU(),
-      nn.BatchNorm2d(64), 
-      nn.ConvTranspose2d(64, 32, kernel_size = cnn_kernel, stride =cnn_stride, padding =cnn_padding),
-      nn.ReLU(),
-      nn.BatchNorm2d(32),
-      nn.ConvTranspose2d(32, 16, kernel_size = cnn_kernel, stride =cnn_stride, padding =cnn_padding),
-      nn.ReLU(),
-      nn.BatchNorm2d(16),
-      nn.ConvTranspose2d(16, 1, kernel_size = cnn_kernel, stride =cnn_stride, padding =2),
-      #nn.ConvTranspose2d(16, 3, kernel_size = cnn_kernel, stride =cnn_stride, padding =cnn_padding),
-      nn.ReLU()
-    )
+    def get_codes(self, x):
+        x = F.relu(self.conv1_1_bn(self.conv1_1(x))) # (3,32,32) -> (48,32,32)
+        x = self.pool1(F.relu(self.conv1_2_bn(self.conv1_2(x)))) # (48,32,32) => (48,16,16)
 
-    
-  def forward(self, x):
-    out = self.cnn_layer1(x)
-    out = torch.flatten(out, 1) # batchsize - 64, 32 * cnn2^2  
-    out = self.fc_encoder(out) # 64, 32 * cnn2^2 -> 64, 2
-    out = self.fc_decoder(out) # 64, 2 => 64, 32 * cnn2^2 2048
-    out = out.view(len(x), 64, 2, 2)  # (batch_size, , H, W)
-    out = self.tran_cnn_layer1(out)
-    return out
+        x = F.relu(self.conv2_1_bn(self.conv2_1(x))) #(48,16,16) => (96,16,16)
+        x = F.relu(self.conv2_2_bn(self.conv2_2(x))) # (96,16,16) => (96,16,16)
+        x = self.pool2(F.relu(self.conv2_3_bn(self.conv2_3(x)))) # (96,16,16) => (96,8,8)
 
-  def get_codes(self, x):
-    out = self.cnn_layer1(x) 
-    out = torch.flatten(out, 1)
-    out = self.fc_encoder(out)
-    return out 
+        x = F.relu(self.conv3_1_bn(self.conv3_1(x))) # (96,8,8) => (192, 8,8)
+        x = F.relu(self.conv3_2_bn(self.conv3_2(x))) # (192, 8,8) => (192, 8,8)
+        x = self.pool3(F.relu(self.conv3_3_bn(self.conv3_3(x)))) # (192, 8, 8) => (192, 4,4)
+
+        x = F.avg_pool2d(x, 4) # (192, 4, 4) => (192, 1, 1) # 이거 오토 encoder로 괜찮나? 일단 해보고 오류면 제외해보자. 
+        x = x.view(-1, 192)
+
+        x = self.drop1(x)
+        x = F.relu(self.fc1(x)) # (192, 192)
+        x = F.relu(self.fc2(x)) # 192 -> n_classes
+        x = self.fc3(x) # n_classes -> dim_reduction 
+        return x
+
 
 
 def ae_train(model, training_data, test_data, device, Loss, optimizer, num_epochs, kwargs):
@@ -269,7 +256,7 @@ def ae_train(model, training_data, test_data, device, Loss, optimizer, num_epoch
 
         train_loss_arr.append(epoch_loss / train_dataloader.batch_size)
 
-        if epoch % 10 == 0:
+        if epoch % 5 == 0:
             model.eval()
 
             test_loss = 0.
@@ -295,8 +282,7 @@ def ae_train(model, training_data, test_data, device, Loss, optimizer, num_epoch
                 early_stop += 1
                 print('Epoch [{}/{}], Train Loss: {:.4f}, Test Loss: {:.4f}'.format(epoch, num_epochs, epoch_loss, test_loss))   
 
-        if early_stop >= early_stop_max: 
-            break
+        if early_stop >= early_stop_max: break
 
 
 
