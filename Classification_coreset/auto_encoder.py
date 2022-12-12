@@ -224,6 +224,111 @@ class RGB_48_96_192_gp (nn.Module):
         return x
 
 
+@architecture('rgb-128-256-down-gp', (3, 32, 32))
+class RGB_128_256_down_gp (nn.Module):
+    def __init__(self, n_classes, dim_reduction):
+        super(RGB_128_256_down_gp, self).__init__()
+
+        self.conv1_1 = nn.Conv2d(3, 128, (3, 3), padding=1)
+        self.conv1_1_bn = nn.BatchNorm2d(128)
+        self.conv1_2 = nn.Conv2d(128, 128, (3, 3), padding=1)
+        self.conv1_2_bn = nn.BatchNorm2d(128)
+        self.conv1_3 = nn.Conv2d(128, 128, (3, 3), padding=1)
+        self.conv1_3_bn = nn.BatchNorm2d(128)
+        self.pool1 = nn.MaxPool2d((2, 2))
+        self.drop1 = nn.Dropout()
+
+        self.conv2_1 = nn.Conv2d(128, 256, (3, 3), padding=1)
+        self.conv2_1_bn = nn.BatchNorm2d(256)
+        self.conv2_2 = nn.Conv2d(256, 256, (3, 3), padding=1)
+        self.conv2_2_bn = nn.BatchNorm2d(256)
+        self.conv2_3 = nn.Conv2d(256, 256, (3, 3), padding=1)
+        self.conv2_3_bn = nn.BatchNorm2d(256)
+        self.pool2 = nn.MaxPool2d((2, 2))
+        self.drop2 = nn.Dropout()
+
+        self.conv3_1 = nn.Conv2d(256, 512, (3, 3), padding=0)
+        self.conv3_1_bn = nn.BatchNorm2d(512)
+        self.conv3_2 = nn.Conv2d(512, 256, (1, 1), padding=1)
+        self.conv3_2_bn = nn.BatchNorm2d(256)
+        self.conv3_3 = nn.Conv2d(256, 128, (1, 1), padding=1)
+        self.conv3_3_bn = nn.BatchNorm2d(128)
+
+        self.fc1 = nn.Linear(128, n_classes)
+        self.fc2 = nn.Linear(n_classes, dim_reduction)
+
+
+        self.fc_d1 = nn.Linear(dim_reduction, n_classes)
+        self.fc_d2 = nn.Linear(n_classes, 128)
+
+
+
+        self.convT1= nn.ConvTranspose2d(128, 128, (6,6)) # (128, 1, 1) -> (128, 6, 6)
+        self.convT1_bn = nn.BatchNorm2d(128)        
+        self.convT2  = nn.ConvTranspose2d(128, 256, (2,2), 2, 2) # (128, 6, 6) -> (256, 8, 8)
+        self.convT2_bn = nn.BatchNorm2d(256)
+        self.convT3 = nn.ConvTranspose2d(256, 128, (2,2), 2) # (256,8,8) => (128, 16,16)
+        self.convT3_bn = nn.BatchNorm2d(128) 
+        self.convT4 = nn.ConvTranspose2d(128, 3, (2,2), 2) # (128,16,16) => (3, 32,32)
+
+
+    def forward(self, x):
+        x = F.relu(self.conv1_1_bn(self.conv1_1(x))) 
+        x = F.relu(self.conv1_2_bn(self.conv1_2(x))) 
+        x = self.pool1(F.relu(self.conv1_3_bn(self.conv1_3(x)))) # (3,32,32) -> (128,16,16)
+        x = self.drop1(x)
+
+        x = F.relu(self.conv2_1_bn(self.conv2_1(x))) 
+        x = F.relu(self.conv2_2_bn(self.conv2_2(x))) 
+        x = self.pool2(F.relu(self.conv2_3_bn(self.conv2_3(x)))) # => (256,8,8)
+        x = self.drop2(x)
+
+        x = F.relu(self.conv3_1_bn(self.conv3_1(x))) # (256,8,8) => (512, 6,6)
+        x = F.relu(self.conv3_2_bn(self.conv3_2(x))) # (512, 6,6) => (256, 8, 8) 
+        x = F.relu(self.conv3_3_bn(self.conv3_3(x))) # (256, 8,8) => (128, 10, 10)
+
+        x = F.avg_pool2d(x, 6) # (128, 1, 1) ?   
+        x = x.view(-1, 128)
+
+        x = F.relu(self.fc1(x)) # (128 => 10)
+        x = self.fc2(x) # 10 -> 3
+    
+
+        x = self.fc_d1(x)
+        x = F.relu(self.fc_d2(x))
+        x = self.drop1(x) 
+
+        x = x.view(-1, 128, 1, 1) # 128 -> (128, 1, 1)
+        x = F.relu(self.convT1_bn(self.convT1(x)))
+        x = F.relu(self.convT2_bn(self.convT2(x)))
+        x = F.relu(self.convT3_bn(self.convT3(x))) 
+        x = self.convT4(x)
+        return x
+
+    def get_codes(self, x):
+        x = F.relu(self.conv1_1_bn(self.conv1_1(x))) 
+        x = F.relu(self.conv1_2_bn(self.conv1_2(x))) 
+        x = self.pool1(F.relu(self.conv1_3_bn(self.conv1_3(x)))) # (3,32,32) -> (128,16,16)
+        x = self.drop1(x)
+
+        x = F.relu(self.conv2_1_bn(self.conv2_1(x))) 
+        x = F.relu(self.conv2_2_bn(self.conv2_2(x))) 
+        x = self.pool2(F.relu(self.conv2_3_bn(self.conv2_3(x)))) # => (256,8,8)
+        x = self.drop2(x)
+
+        x = F.relu(self.conv3_1_bn(self.conv3_1(x))) # (256,8,8) => (512, 6,6)
+        x = F.relu(self.conv3_2_bn(self.conv3_2(x))) # (512, 6,6) => (256, 8, 8) 
+        x = F.relu(self.conv3_3_bn(self.conv3_3(x))) # (256, 8,8) => (128, 10, 10)
+
+        x = F.avg_pool2d(x, 6) # (128, 1, 1) ?   
+        x = x.view(-1, 128)
+
+        x = F.relu(self.fc1(x)) # (128 => 10)
+        x = self.fc2(x) # 10 -> 3
+        return x
+
+
+
 
 def ae_train(model, training_data, test_data, device, Loss, optimizer, num_epochs, kwargs):
     train_loss_arr = []

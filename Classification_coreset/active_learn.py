@@ -13,7 +13,6 @@ from torchvision.transforms import ToTensor
 import torchvision.models as models 
 from collections import defaultdict
 
-import pdb
 from datetime import datetime
 import argparse
 # pretty print. 들여쓰기 등을 지원해준다. 
@@ -30,8 +29,6 @@ from sklearn.metrics import pairwise_distances
 
 # local stuff
 # 폴더에 있는 경우 A.B 형태로 기술 
-from dsets.mnist import MNIST
-from mymodels.mnist_net import Net
 from network_architectures import MNIST_BN_32_64_256, RGB_48_96_192_gp, RGB_128_256_down_gp
 from train_test import MNIST_train, CIFAR_train, MNIST_test, CIFAR_test
 from coreset import Coreset_Greedy
@@ -56,7 +53,7 @@ def argparser():
 
     parser.add_argument('--SC1', default=False, type=bool)
     parser.add_argument('--SC2', default=True, type=bool)
-
+    parser.add_argument('--num-class', default=10, type=int)
 
     parser.add_argument('--max-density', default=0, type=float)
     parser.add_argument('--min-density', default=0, type=float)    
@@ -65,7 +62,7 @@ def argparser():
     parser.add_argument('--threshold', type=float, default=0.9)
 
 
-    parser.add_argument('--dataset-name', default='mnist', type=str,
+    parser.add_argument('--dataset-name', default='CIFAR10', type=str,
                         help='dataset name')
 
     parser.add_argument('--output-dir', default='output', type=str,
@@ -227,7 +224,7 @@ def cal_prob(unlabeled_index, count_subgraph, device = "cuda") :
         i_count_subgraph[i] = F.softmax(torch.Tensor(i_count_subgraph[i]).to(device), dim=0)
         i_count_subgraph[i] = i_count_subgraph[i].cpu()
     
-    if num_iteration == 1 : result = i_count_subgraph[0].numpy()
+    if num_iteration == 1 : result = torch.tensor(i_count_subgraph[0])
         
     else : result = np.sum(i_count_subgraph, axis=0) / len(i_count_subgraph)
     return result 
@@ -285,13 +282,14 @@ def check_performance(classification, original_label) :
         count = 0 
         for index in x_index :
             if original_label[index][0] == i : count += 1 
-        
-        i_score = count/num_x
+        if num_x == 0 : i_score = 0
+        else : i_score = count/num_x
         all_score += count
         all_count += num_x
         score[i] = [num_x, i_score]
     
-    all_score = all_score/all_count
+    if all_count == 0 : return 0,0,0
+    else : all_score = all_score/all_count
     
     return all_count, all_score, score
 
@@ -404,14 +402,14 @@ if __name__ == "__main__":
 
 
     # 데이터 셋 변경 시 수정 필요 ####################################
-    original_data = datasets.MNIST(
+    original_data = datasets.FashionMNIST(
         root="data",
         train=True,
         download=True,
         transform=ToTensor()
     )
 
-    test_data = datasets.MNIST( 
+    test_data = datasets.FashionMNIST( 
         root="data",
         train=False,
         download=True,
@@ -454,7 +452,7 @@ if __name__ == "__main__":
     count_subgraph = defaultdict(list)
 
     # 데이터 셋 변경 시 수정 필요 #####################################
-    PATH = './weights/MNIST/'
+    PATH = './weights/FashionMNIST/'
     AE = None
     CAE = torch.load(PATH + 'CAE.pt')  
     CAE.load_state_dict(torch.load(PATH + 'CAE_state_dict.pt'))  
@@ -503,14 +501,14 @@ if __name__ == "__main__":
 
 
     # 밀도 측정. 실험 이후 조정 필요 
-    ratio_term = list(np.arange(0.01, 1-args.max_density, 0.01))
+    #ratio_term = list(np.arange(0.01, 1-args.max_density, 0.01))
     # 다음은 max_density를 조정해보자. 
-    for ratio in ratio_term : 
-        if len(pseudo_class_label) == 0 : break 
-        f_classification = first_classification(classified_subgraph_index, pseudo_class_label, subgraph, density_subgraph, ratio, args.max_density)
-        sc1_num_classification, sc1_score, sc1_dic_score = check_performance(f_classification,original_label)
+    #for ratio in ratio_term : 
+    #    if len(pseudo_class_label) == 0 : break 
+    #    f_classification = first_classification(classified_subgraph_index, pseudo_class_label, subgraph, density_subgraph, ratio, args.max_density)
+    #    sc1_num_classification, sc1_score, sc1_dic_score = check_performance(f_classification,original_label)
 
-        log(dest_dir_name, episode_id, "CS1", labeled_dataset_label, sc1_num_classification, args.max_density, ratio, sc1_score)
+    #    log(dest_dir_name, episode_id, "CS1", labeled_dataset_label, sc1_num_classification, args.max_density, ratio, sc1_score)
 
     f_classification = first_classification(classified_subgraph_index, pseudo_class_label, subgraph, density_subgraph, args.min_density, args.max_density)
     sc1_num_classification, sc1_score, sc1_dic_score = check_performance(f_classification,original_label)
@@ -520,14 +518,14 @@ if __name__ == "__main__":
     # SC1 방법 이후 SC1 labeled 데이터셋 구분하기 
     if args.SC1 == True : 
         erase_dataset_ori_index = []
-        pre_index = [j[1] for j in sc1_labeled_dataset_label]
         for i in f_classification.keys(): 
             index = f_classification[i]
-            index = list(set(index) - set(pre_index))
 
             new_labeled_dataset = [original_dataset[j] for j in index]
             new_labeled_dataset_label = [ [i,j] for j in index ]
             new_erase_original_index = [new_labeled_dataset_label[j][1] for j in range(len(new_labeled_dataset_label))]
+
+            if len(new_labeled_dataset_label) ==0 : continue
 
             if len(sc1_labeled_dataset_label) == 0 : 
                 sc1_labeled_dataset = new_labeled_dataset
@@ -548,6 +546,9 @@ if __name__ == "__main__":
 
     # 각 unlabeled 데이터에 대해서 각 Class / radius 기록하기 
     update_count_subgraph(count_subgraph, original_label, labeled_dataset_label, subgraph, radius)
+
+    f_score_lst = [] 
+    f_score_lst.append([sc1_num_classification, sc1_score])
 
 
     # Iteration 시작 
@@ -612,6 +613,9 @@ if __name__ == "__main__":
 
             log(dest_dir_name, episode_id, "CS1", labeled_dataset_label, sc1_num_classification, args.max_density, ratio, sc1_score)
 
+        f_score_lst.append([sc1_num_classification, sc1_score])
+
+
         f_classification = first_classification(classified_subgraph_index, pseudo_class_label, subgraph, density_subgraph, args.min_density, args.max_density)
         sc1_num_classification, sc1_score, sc1_dic_score = check_performance(f_classification,original_label)
         log(dest_dir_name, episode_id, "CS1", labeled_dataset_label, sc1_num_classification, args.max_density, args.min_density, sc1_score)
@@ -656,11 +660,11 @@ if __name__ == "__main__":
 
 
     # sc2 방법 적용 
-    threshold_term = list(np.arange(0.01, 1, 0.01))
-    for threshold in threshold_term : 
-        sc2_classification = second_classification(unlabeled_dataset_label, count_subgraph, threshold)
-        sc2_num_classification, sc2_score, sc2_dic_score = check_performance(sc2_classification, original_label)
-        log(dest_dir_name, episode_id, "CS2", labeled_dataset_label, sc2_num_classification, threshold, 0, sc2_score)
+#    threshold_term = list(np.arange(0.01, 1, 0.01))
+#    for threshold in threshold_term : 
+#        sc2_classification = second_classification(unlabeled_dataset_label, count_subgraph, threshold)
+#        sc2_num_classification, sc2_score, sc2_dic_score = check_performance(sc2_classification, original_label)
+#        log(dest_dir_name, episode_id, "CS2", labeled_dataset_label, sc2_num_classification, threshold, 0, sc2_score)
    
     sc2_classification = second_classification(unlabeled_dataset_label, count_subgraph, args.threshold)
     sc2_num_classification, sc2_score, sc2_dic_score = check_performance(sc2_classification, original_label)
@@ -700,7 +704,7 @@ if __name__ == "__main__":
 
     # 여기서 부턴 CNN 모델 학습!  
     neural_1 = MNIST_BN_32_64_256(10).to(device)
-    #neural = RGB_48_96_192_gp().to(device)
+    #neural_1 = RGB_48_96_192_gp(10).to(device)
     #neural = RGB_128_256_down_gp.to(device)
 
     optimizer1 = optim.Adam(neural_1.parameters(), lr=args.lr) # setup the optimizer
@@ -709,22 +713,31 @@ if __name__ == "__main__":
     # Label data만 사용  
     for epoch in range(1, args.first_epochs + 1):
         neural_1 = MNIST_train(args, neural_1, device, labeled_dataset, labeled_dataset_label, optimizer1, criterion, epoch)        
+        #neural_1 = CIFAR_train(args, neural_1, device, labeled_dataset, labeled_dataset_label, optimizer1, criterion, epoch)        
+        
         scheduler1.step()
 
     accuracy = MNIST_test(args, neural_1, device, test_dataset, test_label, criterion)
+    #accuracy = CIFAR_test(args, neural_1, device, test_dataset, test_label, criterion)
     log(dest_dir_name, episode_id, "CNN", labeled_dataset_label, len(unlabeled_dataset_label), 0,0, accuracy)
 
 
     # label data + SC1 
+
+    optimizer2 = optim.Adam(neural_1.parameters(), lr=args.lr ) # setup the optimizer
+    scheduler2 = StepLR(optimizer1, step_size = 10, gamma=args.gamma)
     
     if args.SC1 == True : 
         print("labeled data + SC1 labeling data")
         criterion = "SC1" 
         for epoch in range(1, args.second_epochs + 1):
             neural_1 = MNIST_train(args, neural_1, device, sc1_labeled_dataset, sc1_labeled_dataset_label, optimizer1, criterion, epoch)        
+            #neural_1 = CIFAR_train(args, neural_1, device, sc1_labeled_dataset, sc1_labeled_dataset_label, optimizer1, criterion, epoch)        
             scheduler1.step()
 
         accuracy = MNIST_test(args, neural_1, device, test_dataset, test_label, criterion)
+        #accuracy = CIFAR_test(args, neural_1, device, test_dataset, test_label, criterion)
+
         log(dest_dir_name, episode_id, "CNN", sc1_labeled_dataset_label, len(unlabeled_dataset_label), 0, 0, accuracy)
     
     if args.SC2 == True : 
@@ -733,12 +746,21 @@ if __name__ == "__main__":
         # Label data + SC1 + SC2 
         for epoch in range(1, args.third_epochs + 1):
             neural_1 = MNIST_train(args, neural_1, device, sc2_labeled_dataset, sc2_labeled_dataset_label, optimizer1, criterion, epoch)        
+            #neural_1 = CIFAR_train(args, neural_1, device, sc2_labeled_dataset, sc2_labeled_dataset_label, optimizer1, criterion, epoch)        
             scheduler1.step()
 
         accuracy = MNIST_test(args, neural_1, device, test_dataset, test_label, criterion)
+        #accuracy = CIFAR_test(args, neural_1, device, test_dataset, test_label, criterion)
+
         log(dest_dir_name, episode_id, "CNN", sc2_labeled_dataset_label, len(unlabeled_dataset_label), 0, 0, accuracy)
 
+    total = 0
+    total_score = 0 
+    for (num, score) in f_score_lst : 
+        total += num
+        total_score += num*score
+    final_sc1_score = total_score / total
     
-    print("label :", len(labeled_dataset_label), "SC1 :", len(sc1_labeled_dataset_label), sc1_score, "SC2 :", sc2_num_classification, sc2_score)
+    print("label :", len(labeled_dataset_label), "SC1 :", len(sc1_labeled_dataset_label), final_sc1_score, "SC2 :", sc2_num_classification, sc2_score)
 
 

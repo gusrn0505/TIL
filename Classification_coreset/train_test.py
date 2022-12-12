@@ -42,8 +42,8 @@ def MNIST_train(args, model, device, labeled_dataset, labeled_dataset_label, opt
     
     all_data = [(labeled_dataset[i], labeled_dataset_label[i][0]) for i in range(len(labeled_dataset_label))]
     
-    if criterion == "hard labeling" : batch_size = 4
-    elif criterion == "SC1" : batch_size = 32
+    if criterion == "hard labeling" : batch_size = 8
+    elif criterion == "SC1" : batch_size = 50
     else : batch_size = 100
 
     data_loader = DataLoader(all_data, batch_size= batch_size)
@@ -58,8 +58,7 @@ def MNIST_train(args, model, device, labeled_dataset, labeled_dataset_label, opt
         output = model(data) #여기가 문제가 생기는 지점 
 
         # loss 함수 수정 필요. 
-        if criterion == "hard labeling" : loss = mixup_criterion(F.nll_loss, output, target_a, target_b, lam)
-        else : loss = mixup_criterion(SC1_LabelSmoothingCrossEntropy(), output, target_a, target_b, lam)
+        loss = mixup_criterion(SC1_LabelSmoothingCrossEntropy(), output, target_a, target_b, lam)
         loss.backward()
         optimizer.step()
         if i % 100 == 0:
@@ -87,10 +86,8 @@ def MNIST_test(args, model, device, test_dataset, test_dataset_label, criterion)
             data, target = data.to(device), target.to(device)
 
             output = model(data)
-            if criterion == "hard labeling" : F.nll_loss(output, target, reduction='sum').item()
-            else : 
-                criterion = SC1_LabelSmoothingCrossEntropy()
-                test_loss += criterion(output, target).item()  # sum up batch loss
+            criterion = SC1_LabelSmoothingCrossEntropy()
+            test_loss += criterion(output, target).item()  # sum up batch loss
             pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
             correct += pred.eq(target.view_as(pred)).sum().item()
 
@@ -113,17 +110,21 @@ def CIFAR_train(args, model, device, labeled_dataset, labeled_dataset_label, opt
     labeled_dataset_label = torch.tensor(labeled_dataset_label)
     
     all_data = [(labeled_dataset[i], labeled_dataset_label[i][0]) for i in range(len(labeled_dataset_label))]
-    data_loader = DataLoader(all_data, batch_size=32)
+    if criterion == "hard labeling" : batch_size = 8
+    elif criterion == "SC1" : batch_size = 50
+    else : batch_size = 100
+    
+    data_loader = DataLoader(all_data, batch_size)
 
     for i, (data, target) in enumerate(data_loader):
-        data = data.view(len(target), 3, 32,32)
+        data = data.view(-1, 3, 32,32)
         target = target.type(torch.LongTensor)
         data, target = data.to(device), target.to(device)
         data, target_a, target_b, lam = mixup_data(data, target)
 
         optimizer.zero_grad()
         output = model(data) #여기가 문제가 생기는 지점 
-        loss = mixup_criterion(criterion, output, target_a, target_b, lam)
+        loss = mixup_criterion(SC1_LabelSmoothingCrossEntropy(), output, target_a, target_b, lam)
         loss.backward()
         optimizer.step()
         if i % 100 == 0:
@@ -147,11 +148,12 @@ def CIFAR_test(args, model, device, test_dataset, test_dataset_label, criterion)
     # dataloader에 index가 가능한가? 
     with torch.no_grad():
         for data, target in data_loader:
-            data = data.view(len(target), 3, 32,32)
+            data = data.view(-1, 3, 32,32)
             target = target.type(torch.LongTensor)
             data, target = data.to(device), target.to(device)
 
             output = model(data)
+            criterion = SC1_LabelSmoothingCrossEntropy()
             test_loss += criterion(output, target).item()  # sum up batch loss
             pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
             correct += pred.eq(target.view_as(pred)).sum().item()

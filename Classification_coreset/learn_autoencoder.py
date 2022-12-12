@@ -19,7 +19,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
 
-from auto_encoder import MNIST_BN_32_64_256, RGB_48_96_192_gp  ,ae_train
+from auto_encoder import MNIST_BN_32_64_256, RGB_48_96_192_gp  , RGB_128_256_down_gp, ae_train
 
 if __name__ == "__main__":
     use_cuda = True
@@ -28,14 +28,14 @@ if __name__ == "__main__":
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
     # 데이터 변경시 수정 필요 
-    ae_training_data = datasets.SVHN(
+    ae_training_data = datasets.FashionMNIST(
         root="data",
         train=True,
         download=True,
         transform=ToTensor()
     )
     # 데이터 변경시 수정 필요 
-    ae_test_data = datasets.SVHN(
+    ae_test_data = datasets.FashionMNIST(
         root="data",
         train=False,
         download=True,
@@ -44,8 +44,9 @@ if __name__ == "__main__":
 
 
     # 데이터 셋의 차원에 따라 수정해야 함 
-    #AE = MNIST_BN_32_64_256(10, 2)
-    AE = RGB_48_96_192_gp(10,2)
+    AE = MNIST_BN_32_64_256(10, 2)
+    #AE = RGB_48_96_192_gp(10,3)
+    #AE = RGB_128_256_down_gp(10,3)
     AE_loss = nn.MSELoss()
     AE = AE.to(device)
 
@@ -54,12 +55,12 @@ if __name__ == "__main__":
     
 
     #데이터 변경시 수정 필요. 
-    PATH = './weights/SVHN/'
+    PATH = './weights/FashionMNIST/'
     if not os.path.exists(PATH): os.mkdir(PATH)
 
         # 한번만 Train을 시킬 방법이 없을까? 
     #ae_train(AE, ae_training_data, ae_test_data, device, AE_loss, AE_optimizer, args.ae_epochs, kwargs)
-    ae_train(AE, ae_training_data, ae_test_data, device, AE_loss, AE_optimizer, 200, kwargs)
+    ae_train(AE, ae_training_data, ae_test_data, device, AE_loss, AE_optimizer, 100, kwargs)
     torch.save(AE, PATH + 'CAE.pt')  # 전체 모델 저장
     
     torch.save(AE.state_dict(), PATH + 'CAE_state_dict.pt')  # 모델 객체의 state_dict 저장
