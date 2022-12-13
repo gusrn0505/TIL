@@ -51,8 +51,8 @@ def argparser():
     parser.add_argument('--al-sampling-size', default=100, type=int,
                         help='number of samples to add in each iteration')
 
-    parser.add_argument('--SC1', default=False, type=bool)
-    parser.add_argument('--SC2', default=True, type=bool)
+    parser.add_argument('--SC1', default=True, type=bool)
+    parser.add_argument('--SC2', default=False, type=bool)
     parser.add_argument('--num-class', default=10, type=int)
 
     parser.add_argument('--max-density', default=0, type=float)
@@ -298,6 +298,7 @@ def update_count_subgraph(count_subgraph, unlabeled_dataset_label, labeled_datas
     for i in unlabeled_index : 
         count = [0]*10
         i_subgraph = np.where(subgraph[:, i]==1)[0]
+        
         for j in i_subgraph : 
             count[labeled_dataset_label[j][0]] += 1
         if sum(count) != 0 : count_subgraph[i].append([count, radius[0]]) 
@@ -402,14 +403,14 @@ if __name__ == "__main__":
 
 
     # 데이터 셋 변경 시 수정 필요 ####################################
-    original_data = datasets.FashionMNIST(
+    original_data = datasets.MNIST(
         root="data",
         train=True,
         download=True,
         transform=ToTensor()
     )
 
-    test_data = datasets.FashionMNIST( 
+    test_data = datasets.MNIST( 
         root="data",
         train=False,
         download=True,
@@ -452,7 +453,7 @@ if __name__ == "__main__":
     count_subgraph = defaultdict(list)
 
     # 데이터 셋 변경 시 수정 필요 #####################################
-    PATH = './weights/FashionMNIST/'
+    PATH = './weights/MNIST/'
     AE = None
     CAE = torch.load(PATH + 'CAE.pt')  
     CAE.load_state_dict(torch.load(PATH + 'CAE_state_dict.pt'))  
@@ -660,11 +661,11 @@ if __name__ == "__main__":
 
 
     # sc2 방법 적용 
-#    threshold_term = list(np.arange(0.01, 1, 0.01))
-#    for threshold in threshold_term : 
-#        sc2_classification = second_classification(unlabeled_dataset_label, count_subgraph, threshold)
-#        sc2_num_classification, sc2_score, sc2_dic_score = check_performance(sc2_classification, original_label)
-#        log(dest_dir_name, episode_id, "CS2", labeled_dataset_label, sc2_num_classification, threshold, 0, sc2_score)
+    #threshold_term = list(np.arange(0.01, 1, 0.01))
+    #for threshold in threshold_term : 
+    #    sc2_classification = second_classification(unlabeled_dataset_label, count_subgraph, threshold)
+    #    sc2_num_classification, sc2_score, sc2_dic_score = check_performance(sc2_classification, original_label)
+    #    log(dest_dir_name, episode_id, "CS2", labeled_dataset_label, sc2_num_classification, threshold, 0, sc2_score)
    
     sc2_classification = second_classification(unlabeled_dataset_label, count_subgraph, args.threshold)
     sc2_num_classification, sc2_score, sc2_dic_score = check_performance(sc2_classification, original_label)
@@ -697,6 +698,15 @@ if __name__ == "__main__":
             del unlabeled_dataset_label[i]
 
     log(dest_dir_name, episode_id, "CS2", labeled_dataset_label, sc2_num_classification, args.max_density, args.min_density, sc2_score)
+
+    total = 0
+    total_score = 0 
+    for (num, score) in f_score_lst : 
+        total += num
+        total_score += num*score
+    final_sc1_score = total_score / total
+    
+    print("label :", len(labeled_dataset_label), "SC1 :", len(sc1_labeled_dataset_label), final_sc1_score, "SC2 :", sc2_num_classification, sc2_score)
 
 
     criterion = "hard labeling"
@@ -754,13 +764,5 @@ if __name__ == "__main__":
 
         log(dest_dir_name, episode_id, "CNN", sc2_labeled_dataset_label, len(unlabeled_dataset_label), 0, 0, accuracy)
 
-    total = 0
-    total_score = 0 
-    for (num, score) in f_score_lst : 
-        total += num
-        total_score += num*score
-    final_sc1_score = total_score / total
-    
-    print("label :", len(labeled_dataset_label), "SC1 :", len(sc1_labeled_dataset_label), final_sc1_score, "SC2 :", sc2_num_classification, sc2_score)
 
 

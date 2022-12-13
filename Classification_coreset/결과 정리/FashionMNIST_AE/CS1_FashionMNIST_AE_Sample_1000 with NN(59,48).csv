@@ -1,0 +1,5 @@
+Episode Id,Sample Method,Labeled Pool,Num of classification,max_density,min_density,Accuracy
+1,CS1,1000,4217,0.0,0.0,0.96846099122599
+2,CS2,1000,3418,0.0,0.0,0.6679344645991808
+2,CNN,1000,55582,0,0,0.6924
+2,CNN,3418,55582,0,0,0.5804

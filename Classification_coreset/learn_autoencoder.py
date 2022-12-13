@@ -28,15 +28,17 @@ if __name__ == "__main__":
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
     # 데이터 변경시 수정 필요 
-    ae_training_data = datasets.FashionMNIST(
+    ae_training_data = datasets.EMNIST(
         root="data",
+        split='letters',
         train=True,
         download=True,
         transform=ToTensor()
     )
     # 데이터 변경시 수정 필요 
-    ae_test_data = datasets.FashionMNIST(
+    ae_test_data = datasets.EMNIST(
         root="data",
+        split='letters',
         train=False,
         download=True,
         transform=ToTensor()
@@ -44,7 +46,7 @@ if __name__ == "__main__":
 
 
     # 데이터 셋의 차원에 따라 수정해야 함 
-    AE = MNIST_BN_32_64_256(10, 2)
+    AE = MNIST_BN_32_64_256(26, 2)
     #AE = RGB_48_96_192_gp(10,3)
     #AE = RGB_128_256_down_gp(10,3)
     AE_loss = nn.MSELoss()
@@ -55,7 +57,7 @@ if __name__ == "__main__":
     
 
     #데이터 변경시 수정 필요. 
-    PATH = './weights/FashionMNIST/'
+    PATH = './weights/EMNIST/'
     if not os.path.exists(PATH): os.mkdir(PATH)
 
         # 한번만 Train을 시킬 방법이 없을까? 

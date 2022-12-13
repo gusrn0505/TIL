@@ -1,24 +1,6 @@
 from __future__ import print_function, division
-import os
-import torch
-import pandas as pd
-from skimage import io, transform
+
 import numpy as np
-import matplotlib.pyplot as plt
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
-import torchvision.models as models
-import pdb
-from datetime import datetime
-import argparse
-import pprint
-import time
-
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torch.optim.lr_scheduler import StepLR
-
 from sklearn.metrics import pairwise_distances
 
 
@@ -46,7 +28,7 @@ class Coreset_Greedy:
     def sample(self, labeled_index_list, sample_size):
 
         # already_selected : 이전에 이미 labeling 된 것. 
-        self.already_selected = labeled_index_list
+        self.already_selected = labeled_index_list # label index가 여기에 들어가고 
         self.update_dist(labeled_index_list, reset_dist=True)
 
         # epdb.set_trace()
@@ -61,9 +43,9 @@ class Coreset_Greedy:
                 ind = np.argmax(self.min_distances)
                  
             # assert ind not in already_selected
-            l1 = list(self.already_selected.copy())
+            l1 = list(self.already_selected.copy())  
             new_batch.append(ind)
-            l2 = l1 + new_batch
+            l2 = l1 + new_batch 
             self.update_dist(l2, reset_dist=False)
             
         
