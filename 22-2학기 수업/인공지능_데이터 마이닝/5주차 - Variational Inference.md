@@ -140,7 +140,7 @@
 
 - **Q의 PDF 구조 모델링** : Suppose $Q(H|E, \lambda) = P(H|E, \theta)$
   
-  > lnP(E|$\theta$) >= $\sum_H Q(H|E, \theta) ln \frac{P(H,E|\lambda)}{Q(H|E, \lambda)}$ 
+  > lnP(E|$\theta$) = $\sum_H Q(H|E, \theta) ln \frac{P(H,E|\lambda)}{Q(H|E, \lambda)}$ 
   > 
   >  = $\sum_H P(H|E, \theta) ln \frac{P(H,E|\theta)}{P(H|E, \theta)}$  <mark>*[$Q(H|E, \lambda) = P(H|E, \theta)$]</mark>
   > 
@@ -162,15 +162,17 @@
     > 
     > $L(\theta, q)$ : log p inference - KL term(q(z), P(Z|X, $\theta$)
     > 
-    > $L(\theta, q)$  은 Lower bound 이자 Loss 함수로 사용될 수 있다. Lower bound을 최대화하도록 loss를 정의할 수 있다. 또한 앞서 서술했듯 $L(\theta, q)$ 는 다양한 형태를 띌 수 있다. 
+    > > Lower bound를 최대화하는 것은 KL-term을 최소화하는 것과 같다.
     > 
+    > $L(\theta, q)$  은 Lower bound 이자 Loss 함수로 사용될 수 있다. Lower bound을 최대화하도록 loss를 정의할 수 있다. 또한 앞서 서술했듯 $L(\theta, q)$ 는 다양한 형태를 띌 수 있다. ㅇ
+    
     > $lnP(X) >= \sum_z q(z|x) ln(\frac{p(x,z)}{q(z|x)})$
     > 
     >                     $= \sum_z [q(z|x) lnP(x) - q(z|x) ln(\frac{q(z|x)}{p(z|x)})]$
     > 
     >                     $= lnP(x) - \sum_zq(z|x) ln(\frac{q(z|x)}{p(z|x)})$
     > 
-    > 여기서 $q(z|x)$ 은 $q(z)$ 와 다르다. 그런데 위의 $L(\theta, q)$ 는 갑작스레 $q(z)$ 로 바꿔서 사용하지? z와 x가 indep 을 보장 못해줄 텐데. 
+    > > Q. 여기서 $q(z|x)$ 은 $q(z)$ 와 다르다. 그런데 위의 $L(\theta, q)$ 는 갑작스레 $q(z)$ 로 바꿔서 사용하지? z와 x가 indep 을 보장 못해줄 텐데. 
     
     - 우린 q(Z)에 대한 정보 없이는 $Q(\theta, q)$를 최적화할 수 없다. 
     
