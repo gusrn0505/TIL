@@ -68,6 +68,7 @@ def predict_patch_label(patch_model, data_path: str, batch_size: int):
     """
 
     # load dataset
+    # data_path : Slide 주소! 
     tile_loader = load_patch_loader(data_path=data_path, batch_size=batch_size)
 
     # patch-level classification

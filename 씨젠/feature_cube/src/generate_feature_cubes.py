@@ -8,7 +8,7 @@ from src.utils.utils_feature_cube import base_feature_cube, add_pred_to_base, pr
 
 import src.training.train_config as cfg
 
-
+# txt 파일에다가 각 patch 차원에 대해서 prediction 값을 부여한다! 
 def extract_slide_feature(
         patch_model,
         slide_path: str,
@@ -34,6 +34,7 @@ def extract_slide_feature(
 
     tile_path = f"{tile_dir}/{subset}/{condition}/{slide_name}"
 
+    # 이미 patch로 나눠지지 않았다면 save_patch 함수를 통해서 jpg 형태로 저장하기. 
     if not already_patched:
         Path(tile_path).mkdir(exist_ok=True, parents=True)
 
@@ -58,12 +59,20 @@ def extract_slide_feature(
 
     # Saving feature cubes
     Path(f"{saving_path}/{subset}/{condition}").mkdir(exist_ok=True, parents=True)
+    # base_feature_Cube : 데이터 형상 만들기. 내부 값은 전부 0!
     bf = base_feature_cube(lsize, csize)
     slide_feature, patch_pred = add_pred_to_base(
         base_feature=bf,
         predict=patch_level_pred,
         overlap=overlap,
         tile_size=tile_size)
+
+    # 여기서 txt 파일로 저장하는 구만!
+    # pickle은 대상의 상태를 bynary로 변환시켜준다 (wb) 이러니까 그냥 메모장을 열었을 때 알아보기 어려웠구나 
+    # "{saving_path}/{subset}/{condition}/{slide_name}.txt" 에 대해서 slide_feature.tolist() 정보를 저장해라 라는 거네. 
+    # 여기서 patch_pred 정보를 넣지 않아도 되나? 이게 핵심아닌가? 
+    # 아 slide_feature 에 대해서 add_pred_to_base 함수에서 predict 값을 집어넣는구나 
+    # base_feature[0][i][int(col)][int(row)] = [pred[i]] . 여기서 i는 NDM 의 값! 
     with open(f"{saving_path}/{subset}/{condition}/{slide_name}.txt", "wb") as f:
         pickle.dump(slide_feature.tolist(), f)
 
